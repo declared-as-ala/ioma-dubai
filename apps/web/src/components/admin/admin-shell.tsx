@@ -280,25 +280,6 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           <div className="w-full max-w-xl">
             <AdminSearch />
           </div>
-          {create.length > 0 && (
-            <details className="relative ms-auto shrink-0">
-              <summary className="flex min-h-11 cursor-pointer items-center gap-2 border border-neutral-600 px-3 text-xs">
-                <Plus className="size-4" />
-                <span className="hidden md:inline">{t("create")}</span>
-              </summary>
-              <div className="absolute end-0 top-full max-h-80 w-56 overflow-y-auto border border-neutral-600 bg-neutral-900 p-2">
-                {create.map((r) => (
-                  <Link
-                    key={r.key}
-                    href={r.key === "products" ? "/admin/products/new" : `/admin/${r.key}?create=1`}
-                    className="flex min-h-11 items-center px-3 text-sm hover:bg-neutral-700"
-                  >
-                    {t(`resources.${r.key}`)}
-                  </Link>
-                ))}
-              </div>
-            </details>
-          )}
         </div>
       </header>
       <div className="grid min-w-0 xl:grid-cols-[232px_minmax(0,1fr)]">
