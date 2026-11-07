@@ -154,17 +154,17 @@ export function Header() {
         </div>
 
         {/* Logo row */}
-        <div className="relative mx-auto flex h-20 max-w-[1440px] items-center justify-between px-4 md:px-6">
-          <div className="flex items-center gap-3">
+        <div className="mx-auto grid h-16 max-w-[1440px] grid-cols-[1fr_auto_1fr] items-center px-4 md:h-20 md:px-6">
+          <div className="flex items-center justify-self-start gap-3">
             <MobileNavigation />
           </div>
 
           <Link
             href="/"
             aria-label={t("home")}
-            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center"
+            className="flex items-center justify-center justify-self-center"
           >
-            <span className="flex items-center gap-6 xl:gap-10" dir="ltr">
+            <span className="flex items-center gap-3 md:gap-6 xl:gap-10" dir="ltr">
               <Image
                 src={
                   overHero ? "/images/burj-emblem-white.png" : "/images/burj-emblem.png"
@@ -173,7 +173,7 @@ export function Header() {
                 width={516}
                 height={1184}
                 priority
-                className="h-[52px] w-auto xl:h-[62px]"
+                className="h-[34px] w-auto md:h-[52px] xl:h-[62px]"
               />
               <Image
                 src={
@@ -185,19 +185,19 @@ export function Header() {
                 width={2020}
                 height={856}
                 priority
-                className="h-auto w-[102px] xl:w-[138px]"
+                className="h-auto w-[80px] md:w-[102px] xl:w-[138px]"
               />
             </span>
           </Link>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center justify-self-end gap-0.5 sm:gap-2">
             <Button
               variant="ghost"
               size="icon-sm"
               aria-label={t("search")}
               data-testid="search-trigger"
               onClick={openSearch}
-              className={`inline-flex transition-colors ${
+              className={`inline-flex transition-colors max-[359px]:hidden ${
                 isDarkHeader
                   ? "text-ioma-white hover:bg-ioma-white/10 hover:text-ioma-white"
                   : "hover:bg-muted"
@@ -316,7 +316,10 @@ export function Header() {
 
       {/* Fixed Header Layout Spacer — suppressed on homepage to allow full-bleed Hero */}
       {!isHomepage && (
-        <div className="h-[120px] xl:h-[148px] w-full shrink-0" aria-hidden="true" />
+        <div
+          className="h-[102px] md:h-[120px] xl:h-[148px] w-full shrink-0"
+          aria-hidden="true"
+        />
       )}
     </>
   );
