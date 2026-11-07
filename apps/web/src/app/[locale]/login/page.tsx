@@ -31,7 +31,13 @@ export default function LoginPage() {
   const t = useTranslations("Login");
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectUrl = searchParams.get("redirect");
+  const rawRedirect = searchParams.get("redirect");
+  const redirectUrl =
+    rawRedirect?.startsWith("/") &&
+    !rawRedirect.startsWith("//") &&
+    !rawRedirect.includes("\\")
+      ? rawRedirect
+      : null;
   const mutation = useLoginMutation();
   const [showPassword, setShowPassword] = useState(false);
   const [accountType, setAccountType] = useState<"client" | "pro">("client");
@@ -58,62 +64,59 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="relative min-h-[calc(100vh-5rem)] bg-background overflow-hidden flex flex-col justify-center">
-      {/* Subtle Background Glow Decorative Accents */}
-      <div className="pointer-events-none absolute -top-40 -start-40 size-96 rounded-full bg-ioma-violet/10 blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-40 -end-40 size-96 rounded-full bg-amber-500/10 blur-3xl" />
-
-      <div className="mx-auto w-full max-w-[1440px] px-4 py-8 md:px-6 lg:py-12">
-        <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:items-center">
+    <main className="relative flex min-h-[calc(100vh-5rem)] bg-background">
+      <div className="grid w-full lg:grid-cols-2">
+        <div className="contents">
           {/* LEFT COLUMN: Luxury Form Container */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, ease: "easeOut" }}
-            className="lg:col-span-6 xl:col-span-5 xl:col-start-2"
+            className="flex items-center justify-center px-5 py-12 md:px-10 lg:px-16 lg:py-20"
           >
-            <div className="relative rounded-2xl border border-border/80 bg-background/95 p-6 md:p-10 shadow-xl backdrop-blur-xl transition-all">
+            <div className="relative w-full max-w-md">
               {/* Header Badge & Titles */}
               <div className="space-y-3">
-                <div className="inline-flex items-center gap-2 rounded-full border border-ioma-violet/30 bg-ioma-violet/5 px-3 py-1 text-[0.7rem] uppercase tracking-widest text-ioma-violet">
-                  <Sparkles className="size-3 text-ioma-violet" />
-                  <span>IOMA Paris • Private Portal</span>
-                </div>
+                <p className="flex items-center gap-3 text-[0.7rem] font-semibold uppercase tracking-[0.26em] text-muted-foreground">
+                  <span className="h-px w-8 bg-foreground/40" aria-hidden />
+                  {t("privatePortal")}
+                </p>
 
-                <h1 className="font-display text-3xl md:text-4xl tracking-tight text-foreground">
+                <h1 className="font-display text-4xl tracking-tight text-foreground md:text-5xl">
                   {t("title")}
                 </h1>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  Sign in to manage your skin diagnostics, personalized routines, and
-                  luxury prescriptions.
+                  {t("description")}
                 </p>
               </div>
 
               {/* Role Switcher Tabs */}
-              <div className="mt-6 grid grid-cols-2 gap-2 rounded-xl bg-muted/60 p-1.5 border border-border/50">
+              <div className="mt-8 grid grid-cols-2 gap-1.5 rounded-full bg-muted p-1.5">
                 <button
                   type="button"
                   onClick={() => setAccountType("client")}
-                  className={`flex items-center justify-center gap-2 rounded-lg py-2 text-xs uppercase tracking-wider font-medium transition-all ${
+                  aria-pressed={accountType === "client"}
+                  className={`flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-full py-2 focus-visible:outline-2 focus-visible:outline-offset-2 text-xs uppercase tracking-wider font-medium transition-all ${
                     accountType === "client"
                       ? "bg-background text-foreground shadow-sm"
                       : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
                   <UserCheck className="size-3.5" />
-                  <span>Client Account</span>
+                  <span>{t("clientTab")}</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setAccountType("pro")}
-                  className={`flex items-center justify-center gap-2 rounded-lg py-2 text-xs uppercase tracking-wider font-medium transition-all ${
+                  aria-pressed={accountType === "pro"}
+                  className={`flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-full py-2 focus-visible:outline-2 focus-visible:outline-offset-2 text-xs uppercase tracking-wider font-medium transition-all ${
                     accountType === "pro"
                       ? "bg-background text-foreground shadow-sm"
                       : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
                   <Building2 className="size-3.5" />
-                  <span>Pro Partner</span>
+                  <span>{t("proTab")}</span>
                 </button>
               </div>
 
@@ -126,12 +129,16 @@ export default function LoginPage() {
                 >
                   <Building2 className="size-4 shrink-0 text-amber-600 mt-0.5" />
                   <div>
-                    <span>Professional clinic or spa? </span>
+                    <span>{t("professionalPrompt")} </span>
                     <Link
                       href="/professionals/apply"
-                      className="font-semibold underline underline-offset-2 hover:text-foreground"
+                      className="inline-flex min-h-11 cursor-pointer items-center gap-2 font-semibold underline underline-offset-4 hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-sf-champagne"
                     >
-                      Apply for B2B partner access →
+                      {t("applyLink")}{" "}
+                      <ArrowRight
+                        aria-hidden="true"
+                        className="size-4 shrink-0 rtl:rotate-180"
+                      />
                     </Link>
                   </div>
                 </motion.div>
@@ -141,7 +148,7 @@ export default function LoginPage() {
               <form
                 onSubmit={form.handleSubmit(onSubmit)}
                 noValidate
-                className="mt-8 space-y-5"
+                className="mt-10 space-y-5"
               >
                 <FieldGroup className="space-y-4">
                   {/* Email Field */}
@@ -165,10 +172,10 @@ export default function LoginPage() {
                             autoComplete="email"
                             placeholder="your.email@ioma-paris.com"
                             aria-invalid={fieldState.invalid}
-                            className="ps-10 h-12 rounded-xl border-border bg-background text-sm transition-all focus:border-ioma-violet focus:ring-1 focus:ring-ioma-violet"
+                            className="ps-10 h-13 min-h-12 rounded-full border-border bg-white text-sm shadow-sm transition-all focus:border-foreground focus:ring-1 focus:ring-foreground"
                           />
                         </div>
-                        {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                        {fieldState.invalid && <FieldError>{t("emailError")}</FieldError>}
                       </Field>
                     )}
                   />
@@ -179,7 +186,7 @@ export default function LoginPage() {
                     control={form.control}
                     render={({ field, fieldState }) => (
                       <Field data-invalid={fieldState.invalid} className="space-y-1.5">
-                        <div className="flex items-center justify-between">
+                        <div className="flex flex-wrap items-center justify-between gap-2">
                           <FieldLabel
                             htmlFor="login-password"
                             className="text-xs uppercase tracking-wider text-muted-foreground"
@@ -187,10 +194,10 @@ export default function LoginPage() {
                             {t("passwordLabel")}
                           </FieldLabel>
                           <Link
-                            href="/privacy-policy"
+                            href="/forgot-password"
                             className="text-[0.75rem] text-muted-foreground hover:text-foreground transition-colors"
                           >
-                            Forgot password?
+                            {t("forgotPassword")}
                           </Link>
                         </div>
                         <div className="relative flex items-center">
@@ -202,13 +209,15 @@ export default function LoginPage() {
                             autoComplete="current-password"
                             placeholder="••••••••••••"
                             aria-invalid={fieldState.invalid}
-                            className="ps-10 pe-10 h-12 rounded-xl border-border bg-background text-sm transition-all focus:border-ioma-violet focus:ring-1 focus:ring-ioma-violet"
+                            className="ps-10 pe-10 h-13 min-h-12 rounded-full border-border bg-white text-sm shadow-sm transition-all focus:border-foreground focus:ring-1 focus:ring-foreground"
                           />
                           <button
                             type="button"
                             onClick={() => setShowPassword(!showPassword)}
-                            className="absolute end-3.5 text-muted-foreground hover:text-foreground transition-colors p-1"
-                            aria-label={showPassword ? "Hide password" : "Show password"}
+                            className="absolute end-1 flex size-11 items-center justify-center text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-2"
+                            aria-label={
+                              showPassword ? t("hidePassword") : t("showPassword")
+                            }
                           >
                             {showPassword ? (
                               <EyeOff className="size-4" />
@@ -217,7 +226,9 @@ export default function LoginPage() {
                             )}
                           </button>
                         </div>
-                        {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                        {fieldState.invalid && (
+                          <FieldError>{t("passwordError")}</FieldError>
+                        )}
                       </Field>
                     )}
                   />
@@ -239,7 +250,7 @@ export default function LoginPage() {
                     type="submit"
                     size="lg"
                     disabled={mutation.isPending}
-                    className="w-full h-12 rounded-xl bg-foreground text-background font-semibold uppercase tracking-widest text-xs hover:bg-foreground/90 transition-all shadow-md group mt-2"
+                    className="group mt-3 h-13 min-h-12 w-full rounded-full bg-foreground text-xs font-semibold uppercase tracking-[0.2em] text-background shadow-lg shadow-black/10 transition-all hover:bg-foreground/90"
                   >
                     {mutation.isPending ? (
                       <div className="flex items-center justify-center gap-2">
@@ -260,8 +271,12 @@ export default function LoginPage() {
               <div className="mt-8 border-t border-border/60 pt-6 text-center text-sm text-muted-foreground">
                 <span>{t("noAccount")} </span>
                 <Link
-                  href={redirectUrl ? `/register?redirect=${encodeURIComponent(redirectUrl)}` : "/register"}
-                  className="font-semibold text-foreground underline underline-offset-4 hover:text-ioma-violet transition-colors ms-1"
+                  href={
+                    redirectUrl
+                      ? `/register?redirect=${encodeURIComponent(redirectUrl)}`
+                      : "/register"
+                  }
+                  className="font-semibold text-foreground underline underline-offset-4 hover:text-sf-champagne transition-colors ms-1"
                 >
                   {t("registerLink")}
                 </Link>
@@ -270,66 +285,44 @@ export default function LoginPage() {
               {/* Trust Badge */}
               <div className="mt-6 flex items-center justify-center gap-2 text-[0.7rem] uppercase tracking-wider text-muted-foreground/80">
                 <ShieldCheck className="size-3.5 text-emerald-600 dark:text-emerald-400" />
-                <span>256-Bit Encrypted • Private & Secure</span>
+                <span>{t("secure")}</span>
               </div>
             </div>
           </motion.div>
 
-          {/* RIGHT COLUMN: Luxury Editorial Hero Panel */}
+          {/* RIGHT: full-height editorial photo (IOMA campaign) */}
           <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, ease: "easeOut", delay: 0.1 }}
-            className="hidden lg:col-span-6 lg:block xl:col-span-5"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+            className="relative hidden min-h-[40rem] lg:block"
           >
-            <div className="relative aspect-[4/5] w-full overflow-hidden rounded-3xl border border-border/50 shadow-2xl">
-              {/* Background Luxury Skincare Image */}
-              <Image
-                src="/images/login-hero.png"
-                alt="IOMA Paris High-Fashion Luxury Skincare"
-                fill
-                priority
-                unoptimized
-                className="object-cover object-center transition-transform duration-700 hover:scale-105"
-              />
-
-              {/* Gradient Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
-
-              {/* Floating Glassmorphism Cards & Typography Overlay */}
-              <div className="absolute inset-0 p-8 flex flex-col justify-between">
-                {/* Top Badge */}
-                <div className="flex justify-start">
-                  <span className="rounded-full bg-white/20 backdrop-blur-md px-3.5 py-1.5 text-[0.65rem] font-medium uppercase tracking-widest text-white border border-white/30 shadow-sm">
-                    HAUTE DERMA-COSMÉTIQUE PARIS
-                  </span>
-                </div>
-
-                {/* Bottom Quote Card */}
-                <div className="space-y-4">
-                  <div className="rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 p-5 text-white shadow-lg space-y-3">
-                    <p className="font-display text-lg leading-snug tracking-tight text-white">
-                      “Your skin is unique. Science reads its code, luxury prescribes its
-                      perfection.”
-                    </p>
-
-                    <div className="pt-2 border-t border-white/15 grid grid-cols-2 gap-2 text-xs text-white/90">
-                      <div className="flex items-center gap-1.5">
-                        <CheckCircle2 className="size-3.5 text-emerald-400" />
-                        <span>Instant Skin Code Access</span>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <CheckCircle2 className="size-3.5 text-emerald-400" />
-                        <span>Clinical Efficacy Reports</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <p className="text-[0.7rem] uppercase tracking-widest text-white/70 text-center">
-                    Paris • Dubai • Worldwide Flagship Network
-                  </p>
-                </div>
-              </div>
+            <Image
+              src="/images/brand/login-hero.webp"
+              alt={t("imageAlt")}
+              fill
+              priority
+              sizes="50vw"
+              className="object-cover object-[50%_30%]"
+            />
+            <div
+              aria-hidden
+              className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent"
+            />
+            <div className="absolute inset-x-0 bottom-0 p-10 text-white xl:p-14">
+              <p className="text-[0.7rem] font-semibold uppercase tracking-[0.26em] text-white/75">
+                {t("editorialBadge")}
+              </p>
+              <p className="mt-4 max-w-md font-display text-3xl leading-tight xl:text-4xl">
+                {t("quote")}
+              </p>
+              <p className="mt-5 flex items-center gap-2 text-sm text-white/85">
+                <CheckCircle2 className="size-4 text-white" aria-hidden />
+                {t("routineBenefit")}
+              </p>
+              <p className="mt-8 text-[0.68rem] uppercase tracking-[0.24em] text-white/60">
+                {t("locations")}
+              </p>
             </div>
           </motion.div>
         </div>

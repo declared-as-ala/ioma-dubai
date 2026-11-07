@@ -8,11 +8,17 @@ export type ProductRangeDocument = HydratedDocument<ProductRange>;
 // ProductRangeKey — the 7 ranges are fixed by the charter, not admin-created.
 @Schema({ timestamps: true })
 export class ProductRange {
-  // Explicit `type: String` — a string-literal union like ProductRangeKey
-  // emits no usable design:type reflection metadata, so @nestjs/mongoose
-  // can't infer it (same root cause as PROGRESS.md bug #6).
+  @Prop({ type: String, enum: ["active", "inactive"], default: "active", index: true })
+  status!: "active" | "inactive";
+
+  @Prop({ type: Number, default: 1 })
+  number!: number;
+
   @Prop({ type: String, required: true, unique: true, index: true })
   slug!: ProductRangeKey;
+
+  @Prop({ type: String, default: "#6D2077" })
+  color!: string;
 
   @Prop({ type: { en: String, fr: String, ar: String }, required: true })
   name!: { en: string; fr: string; ar: string };
@@ -22,6 +28,25 @@ export class ProductRange {
 
   @Prop({ type: String, default: null })
   heroImage!: string | null;
+
+  @Prop({ type: Number, default: 1 })
+  sortOrder!: number;
+
+  @Prop({ type: Boolean, default: true })
+  visibleInMegaMenu!: boolean;
+
+  @Prop({
+    type: {
+      title: { en: String, fr: String, ar: String },
+      description: { en: String, fr: String, ar: String },
+    },
+    default: null,
+  })
+  seo?: {
+    title: { en: string; fr: string; ar: string };
+    description: { en: string; fr: string; ar: string };
+  } | null;
 }
 
 export const ProductRangeSchema = SchemaFactory.createForClass(ProductRange);
+ProductRangeSchema.index({ status: 1, sortOrder: 1 });

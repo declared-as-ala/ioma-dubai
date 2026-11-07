@@ -669,13 +669,16 @@ async function main() {
   const args = process.argv.slice(2);
   const isApply = args.includes("--apply");
   const isDryRun = args.includes("--dry-run") || !isApply;
-  const isUpdateImages = args.includes("--update-images") || args.includes("--download-images");
+  const isUpdateImages =
+    args.includes("--update-images") || args.includes("--download-images");
 
   console.log("=== IOMA PARIS UAE CATALOGUE IMPORTER ===");
   console.log(
     `Mode: ${isApply ? "APPLY (Production/Database Write)" : "DRY RUN (Simulate & Validate)"}`,
   );
-  console.log(`Download/Sync Images: ${isUpdateImages ? "YES" : "NO (using pre-bundled assets)"}`);
+  console.log(
+    `Download/Sync Images: ${isUpdateImages ? "YES" : "NO (using pre-bundled assets)"}`,
+  );
 
   // 1. Connect to Mongo
   const mongoUri = process.env.MONGO_URI || "mongodb://localhost:27017/ioma";
@@ -918,6 +921,11 @@ async function main() {
 
     let prodDocId: any;
     if (isApply) {
+      const managed = await productCollection.findOne(
+        { slug },
+        { projection: { media: 1 } },
+      );
+      if (managed?.media?.length) delete productPayload.images;
       const pRes = await productCollection.findOneAndUpdate(
         { slug },
         { $set: productPayload, $setOnInsert: { createdAt: new Date() } },

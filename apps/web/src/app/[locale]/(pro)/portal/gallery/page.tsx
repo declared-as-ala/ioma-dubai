@@ -1,0 +1,5 @@
+import { ProGallery } from "@/components/pro/pro-content-pages";
+
+export default function Page() {
+  return <ProGallery />;
+}

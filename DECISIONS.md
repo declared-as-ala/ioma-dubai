@@ -1,5 +1,43 @@
 # DECISIONS.md — IOMA Paris Dubai
 
+## 2026-11-06 — Complete IOMA Paris Magazine Migration & Multilingual Platform Integration
+
+**Context**: To establish IOMA Paris Dubai as the definitive authority on cosmetic science, Beautiful Longevity, and advanced skincare routines, the complete official IOMA Paris Magazine (78 published articles from https://ioma-paris.com/blogs/ioma-mag) was migrated into the UAE platform with full multilingual translations into English and Arabic.
+
+**Decisions**:
+
+1. **Source Preservation & Authorship**: The original French (fr) text, author attribution (e.g., Raphaëlle Gorlier, IOMA Scientific Committee), official cover photography from Shopify CDN, and original publication dates are preserved as authoritative records in MongoDB collection `contentpages`.
+2. **Professional Luxury Translations**:
+   - English (en) was crafted with clinical dermatological precision and luxury beauty editorial phrasing.
+   - Arabic (ar) was authored in Modern Standard Arabic (فصحى معاصرة راقية) specifically attuned to the UAE premium audience, properly translating complex concepts like _Beautiful Longevity (طول عمر وجمال البشرة)_, _Empreinte Cutanée (بصمة البشرة)_, cellular aging, peptides, and photo-protection without literal mechanical translation artifacts.
+3. **Hyperlink Rewriting**: All embedded French e-commerce links (e.g., `/products/...`) inside article bodies were converted to the active store catalog paths (`/shop/...`) ensuring zero 404s or dead navigation.
+4. **Idempotent Seeder**: Created `apps/api/src/scripts/seed-ioma-magazine.ts` registered as `pnpm run seed:ioma-magazine`. It generates stable slug-based documents in MongoDB without clobbering manual edits unless `--force` is supplied.
+5. **Dynamic Frontend Architecture**:
+   - Mounted `/[locale]/magazine` index with category taxonomy filtering, real-time search, featured hero layout, 3-column card grid, and pagination.
+   - Mounted `/[locale]/magazine/[slug]` with sticky reading progress bar, breadcrumbs, reading time indicators, rich formatted HTML typography, social share triggers, and category-relevant related article cards.
+   - Retained full backward compatibility by setting up 308 redirects from `/journal` and `/journal/[slug]` to the new magazine routes.
+6. **Multilingual SEO Microdata**: Embedded Article and BreadcrumbList JSON-LD schemas, Open Graph tags, Twitter card tags, and bi-directional alternate hreflang tags for en and ar.
+7. **Admin Studio Integration**: Configured `magazine` in `ADMIN_RESOURCES` and the Website navigation in `admin-shell.tsx` to allow content managers to edit, translate, and update publication status directly.
+
+## 2026-11-05 — Booking System Removal & Partners B2B Acquisition Platform
+
+**Context**: The business direction for IOMA Paris Dubai refocused partner relations strictly onto two objectives: (1) allowing consumers to discover and locate authorized luxury partners (spas, clinics, hotels, beauty institutes) across the UAE and contact them directly, and (2) attracting new luxury establishments and distributors to apply for official IOMA B2B partnership. Consumer appointment booking has been eliminated from the digital experience.
+
+**Decisions**:
+
+1. **Consumer Appointment Booking Removal**: All appointment booking endpoints, slots queries, calendars, specialist pickers, and cancellation/rescheduling flows are removed from the active application. Next.js server redirects are mounted for `/booking` (to `/partners`) and `/account/appointments` (to `/account`).
+2. **Data & Schema Preservation**: The underlying `Appointment` Mongoose schema and historical MongoDB collections are safely preserved without schema dropping or data deletion to protect referential integrity and historical records.
+3. **Partners Discovery Platform**: The public `/partners` page is upgraded into a luxury discovery locator featuring real-time search, category filters (including distributor), all 7 emirates, Leaflet interactive map, and view mode toggle (Map & List, List only, Map only). Partner cards provide "View Partner", Google Maps directions, and direct phone/WhatsApp contact shortcuts without any booking buttons.
+4. **Partner Detail Pages**: Dedicated `/partners/[slug]` routes display rich photo galleries, bilingual descriptions, available cabin treatments (educational only), opening hours, official website links, and direct contact options.
+5. **B2B Partnership Acquisition Experience**: Both the bottom of `/partners` and `/professionals` now feature a dedicated luxury French skincare acquisition funnel presenting brand heritage, MEMS scientific precision, wholesale pricing, cabin product formats, masterclasses, and an expanded registration form capturing business type, location, trade licence number, and partnership notes.
+6. **Admin Sidebar Cleanliness**: "Appointments" and "Availability" links are removed from the admin sidebar, grouping partner location and treatment management under "Partners & Spas".
+
+## 2026-11-05 - Minimal cinematic homepage
+
+The supplied cinematic reference governs the homepage composition: official SVG logo plus separate Burj asset, black header and a persistent minimal caption. The existing CMS reel still controls media/order/chapter labels; historical CMS headline/body/CTA fields are deliberately not rendered over the film. Discovery consistently links to /maison. Homepage desktop navigation is accessible through the existing menu drawer to retain the reference's uncluttered header. Other route headers and business flows are unchanged.
+
+The reel now advances on actual video completion rather than an arbitrary timeout, and reduced motion suppresses automatic playback while preserving explicit user control. Keep source footage intact, including its embedded titles. Add French hero copy without re-enabling the French routes removed by the previously recorded October requirement.
+
 Architecture/product decisions, dated, with rationale. Append-only; if a decision is later reversed, add a new entry that supersedes it rather than editing history.
 
 ---
@@ -183,3 +221,105 @@ To deliver an art-directed luxury editorial Hero (Luxury Beauty Campaign × Fren
 3. **Multi-Phase Storytelling**: Orchestrated 4 scrubbed phases (Phase 1: Brand Entrance, Phase 2: Scientific Precision & Sphere Diagnostic Probe, Phase 3: "SUR-MESURE. PRÉCISION. IOMA." Transformation, Phase 4: Seamless Magazine Unfolding into Section 2).
 4. **Header Dynamic Coordination**: When at the top of the homepage, the header is dark translucent with a white IOMA logo and white navigation links; upon scrolling, it transitions smoothly to solid white with black logo and dark links.
 5. **Accessibility & Reduced Motion**: Automatically renders a static accessible fallback when `prefers-reduced-motion: reduce` is detected.
+
+### 2026-09-06 — Repair the existing professional application journey
+
+Keep `/[locale]/professionals/apply` and the existing authenticated `/api/professional` controller. Signed-out visitors receive a clear account step; registration and login preserve the application destination and locale. This avoids duplicate registration/application systems and removes the login redirect loop.
+
+Allow incomplete draft documents in MongoDB, but enforce shared Zod validation, accepted terms and private professional documents on submission. Use one active application per user plus atomic submission and optimistic review concurrency; rejection permits a new application while pending, approved and suspended states cannot silently create duplicates. Add document requests and signed document review to the existing admin page. Resolve current user roles from MongoDB during JWT authentication so approval/suspension takes effect without waiting for token expiry.
+
+Use optional `MINIO_SIGNED_URL_ENDPOINT` for a browser-reachable signing origin. Internal Docker storage traffic remains on the existing MinIO endpoint; private object downloads still require an authorized, expiring signature.
+
+## 2026-09-06 — One identity, personal account and professional portal
+
+Keep User + CustomerProfile + optional ProfessionalApplication/ProfessionalProfile. The same session serves both modes. /account owns personal activity and the application gateway; /portal owns approved professional commerce, training, protocols, company and documents. Reuse the existing application route and actual status enum. Do not duplicate B2B modules under /account.
+
+Cart ownership now includes b2c/b2b type. Personal order history uses /orders/my filtered to b2c; professional history remains /orders/pro/list. Both checkout modes reuse one form and select separate backend endpoints. Server-side roles are read from MongoDB on each authenticated request. Training/protocol controllers must carry RequireProfessional metadata as well as the guard.
+
+Application reviewNotes and historical audit notes are internal. New rejection/document-request messages are explicitly applicant-facing, stored separately as applicantMessage; public application reads strip internal reviewer/audit notes. Only attached, owned private documents get temporary URLs. Legal company edits require IOMA verification.
+
+Account query caches are cleared on login, registration and logout to prevent another identity seeing a prior user's cached personal data. Standard diagnosis remains independently available at /diagnosis/standard; restoring it reverses the historical Sprint 13 deprecation in accordance with the current brief.
+
+## 2026-09-06 — Admin shell and analytics
+
+Admin uses a dedicated Carbon-inspired neutral/blue shell. Storefront chrome is excluded on admin routes; the public Admin Panel link reads server-resolved access. The API checks current database roles independently on every management request. Shared permission vocabulary and a fixed resource registry prevent arbitrary collection access.
+
+Analytics use Mongo aggregation facets and server-filled chart series, bounded permission-scoped 30-second caching and invalidation on admin mutations. AED fils remain integer values; Dubai calendar periods and eligible paid-order definitions are documented in ADMIN_IMPLEMENTATION.md. Native React/SVG charts with tooltips and accessible data tables avoid a new chart dependency. Configuration flags and observed AI outcomes remain distinct from active provider health checks.
+
+Structured multilingual CMS blocks replace raw JSON editing. Existing public content remains the fallback until a corresponding entry is published. Private documents continue to use signed storage access. No invoice/refund, reviews or promotions workflows were invented.
+
+## 2026-09-06 — Managed product media and stable administration
+
+- Product references ordered MediaAsset metadata; binaries stay in MinIO. Array index zero is primary, protected by mediaRevision CAS. Localized alt belongs to the product relation, allowing shared assets with different descriptions.
+- Immutable asset paths hold original, 2000px main, 800px card and 160px thumbnail. Public API media URLs are stable, cacheable and generated from IDs; private documents/AI images remain private. A compatibility Product.images projection contains stable URLs, never temporary signatures.
+- Removal detaches only the intended relation. Objects remain retained for shared products and historical references; no automatic deletion/garbage collection can break another product or historical routine. Failed new uploads compensate only their own written keys.
+- Safe migration backs up before writes, validates official/local sources, preserves a whole original gallery if any image fails, and deduplicates retries by product/checksum. The full catalogue importer is not used to migrate media and preserves existing managed image projections.
+- Admin shell remains in the nested layout; only main content transitions (180ms, 5px, disabled for reduced motion). Same-resource query changes keep rows in place.
+
+## User-requested consolidation and bulk deletion
+
+Skin concerns, inventory and stock movements live as Product Management tabs; old list routes redirect with query preservation. Product deletion is an audited soft delete to preserve immutable media/order references. Order deletion sets adminDeletedAt only: payment, accounting, stock and customer records must not silently change when cleaning the management list. Selection is limited to the visible page and resets on filters/page navigation.
+
+## Canonical product workspace — 2026-09-07
+
+Product Detail is the canonical product management workspace; the separate Edit route is deprecated and redirects to ?mode=edit. One parent draft owns content, media order/alt/uploads and variant prices across tabs. A single Save persists variants, media and product using existing guarded endpoints. These operations are not a cross-service transaction: successful media/variant writes survive later failure and retries reuse uploaded assets/created variants. Explicit stock adjustments remain immediate audited actions and explain their separate persistence in the dialog. Unsupported metadata/AI controls are described rather than fabricated.
+
+## Admin Orders & Skin Diagnoses Redesign — 2026-09-07
+
+- **Order Management & In-Place Editing**: Replaced the previous navigation flow with a high-density, right-side sliding Drawer (`AdminOrderDrawer`) for viewing and editing order details, shipment tracking, addresses, and line items. The drawer integrates dirty-state tracking with an unsaved changes confirmation modal. All date format operations are hardened against invalid timestamps.
+- **Order Deletion Lifecycle**: Added single-order deletion in both the table row actions and the drawer header, complemented by bulk-deletion in the table selection toolbar. Deletions apply `adminDeletedAt: now` soft-delete markers in MongoDB to preserve historical accounting and inventory audits while cleanly removing cancelled/test records from active administrative operations.
+- **Diagnostic Intelligence Consolidation**: Removed obsolete admin pages (`/admin/routines`, `/admin/ai-analyses`, `/admin/ranges`) with seamless route redirects. Consolidated all AI and clinical diagnosis monitoring into `/admin/diagnoses` featuring prominent customer identification cards, 5 KPI metrics, and a 5-tab drawer with 11 optical biomarkers, 3-tier prescribed routines backed by authoritative database AED prices and MinIO product assets, lifestyle analysis, trilingual Éléonore narrative (EN/FR/AR), and consultation transcript.
+
+---
+
+## 2026-09-14 — Official Shopify Catalogue Migration & Product Model Refactoring
+
+- **Shopify Export as Authoritative Source of Truth**: The official IOMA Paris French export `ioma-paris-eshop-FR-product-export_2026-09-14.xlsx` serves as the primary ground truth for product handles, French titles, accroches, textures, clinical results, contenances, vendor identifiers, active ingredient formulations, and ordered media sequences. French copy is ingested directly without automated translation or AI reformulation.
+- **Strict Separation of French EUR and UAE AED Prices**: European euro prices from Shopify (`custom.price_eur`) are never imported or converted. 49 retail products were 100% matched against client-supplied UAE retail AED prices. The remaining 14 items without client AED pricing (bundles, gift cards, patch kits) are strictly kept in `status: "draft"` and `uaeAvailability: "PENDING"`, ensuring they cannot be purchased at zero dirhams while remaining manageable in the administrative catalog.
+- **Expanded Scientific Product Data Model**:
+  - Extracted `SkinType` (8 types) and `ProductType` (20 types) into dedicated MongoDB schemas and API endpoints to allow faceted shop navigation and normalized admin categorization.
+  - Extended `Product` schema with official Shopify fields: `accroche`, `texture`, `results`, `contenance`, `vendor`, `productType`, `skinTypeIds`, `activeIngredientsList`, and ordered `media` (primary hero asset + secondary texture/packaging assets).
+- **NavigationMenu Unique Compound Index**: Fixed `NavigationMenuSchema` where `key` had an unnecessary single-field unique constraint. Because both `draft` and `published` documents share `key: "main_header"`, the index was changed to a compound `{ key: 1, status: 1 }` index, preventing bootstrap collision.
+- **Shopify-Inspired Admin Ergonomics**: Modernized the admin products workspace with Shopify-standard lifecycle tabs (`All`, `Active`, `Draft`, `Archived`), multi-attribute filters, batch operations, and a 2-column product editor separating main editorial/scientific content from contextual status and organizational sidebar panels.
+
+## 2026-10-07 — Admin split into its own app; French, skin diagnosis and inventory page removed
+
+Direct instructions from the client owner, recorded here because they depart from earlier documents (CLAUDE.md, PROJECT_BRIEF.md, ARCHITECTURE.md):
+
+- **Admin is a separate Next.js app (`apps/admin`, port 3100)** with its own login, session key (`ioma_admin_auth`) and build. Admin code and `/admin` routes were removed from `apps/web`. Shared bits (API client, UI primitives, auth store) were copied rather than extracted into packages for speed; extracting them is a follow-up. Why: the back office must not share a login surface or bundle with the public site.
+- **Admin accounts cannot sign in on the storefront.** `POST /auth/login` rejects accounts holding an admin role unless the request carries `X-Ioma-App: admin` (same generic error as a wrong password). Real access control is still enforced per endpoint by RBAC; this only separates the login surfaces.
+- **Dev admin bypass (`ADMIN_DEMO_BYPASS`) was built and removed.** Admin always requires a real login.
+- **French locale removed** from the storefront and admin UI (`SUPPORTED_LOCALES = en, ar`; `/fr/*` redirects to `/en/*`). Stored `fr` content values remain in the database and the `Locale` type still allows `fr` so existing data reads safely; the API no longer requires `fr` on admin saves.
+- **Skin diagnosis UI removed** from the storefront (`/diagnosis/*`, account diagnosis/AI/routines pages, homepage AI Skin Expert section, nav/footer/CTA links) and the admin (Skin Diagnoses page, customer-drawer tab, dashboard AI panel). The API modules (`diagnosis`, `ai-analysis`) and stored data were deliberately left in place so the feature can be restored.
+- **Inventory page removed** from the admin; stock is edited per product. Skin Concerns / Skin Types / Product Types tabs were removed from Product Organization (their pages still exist but are unlinked).
+
+## 2026-10-07 — B2B trade access: three access levels (client brief "B2B Professionals v2")
+
+- **Levels:** visitor → validated → customer. The level is **derived on the server** from the account and its orders (`ProAccessService.getAccess`, rules in `pro-access.rules.ts`), never stored as the source of truth. A cancelled/refunded first order therefore closes the benefits again automatically; there is no unlock job that can drift out of sync.
+- **Unlock trigger (recommended by the client brief, adopted):** an order counts when it is _confirmed_ (authorised, paid, or already in preparation) or, if configured, only _paid_ — never merely placed. Minimum first-order amount and an optional validity period (e.g. 12 months) are settings (`B2bSettings`, admin app → B2B settings), left open until IEVA decides.
+- **Registration:** five fields only (`POST /professional/leads`, public, rate-limited, honeypot). It creates a `ProfessionalLead`, emails the IOMA team and confirms to the lead. The long application flow was replaced. Legacy approved applications/profiles keep working; their level is computed from their orders on first access.
+- **Validation:** an admin attaches the Trade License (and TRN) to the lead, then validates. Validation creates the login (random unusable password) and emails a one-time "set your password" link (reuses the password-reset token store). Validation is refused without a Trade License.
+- **Locked content never leaves the server:** `/pro/videos`, `/pro/gallery`, `/pro/documents` return titles and a low-resolution `preview` only while locked; the video URL, full image and file download are returned/served only once the required level is reached (unit-tested). The blur in the UI is cosmetic.
+- **Storefront chrome:** `/portal` has its own header, menu and contact box (as in the PDF), so the site header/footer are hidden there.
+- Content (videos, gallery, benefits, documents) is edited in the admin app through generic resources `pro-videos`, `pro-gallery`, `pro-benefits`, `pro-documents`; `pnpm --filter @ioma/api seed:pro-space` creates the structure named in the brief (no invented files).
+
+---
+
+## 2026-11-05 — Complete AI Diagnostic Removal & Cinematic Hero Redesign
+
+Client directive:
+
+1. **Completely remove AI Skin Diagnostic**:
+   - Storefront: removed all AI Skin Expert 2.0 / AI diagnostic entry points, links, and banners from customer account (`/account`), experience nav, and action center.
+   - Account KPI grid updated to a balanced 4-card structure (Orders, Addresses, Appointments, Wishlist).
+   - Replaced AI banner with an authentic In.Lab Bespoke Skincare banner linking to `/shop/ma-creme-jour` and `/booking`.
+   - Removed obsolete `ai-consent` page and added Next.js redirects (`/diagnosis`, `/diagnosis/:path*`, `/ai-consent` → `/technology` & `/privacy-policy`).
+   - Cleaned FAQ and translations (EN, FR, AR) to focus on in-person diagnostic devices and In.Lab bespoke formulation.
+   - API: Deactivated active `AiAnalysisModule` from NestJS `app.module.ts` and `admin.module.ts`, and removed queue injection from `admin-actions.service.ts`. Historical MongoDB records are completely preserved. Made AI provider env vars optional in `env.validation.ts`.
+2. **Cinematic Minimalist Homepage Hero Redesign**:
+   - Replaced oversized headline ("Measured first, formulated after") and large animated typography with an unobstructed, full-bleed video hero (88-96svh).
+   - Rebuilt `CinematicHero` with minimal editorial caption at bottom-left ("IOMA PARIS — DUBAI / The art of personalised skincare." with Arabic equivalent), bottom-center animated scroll cue, and bottom-right "Discover IOMA" link + play/pause toggle.
+   - Configured responsive video assets (`ioma-hero.mp4`, `ioma-hero-mobile.mp4`, `ioma-hero.webm`) and poster image with subtle luxury gradient vignette.
+3. **Homepage Visual Hierarchy & Transition**:
+   - Added an editorial Hero-to-Content transition section (`#brand-story`) with La Maison IOMA storytelling, philosophy ("Born in Paris, Perfected for the Gulf Climate"), and key credentials (1M+ skin profiles, 40,000+ In.Lab formulas, 100% made in France).
+   - Structured sections strictly in priority order: Hero → Brand Storytelling & Philosophy → Bespoke In.Lab Skincare → 7 Expert Collections & Haircare → IOMA Technology & Diagnostic Devices Spotlight → Best-Selling Products → Skincare Routines & Kits → Partner Locations & In-Person Appointment Booking → B2B Professional Space.

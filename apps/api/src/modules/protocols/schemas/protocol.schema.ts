@@ -30,6 +30,8 @@ export class Protocol {
 
   @Prop({ type: [String], default: [] })
   applicableRangeKeys!: string[];
+  @Prop({ type: [Types.ObjectId], ref: "Product", default: [] })
+  relatedProductIds!: Types.ObjectId[];
 
   @Prop({ type: Types.ObjectId, ref: "Document", default: null })
   pdfDocumentId!: Types.ObjectId | null;

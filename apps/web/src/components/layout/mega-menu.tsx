@@ -1,146 +1,349 @@
 "use client";
 
 import Image from "next/image";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { motion } from "motion/react";
 import { Link } from "@/i18n/navigation";
 import { PRODUCT_RANGE_COLORS } from "@ioma/config";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight, Star } from "lucide-react";
+import type { ResolvedNavigationItem } from "@/hooks/use-navigation-query";
 
 interface MegaMenuProps {
   isOpen: boolean;
   onClose: () => void;
+  item?: ResolvedNavigationItem | null;
 }
 
-const CONCERNS = [
+type Loc = "en" | "ar";
+const l = (en: string, ar: string) => ({ en, ar });
+
+// Built-in menu used when the admin has not configured sections.
+const DEFAULT_CONCERNS = [
   {
     slug: "dehydration",
-    labelKey: "concernHydration",
+    fallback: l("Dehydration", "الجفاف"),
     href: "/shop?concern=dehydration",
   },
   {
     slug: "first-signs-of-aging",
-    labelKey: "concernAntiAging",
+    fallback: l("Anti-ageing & wrinkles", "مكافحة الشيخوخة والتجاعيد"),
     href: "/shop?concern=first-signs-of-aging",
   },
   {
     slug: "fatigue-dullness",
-    labelKey: "concernRadiance",
+    fallback: l("Radiance & dull skin", "الإشراقة والبشرة الباهتة"),
     href: "/shop?concern=fatigue-dullness",
   },
+  { slug: "firmness", fallback: l("Firmness", "الشدّ"), href: "/shop?concern=firmness" },
   {
-    slug: "sensitivity",
-    labelKey: "concernFirmness",
-    fallback: "Sensibilité & Rougeurs",
-    href: "/shop?concern=sensitivity",
-  },
-  {
-    slug: "blemishes",
-    labelKey: "concernPores",
-    fallback: "Imperfections & Pores",
-    href: "/shop?concern=blemishes",
-  },
-  {
-    slug: "shine-control",
-    fallback: "Contrôle de la brillance",
-    href: "/shop?concern=shine-control",
+    slug: "redness",
+    fallback: l("Redness & sensitivity", "الاحمرار والحساسية"),
+    href: "/shop?concern=redness",
   },
   {
     slug: "dark-spots",
-    fallback: "Taches & Teint uniforme",
+    fallback: l("Dark spots & even tone", "البقع وتوحيد اللون"),
     href: "/shop?concern=dark-spots",
   },
-  { slug: "menopause", fallback: "Ménopause & Densité", href: "/shop?concern=menopause" },
+  {
+    slug: "imperfections",
+    fallback: l("Imperfections & pores", "الشوائب والمسام"),
+    href: "/shop?concern=imperfections",
+  },
+  {
+    slug: "eye-care",
+    fallback: l("Eye contour", "محيط العينين"),
+    href: "/shop?category=eyes",
+  },
   {
     slug: "uv-protection",
-    fallback: "Protection UV & Ville",
-    href: "/shop?concern=uv-protection",
+    fallback: l("Sun protection & pollution", "الحماية من الشمس والتلوث"),
+    href: "/shop?category=sun",
   },
 ];
 
-const CATEGORIES = [
-  { slug: "serums", label: "Sérums", href: "/shop?category=serums" },
-  { slug: "cremes", label: "Crèmes de Jour & Nuit", href: "/shop?category=cremes" },
+const DEFAULT_CATEGORIES = [
   {
-    slug: "nettoyants",
-    label: "Nettoyants & Lotions",
-    href: "/shop?category=nettoyants",
-  },
-  { slug: "demaquillants", label: "Démaquillants", href: "/shop?category=demaquillants" },
-  { slug: "masques", label: "Masques & Gommages", href: "/shop?category=masques" },
-  {
-    slug: "soins-yeux-levres",
-    label: "Contour des Yeux & Lèvres",
-    href: "/shop?category=soins-yeux-levres",
+    slug: "cleansers",
+    fallback: l("Cleansers & makeup removers", "المنظفات ومزيلات المكياج"),
+    href: "/shop?category=cleansers",
   },
   {
-    slug: "protection-solaire",
-    label: "Protection Solaire",
-    href: "/shop?category=protection-solaire",
+    slug: "creams",
+    fallback: l("Day & night creams", "كريمات النهار والليل"),
+    href: "/shop?category=creams",
   },
   {
-    slug: "soins-sur-mesure",
-    label: "Soins Sur Mesure In.Lab",
-    href: "/shop?category=soins-sur-mesure",
+    slug: "serums",
+    fallback: l("High-precision serums", "سيرومات عالية الدقة"),
+    href: "/shop?category=serums",
+  },
+  {
+    slug: "masks",
+    fallback: l("Masks & scrubs", "الأقنعة والمقشرات"),
+    href: "/shop?category=masks",
+  },
+  {
+    slug: "eyes",
+    fallback: l("Eye care", "العناية بالعيون"),
+    href: "/shop?category=eyes",
+  },
+  {
+    slug: "sun",
+    fallback: l("UV protection", "الحماية من الأشعة"),
+    href: "/shop?category=sun",
   },
 ];
 
-const RANGES = [
+const DEFAULT_RANGES = [
   {
     key: "hydra",
     num: "1",
     name: "Hydra",
     color: PRODUCT_RANGE_COLORS.hydra,
-    desc: "Hydratation durable",
+    desc: l("Hydration & nutrition", "ترطيب وتغذية"),
   },
   {
     key: "energize",
     num: "2",
     name: "Energize",
     color: PRODUCT_RANGE_COLORS.energize,
-    desc: "Éclat & Vitalité",
+    desc: l("First wrinkles & radiance", "التجاعيد الأولى والإشراقة"),
   },
   {
     key: "renew",
     num: "3",
     name: "Renew",
     color: PRODUCT_RANGE_COLORS.renew,
-    desc: "Fermeté & Anti-âge",
+    desc: l("Anti-ageing & firmness", "مكافحة الشيخوخة والشدّ"),
   },
   {
     key: "calm",
     num: "4",
     name: "Calm",
     color: PRODUCT_RANGE_COLORS.calm,
-    desc: "Apaisement & Anti-rougeurs",
+    desc: l("Redness & soothing", "الاحمرار والتهدئة"),
   },
   {
     key: "purete",
     num: "5",
     name: "Pureté",
     color: PRODUCT_RANGE_COLORS.purete,
-    desc: "Clarté & Anti-imperfections",
+    desc: l("Clarity & imperfections", "الصفاء والشوائب"),
   },
   {
     key: "matte",
     num: "6",
     name: "Matte",
     color: PRODUCT_RANGE_COLORS.matte,
-    desc: "Matité & Pores",
+    desc: l("Matte finish & pores", "مظهر مطفي والمسام"),
   },
   {
     key: "illumine",
     num: "7",
     name: "Illumine",
     color: PRODUCT_RANGE_COLORS.illumine,
-    desc: "Taches & Éclat",
+    desc: l("Dark spots & radiance", "البقع والإشراقة"),
   },
 ];
 
-export function MegaMenu({ isOpen, onClose }: MegaMenuProps) {
+const pick = (v: unknown, loc: Loc): string => {
+  if (typeof v === "string") return v;
+  if (v && typeof v === "object") {
+    const o = v as Record<string, string>;
+    return o[loc] || o.en || "";
+  }
+  return "";
+};
+
+function Heading({ children }: { children: React.ReactNode }) {
+  return (
+    <p className="mb-5 flex items-center gap-3 text-[0.68rem] font-semibold uppercase tracking-[0.24em] text-muted-foreground">
+      <span className="h-px w-6 bg-foreground/30" aria-hidden />
+      {children}
+    </p>
+  );
+}
+
+function MenuLink({
+  href,
+  onClose,
+  children,
+}: {
+  href: string;
+  onClose: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <Link
+      href={href}
+      onClick={onClose}
+      className="group relative flex min-h-9 items-center justify-between gap-3 rounded-md px-3 py-1.5 text-[0.85rem] text-foreground/80 transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground -mx-3"
+    >
+      <span className="min-w-0 truncate">{children}</span>
+      <ArrowRight
+        className="size-3.5 shrink-0 -translate-x-1 opacity-0 transition-all group-hover:translate-x-0 group-hover:opacity-100 rtl:rotate-180 rtl:translate-x-1 rtl:group-hover:translate-x-0"
+        aria-hidden
+      />
+    </Link>
+  );
+}
+
+export function MegaMenu({ isOpen, onClose, item }: MegaMenuProps) {
   const t = useTranslations("Nav");
+  const loc = (useLocale() === "ar" ? "ar" : "en") as Loc;
 
   if (!isOpen) return null;
+
+  const sections =
+    item?.megaMenuSections && item.megaMenuSections.length > 0
+      ? item.megaMenuSections.filter((s) => s.visible !== false)
+      : null;
+
+  const concernList = (data: unknown) =>
+    (Array.isArray(data) && data.length > 0 ? data : DEFAULT_CONCERNS).map((c: any) => ({
+      key: c.slug,
+      href: c.href || `/shop?concern=${c.slug}`,
+      label: c.label ? pick(c.label, loc) : pick(c.fallback, loc),
+    }));
+  const categoryList = (data: unknown) =>
+    (Array.isArray(data) && data.length > 0 ? data : DEFAULT_CATEGORIES).map(
+      (c: any) => ({
+        key: c.slug,
+        href: c.href || `/shop?category=${c.slug}`,
+        label: c.label ? pick(c.label, loc) : pick(c.fallback, loc),
+      }),
+    );
+
+  const LinkColumn = ({
+    title,
+    links,
+    footer,
+  }: {
+    title: string;
+    links: { key: string; href: string; label: string }[];
+    footer?: React.ReactNode;
+  }) => (
+    <div className="col-span-3">
+      <Heading>{title}</Heading>
+      <ul className="space-y-0.5">
+        {links.map((c) => (
+          <li key={c.key}>
+            <MenuLink href={c.href} onClose={onClose}>
+              {c.label}
+            </MenuLink>
+          </li>
+        ))}
+      </ul>
+      {footer && <div className="mt-4">{footer}</div>}
+    </div>
+  );
+
+  const AllFace = (
+    <Link
+      href="/shop"
+      onClick={onClose}
+      className="inline-flex min-h-9 items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-foreground underline-offset-4 hover:underline"
+    >
+      {t("allFace")}
+      <ArrowRight className="size-3.5 rtl:rotate-180" aria-hidden />
+    </Link>
+  );
+
+  const RangeColumn = ({
+    title,
+    ranges,
+    bestSellers,
+  }: {
+    title: string;
+    ranges: any[];
+    bestSellers: boolean;
+  }) => (
+    <div className="col-span-3">
+      <Heading>{title}</Heading>
+      <ul className="space-y-0.5">
+        {ranges.map((r) => (
+          <li key={r.key}>
+            <Link
+              href={r.href || `/shop?range=${r.key}`}
+              onClick={onClose}
+              className="group -mx-3 flex min-h-10 items-center gap-3 rounded-md px-3 py-1.5 transition-colors hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground"
+            >
+              <span
+                className="grid size-6 shrink-0 place-items-center rounded-full text-[0.65rem] font-bold text-white"
+                style={{ backgroundColor: r.color }}
+                aria-hidden
+              >
+                {r.num}
+              </span>
+              <span className="min-w-0">
+                <span className="block text-[0.85rem] font-semibold leading-tight text-foreground">
+                  {String(r.name || "").replace(/^(\d+)\s+/, "")}
+                </span>
+                <span className="block truncate text-[0.72rem] text-muted-foreground">
+                  {pick(r.desc, loc)}
+                </span>
+              </span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+      {bestSellers && (
+        <Link
+          href="/shop?bestSeller=true"
+          onClick={onClose}
+          className="mt-4 inline-flex min-h-9 items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] hover:text-sf-champagne"
+        >
+          <Star className="size-3.5 fill-current" aria-hidden />
+          {t("allBestSellers")}
+        </Link>
+      )}
+    </div>
+  );
+
+  // Large photo card: an iconic product, with the official campaign visual.
+  const Featured = ({ data, title }: { data?: any; title: string }) => {
+    const f = data || {};
+    const legacy = typeof f.image === "string" && f.image.startsWith("/images/products/");
+    const image = !f.image || legacy ? "/images/brand/routine-renew.webp" : f.image;
+    return (
+      <Link
+        href={f.href || "/shop/creme-sublime-revitalisante"}
+        onClick={onClose}
+        className="group relative col-span-3 block min-h-[22rem] overflow-hidden rounded-xl bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground"
+      >
+        <Image
+          src={image}
+          alt={pick(f.headline, loc) || "IOMA Paris"}
+          fill
+          sizes="320px"
+          className="object-cover transition-transform duration-700 group-hover:scale-105 motion-reduce:transition-none"
+        />
+        <span
+          aria-hidden
+          className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent"
+        />
+        <span className="absolute start-4 top-4 rounded-full bg-white/95 px-3 py-1 text-[0.62rem] font-semibold uppercase tracking-[0.16em] text-foreground">
+          {pick(f.badge, loc) || (loc === "ar" ? "منتج أيقوني" : "Iconic care")}
+        </span>
+        <span className="absolute inset-x-0 bottom-0 p-5 text-white">
+          <span className="block text-[0.62rem] uppercase tracking-[0.2em] text-white/70">
+            {title}
+          </span>
+          <span className="mt-1 block font-display text-xl leading-tight">
+            {pick(f.headline, loc) || "Crème Sublime Revitalisante"}
+          </span>
+          <span className="mt-3 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em]">
+            {pick(f.ctaLabel, loc) || t("discoverAll")}
+            <ArrowRight
+              className="size-3.5 transition-transform group-hover:translate-x-1 rtl:rotate-180 rtl:group-hover:-translate-x-1"
+              aria-hidden
+            />
+          </span>
+        </span>
+      </Link>
+    );
+  };
 
   return (
     <motion.div
@@ -148,157 +351,56 @@ export function MegaMenu({ isOpen, onClose }: MegaMenuProps) {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -6 }}
       transition={{ duration: 0.18, ease: "easeOut" }}
-      className="absolute top-full inset-x-0 bg-background/98 backdrop-blur-xl border-b border-border shadow-2xl z-40"
+      className="absolute inset-x-0 top-full z-40 border-b border-border bg-background/98 shadow-2xl backdrop-blur-xl"
       onMouseLeave={onClose}
       role="region"
-      aria-label={t("visage")}
+      aria-label={item?.label || t("visage")}
     >
-      <div className="max-w-[1440px] mx-auto px-6 py-8 grid grid-cols-12 gap-8 text-foreground">
-        {/* Col 1: Vos Préoccupations */}
-        <div className="col-span-3 border-e border-border/50 pe-6">
-          <div className="text-[0.7rem] uppercase tracking-widest font-semibold text-muted-foreground mb-4 pb-1 border-b border-border/40">
-            {t("concernsTitle")}
-          </div>
-          <ul className="space-y-2.5 text-xs">
-            {CONCERNS.map((item) => (
-              <li key={item.slug}>
-                <Link
-                  href={item.href}
-                  onClick={onClose}
-                  className="group flex items-center justify-between text-foreground/80 hover:text-foreground hover:translate-x-1 rtl:hover:-translate-x-1 transition-all duration-150"
-                >
-                  <span>{item.fallback || t(item.labelKey as any)}</span>
-                  <span className="opacity-0 group-hover:opacity-100 text-muted-foreground transition-opacity">
-                    →
-                  </span>
-                </Link>
-              </li>
-            ))}
-            <li className="pt-2">
-              <Link
-                href="/diagnosis"
-                onClick={onClose}
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-ioma-violet hover:underline uppercase tracking-wider"
-              >
-                <Sparkles className="size-3" />
-                <span>{t("startDiagnosisCta")}</span>
-              </Link>
-            </li>
-          </ul>
-        </div>
-
-        {/* Col 2: Nos Catégories */}
-        <div className="col-span-3 border-e border-border/50 pe-6">
-          <div className="text-[0.7rem] uppercase tracking-widest font-semibold text-muted-foreground mb-4 pb-1 border-b border-border/40">
-            {t("categoriesTitle")}
-          </div>
-          <ul className="space-y-2.5 text-xs">
-            {CATEGORIES.map((cat) => (
-              <li key={cat.slug}>
-                <Link
-                  href={cat.href}
-                  onClick={onClose}
-                  className="group flex items-center justify-between text-foreground/80 hover:text-foreground hover:translate-x-1 rtl:hover:-translate-x-1 transition-all duration-150"
-                >
-                  <span>{cat.label}</span>
-                  <span className="opacity-0 group-hover:opacity-100 text-muted-foreground transition-opacity">
-                    →
-                  </span>
-                </Link>
-              </li>
-            ))}
-            <li className="pt-2">
-              <Link
-                href="/shop"
-                onClick={onClose}
-                className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground underline underline-offset-4"
-              >
-                <span>{t("allFace")}</span>
-                <ArrowRight className="size-3 rtl:rotate-180" />
-              </Link>
-            </li>
-          </ul>
-        </div>
-
-        {/* Col 3: Nos Gammes */}
-        <div className="col-span-3 border-e border-border/50 pe-6">
-          <div className="text-[0.7rem] uppercase tracking-widest font-semibold text-muted-foreground mb-4 pb-1 border-b border-border/40">
-            {t("rangesTitle")}
-          </div>
-          <ul className="space-y-2.5 text-xs">
-            {RANGES.map((r) => (
-              <li key={r.key}>
-                <Link
-                  href={`/shop?range=${r.key}`}
-                  onClick={onClose}
-                  className="group flex items-center gap-2.5 text-foreground/80 hover:text-foreground hover:translate-x-1 rtl:hover:-translate-x-1 transition-all duration-150"
-                >
-                  <span
-                    className="size-2 rounded-full shrink-0"
-                    style={{ backgroundColor: r.color }}
-                    aria-hidden="true"
-                  />
-                  <span className="font-semibold text-foreground">
-                    {r.num} {r.name}
-                  </span>
-                  <span className="text-[0.7rem] text-muted-foreground font-normal truncate">
-                    — {r.desc}
-                  </span>
-                </Link>
-              </li>
-            ))}
-            <li className="pt-2">
-              <Link
-                href="/shop?bestSeller=true"
-                onClick={onClose}
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-foreground hover:text-ioma-violet transition-colors"
-              >
-                <span>★ {t("allBestSellers")}</span>
-              </Link>
-            </li>
-          </ul>
-        </div>
-
-        {/* Col 4: Featured Product Card */}
-        <div className="col-span-3 flex flex-col justify-between bg-muted/30 p-4 rounded-sm border border-border/60">
-          <div>
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-[0.65rem] uppercase tracking-widest text-muted-foreground font-semibold">
-                {t("featuredTitle")}
-              </span>
-              <span className="text-[0.65rem] uppercase tracking-widest text-ioma-violet font-semibold bg-ioma-violet/10 px-2 py-0.5 rounded-full">
-                Soin Iconique
-              </span>
-            </div>
-            <div className="relative aspect-square w-full mb-3 rounded-sm overflow-hidden bg-white">
-              <Image
-                src="/images/products/creme-sublime-revitalisante-1.jpg"
-                alt="Crème Sublime Revitalisante"
-                fill
-                sizes="260px"
-                className="object-contain p-2 hover:scale-105 transition-transform duration-300"
-              />
-            </div>
-            <h4 className="text-sm font-semibold text-foreground leading-tight">
-              Crème Sublime Revitalisante
-            </h4>
-            <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-              Haute régénération cellulaire anti-âge aux actifs d'exception et résultats
-              visibles.
-            </p>
-          </div>
-          <div className="mt-4 pt-3 border-t border-border/50 flex items-center justify-between">
-            <span className="text-xs font-semibold text-foreground">968 AED</span>
-            <Link
-              href="/shop/creme-sublime-revitalisante"
-              onClick={onClose}
-              className="inline-flex items-center gap-1 text-xs font-medium uppercase tracking-wider text-ioma-violet hover:underline"
-            >
-              <span>{t("discoverAll")}</span>
-              <ArrowRight className="size-3 rtl:rotate-180" />
-            </Link>
-          </div>
-        </div>
+      <div className="mx-auto grid max-w-[1440px] grid-cols-12 gap-x-10 gap-y-8 px-8 py-10 text-foreground">
+        {sections ? (
+          sections.map((sec) => {
+            if (sec.type === "SKIN_CONCERNS")
+              return (
+                <LinkColumn
+                  key={sec.id}
+                  title={sec.title}
+                  links={concernList(sec.data)}
+                />
+              );
+            if (sec.type === "PRODUCT_CATEGORIES")
+              return (
+                <LinkColumn
+                  key={sec.id}
+                  title={sec.title}
+                  links={categoryList(sec.data)}
+                  footer={AllFace}
+                />
+              );
+            if (sec.type === "PRODUCT_RANGES")
+              return (
+                <RangeColumn
+                  key={sec.id}
+                  title={sec.title}
+                  ranges={sec.data?.ranges ? sec.data.ranges : DEFAULT_RANGES}
+                  bestSellers={sec.data?.includeBestSellers !== false}
+                />
+              );
+            if (sec.type === "FEATURED_PRODUCT")
+              return <Featured key={sec.id} data={sec.data} title={sec.title} />;
+            return null;
+          })
+        ) : (
+          <>
+            <LinkColumn title={t("concernsTitle")} links={concernList(null)} />
+            <LinkColumn
+              title={t("categoriesTitle")}
+              links={categoryList(null)}
+              footer={AllFace}
+            />
+            <RangeColumn title={t("rangesTitle")} ranges={DEFAULT_RANGES} bestSellers />
+            <Featured title={t("featuredTitle")} />
+          </>
+        )}
       </div>
     </motion.div>
   );

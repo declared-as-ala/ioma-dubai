@@ -1,4 +1,5 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, UnauthorizedException } from "@nestjs/common";
+import { UsersService } from "../../users/users.service";
 import { ConfigService } from "@nestjs/config";
 import { PassportStrategy } from "@nestjs/passport";
 import { ExtractJwt, Strategy } from "passport-jwt";
@@ -12,7 +13,10 @@ export interface JwtPayload {
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor(configService: ConfigService<EnvConfig, true>) {
+  constructor(
+    configService: ConfigService<EnvConfig, true>,
+    private readonly users: UsersService,
+  ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
@@ -20,7 +24,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  validate(payload: JwtPayload): JwtPayload {
-    return payload;
+  async validate(payload: JwtPayload): Promise<JwtPayload> {
+    // Approval and suspension must apply immediately, even to already-issued JWTs.
+    const user = await this.users.findById(payload.sub);
+    if (!user || user.status === "locked" || user.status === "deleted")
+      throw new UnauthorizedException();
+    return { sub: payload.sub, email: user.email, roles: user.roles };
   }
 }

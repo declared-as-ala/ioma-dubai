@@ -25,7 +25,16 @@ function resolveOwner(
   user: JwtPayload | undefined,
   guestSessionId: string | undefined,
 ): CartOwner {
-  return user ? { userId: user.sub } : { sessionId: guestSessionId };
+  return user
+    ? {
+        userId: user.sub,
+        professionalApproved: user.roles.some((role) =>
+          ["professional_approved", "administrator", "super_administrator"].includes(
+            role,
+          ),
+        ),
+      }
+    : { sessionId: guestSessionId };
 }
 
 @ApiTags("orders")
@@ -53,8 +62,7 @@ export class OrdersController {
   @UseGuards(JwtAuthGuard)
   list(@CurrentUser() user: JwtPayload) {
     const isAdmin =
-      user.roles.includes("administrator") ||
-      user.roles.includes("super_administrator");
+      user.roles.includes("administrator") || user.roles.includes("super_administrator");
 
     if (isAdmin) {
       return this.ordersService.listAll();
@@ -75,7 +83,16 @@ export class OrdersController {
     @Param("orderNumber") orderNumber: string,
     @Query("token") token?: string,
   ) {
-    const owner = user ? { userId: user.sub } : {};
+    const owner = user
+      ? {
+          userId: user.sub,
+          professionalApproved: user.roles.some((role) =>
+            ["professional_approved", "administrator", "super_administrator"].includes(
+              role,
+            ),
+          ),
+        }
+      : {};
     return this.ordersService.getOrder(orderNumber, { ...owner, guestToken: token });
   }
 
@@ -89,7 +106,14 @@ export class OrdersController {
     @Body() dto: RetryPaymentDto,
   ) {
     const owner = user
-      ? { userId: user.sub }
+      ? {
+          userId: user.sub,
+          professionalApproved: user.roles.some((role) =>
+            ["professional_approved", "administrator", "super_administrator"].includes(
+              role,
+            ),
+          ),
+        }
       : { sessionId: guestSessionId, guestToken: token };
     return this.ordersService.retryPayment(orderNumber, owner, dto.paymentMethod);
   }
@@ -101,8 +125,27 @@ export class OrdersController {
     @Param("orderNumber") orderNumber: string,
     @Query("token") token?: string,
   ) {
-    const owner = user ? { userId: user.sub } : {};
+    const owner = user
+      ? {
+          userId: user.sub,
+          professionalApproved: user.roles.some((role) =>
+            ["professional_approved", "administrator", "super_administrator"].includes(
+              role,
+            ),
+          ),
+        }
+      : {};
     return this.ordersService.cancel(orderNumber, { ...owner, guestToken: token });
+  }
+
+  @Post("pro/checkout")
+  @UseGuards(JwtAuthGuard, ProfessionalApprovedGuard)
+  @RequireProfessional()
+  checkoutB2B(@CurrentUser() user: JwtPayload, @Body() dto: CheckoutDto) {
+    return this.ordersService.checkout(
+      { userId: user.sub, type: "b2b", professionalApproved: true },
+      dto,
+    );
   }
 
   @Get("pro/list")

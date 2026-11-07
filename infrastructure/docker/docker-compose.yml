@@ -63,6 +63,11 @@ services:
     env_file:
       - ../../.env
     environment:
+      APP_URL: http://localhost:3000
+      ADMIN_APP_URL: http://localhost:3100
+      PORT: "4000"
+      SMTP_HOST: mailhog
+      SMTP_PORT: "1025"
       MONGO_URI: mongodb://mongo:27017/ioma
       REDIS_URL: redis://redis:6379
       MINIO_ENDPOINT: minio
@@ -73,6 +78,7 @@ services:
       # live once the API itself (not just the host-run bucket-init
       # script) first connected to MinIO in Sprint 6.
       MINIO_PORT: "9000"
+      MINIO_SIGNED_URL_ENDPOINT: ${MINIO_SIGNED_URL_ENDPOINT:-http://localhost:9010}
     ports:
       - "127.0.0.1:4000:4000"
     depends_on:
@@ -105,9 +111,25 @@ services:
       - ../../.env
     environment:
       API_URL: http://api:4000
+      INTERNAL_API_URL: http://api:4000
       PORT: ${WEB_PORT:-3000}
     ports:
       - "127.0.0.1:3000:3000"
+    depends_on:
+      api:
+        condition: service_healthy
+
+  admin:
+    build:
+      context: ../..
+      dockerfile: infrastructure/docker/admin.Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4000}
+    restart: unless-stopped
+    environment:
+      INTERNAL_API_URL: http://api:4000
+    ports:
+      - "127.0.0.1:3100:3100"
     depends_on:
       api:
         condition: service_healthy

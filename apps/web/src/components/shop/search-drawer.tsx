@@ -100,7 +100,7 @@ export function SearchDrawer() {
               <button
                 type="button"
                 onClick={closeSearch}
-                className="p-2 text-muted-foreground hover:text-foreground transition-colors rounded-sm focus-visible:outline-2 focus-visible:outline-ioma-violet"
+                className="p-2 text-muted-foreground hover:text-foreground transition-colors rounded-sm focus-visible:outline-2 focus-visible:outline-sf-champagne"
                 aria-label={t("closeSearch")}
               >
                 <X className="size-5" />
@@ -142,7 +142,7 @@ export function SearchDrawer() {
                       router.push(`/shop?q=${encodeURIComponent(concern)}`);
                       closeSearch();
                     }}
-                    className="text-xs px-3 py-1.5 rounded-sm bg-secondary text-secondary-foreground hover:bg-ioma-violet/10 transition-colors"
+                    className="text-xs px-3 py-1.5 rounded-sm bg-secondary text-secondary-foreground hover:bg-sf-champagne/10 transition-colors"
                   >
                     {concern}
                   </button>

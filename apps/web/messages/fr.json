@@ -1,4 +1,17 @@
 {
+  "CinematicHero": {
+    "brand": "IOMA PARIS — DUBAÏ",
+    "tagline": "L’art du soin personnalisé.",
+    "discover": "Découvrir IOMA",
+    "scroll": "Explorer la collection",
+    "chapters": "Chapitres du film",
+    "pause": "Mettre la vidéo en pause",
+    "play": "Lire la vidéo",
+    "measure": "Mesure",
+    "inlab": "In.Lab",
+    "precision": "Précision",
+    "book": "Réserver"
+  },
   "Home": {
     "hero": {
       "kicker": "IOMA Paris — Dubaï",
@@ -17,7 +30,8 @@
       "phase3Title": "Sur-Mesure. Précision. IOMA.",
       "phase3Subtitle": "L'intelligence cutanée transformée en votre formule sur-mesure quotidienne.",
       "phase3Cta": "Commencer le diagnostic",
-      "phase3Badge": "ATLAS MONDIAL IOMA — 1M+ DIAGNOSTICS"
+      "phase3Badge": "ATLAS MONDIAL IOMA — 1M+ DIAGNOSTICS",
+      "technologyCta": "Notre technologie"
     },
     "maison": {
       "label": "La Maison",
@@ -92,6 +106,9 @@
       "title": "Réservez votre rendez-vous diagnostic",
       "body": "Vous préférez un diagnostic en personne ? Réservez une séance avec un partenaire près de chez vous.",
       "cta": "Choisir un créneau"
+    },
+    "technology": {
+      "cta": "Découvrir notre technologie"
     }
   },
   "MaisonPage": {
@@ -174,16 +191,16 @@
   "FaqPage": {
     "kicker": "FAQ",
     "title": "Questions fréquentes",
-    "q1Title": "Comment fonctionne le diagnostic ?",
-    "q1Body": "Vous répondez à un questionnaire court et précis — ou vous rendez chez un partenaire pour une séance en personne. Vos réponses déterminent la gamme et la routine adaptées à votre peau.",
-    "q2Title": "L'analyse de peau par IA est-elle un diagnostic médical ?",
-    "q2Body": "Non. Il s'agit d'une analyse simulée et informative destinée à guider votre routine — jamais un substitut à un avis médical. Les résultats sont toujours clairement identifiés.",
+    "q1Title": "Comment fonctionne le diagnostic chez IOMA ?",
+    "q1Body": "Dans nos spas et instituts partenaires aux Émirats, des spécialistes certifiés utilisent des appareils de diagnostic haute précision pour lire vos paramètres cutanés et recommander une routine sur-mesure ciblée.",
+    "q2Title": "Comment sont créées les formules de soin sur-mesure IOMA ?",
+    "q2Body": "Avec IOMA In.Lab, vos formules sur-mesure sont préparées goutte à goutte à partir de capsules d'actifs purs hautement dosés selon les besoins uniques de votre peau, à la demande.",
     "q3Title": "Livrez-vous dans tous les Émirats ?",
     "q3Body": "Les modalités et zones de livraison seront confirmées lors du paiement une fois notre boutique en ligne. Voir la Politique de Livraison pour les informations à jour.",
     "q4Title": "Comment devenir partenaire professionnel IOMA ?",
     "q4Body": "Rendez-vous sur la page Professionnels et soumettez votre candidature. Notre équipe étudie chaque demande et revient vers vous avec les prochaines étapes.",
-    "q5Title": "Puis-je supprimer mes données de diagnostic ou d'analyse IA ?",
-    "q5Body": "Oui — vous pouvez supprimer vos diagnostics enregistrés ainsi que vos images et résultats d'analyse IA à tout moment depuis votre compte.",
+    "q5Title": "Comment puis-je gérer ou supprimer mes données de compte ?",
+    "q5Body": "Vous pouvez modifier vos informations personnelles, vos adresses et vos paramètres de sécurité ou demander la suppression de votre compte depuis votre espace client.",
     "contactCta": "Une autre question ? Contactez-nous"
   },
   "Health": {
@@ -218,7 +235,8 @@
     "account": "Compte",
     "search": "Rechercher",
     "bag": "Panier",
-    "bookAppointment": "Prendre rendez-vous",
+    "findPartner": "Trouver un Partenaire",
+    "bookAppointment": "Trouver un Partenaire",
     "region": "Émirats Arabes Unis",
     "currency": "Prix en AED",
     "bottomNavigation": "Navigation basse",
@@ -231,6 +249,7 @@
     "concernFirmness": "Fermeté",
     "concernPores": "Pores",
     "goAction": "Aller",
+    "loadingLive": "Chargement des données en direct…",
     "concernsTitle": "Vos Préoccupations",
     "categoriesTitle": "Nos Catégories",
     "rangesTitle": "Nos Gammes",
@@ -254,6 +273,8 @@
     "supportTitle": "Aide",
     "legalTitle": "Mentions légales",
     "maison": "La Maison IOMA",
+    "founder": "Jean Michel Karam",
+    "iomaPrive": "IOMA Privé",
     "technology": "Notre Technologie",
     "diagnosis": "Diagnostic de Peau",
     "treatments": "Soins",
@@ -279,7 +300,8 @@
     "newsletterSuccess": "Vous êtes inscrite.",
     "newsletterError": "Une erreur est survenue. Merci de réessayer.",
     "region": "Émirats Arabes Unis",
-    "currency": "Prix en AED"
+    "currency": "Prix en AED",
+    "magazine": "Le Magazine"
   },
   "Legal": {
     "pendingNotice": "Cette page est une structure provisoire — le texte juridique final sera fourni par IOMA Paris et validé par un conseil juridique avant la mise en ligne. Rien ci-dessous n'a de valeur contractuelle.",
@@ -457,7 +479,71 @@
     "submitting": "Connexion en cours...",
     "noAccount": "Vous n'avez pas de compte ?",
     "registerLink": "En créer un",
-    "errorGeneric": "Cette combinaison e-mail / mot de passe ne correspond à aucun compte."
+    "errorGeneric": "Cette combinaison e-mail / mot de passe ne correspond à aucun compte.",
+    "privatePortal": "IOMA Paris • Espace privé",
+    "description": "Connectez-vous pour retrouver vos consultations et vos routines personnalisées.",
+    "clientTab": "Compte client",
+    "proTab": "Partenaire pro",
+    "professionalPrompt": "Vous êtes une clinique ou un spa ?",
+    "applyLink": "Demander un accès partenaire B2B",
+    "forgotPassword": "Mot de passe oublié ?",
+    "hidePassword": "Masquer le mot de passe",
+    "showPassword": "Afficher le mot de passe",
+    "secure": "Votre espace IOMA privé",
+    "imageAlt": "Soins de la peau IOMA Paris",
+    "editorialBadge": "Expertise cosmétique • Paris",
+    "quote": "Votre peau est unique. Découvrez des soins adaptés à vos besoins.",
+    "diagnosisBenefit": "Vos consultations de peau",
+    "routineBenefit": "Routines personnalisées",
+    "locations": "Paris • Dubaï",
+    "emailError": "Indiquez une adresse e-mail valide.",
+    "passwordError": "Saisissez votre mot de passe."
+  },
+  "ForgotPassword": {
+    "kicker": "Récupération de compte",
+    "title": "Mot de passe oublié ?",
+    "description": "Entrez l'e-mail associé à votre compte IOMA et nous vous enverrons un lien sécurisé pour réinitialiser votre mot de passe.",
+    "emailLabel": "Adresse e-mail",
+    "submit": "Envoyer le lien de réinitialisation",
+    "submitting": "Envoi en cours...",
+    "backToLogin": "Retour à la connexion",
+    "sentTitle": "Vérifiez votre boîte mail",
+    "sentMessage": "Si un compte existe pour cet e-mail, un lien de réinitialisation a été envoyé. Vérifiez également votre dossier de courriers indésirables.",
+    "sentBack": "Retour à la connexion",
+    "errorGeneric": "Une erreur est survenue. Veuillez réessayer.",
+    "emailError": "Indiquez une adresse e-mail valide.",
+    "imageAlt": "Soins de la peau IOMA Paris",
+    "editorialBadge": "Sécurité du compte • IOMA",
+    "quote": "Votre confidentialité et votre sécurité sont notre priorité absolue.",
+    "secure": "Sécurisé par un chiffrement standard"
+  },
+  "ResetPassword": {
+    "kicker": "Récupération de compte",
+    "title": "Nouveau mot de passe",
+    "description": "Choisissez un nouveau mot de passe sécurisé pour votre compte IOMA.",
+    "newPasswordLabel": "Nouveau mot de passe",
+    "confirmPasswordLabel": "Confirmer le nouveau mot de passe",
+    "requirements": "Au moins 10 caractères, avec une majuscule, une minuscule et un chiffre.",
+    "submit": "Réinitialiser le mot de passe",
+    "submitting": "Mise à jour en cours...",
+    "showPassword": "Afficher le mot de passe",
+    "hidePassword": "Masquer le mot de passe",
+    "successTitle": "Mot de passe mis à jour",
+    "successMessage": "Votre mot de passe a été modifié avec succès. Vous pouvez maintenant vous connecter avec votre nouveau mot de passe.",
+    "successCta": "Se connecter",
+    "expiredTitle": "Lien expiré",
+    "expiredMessage": "Ce lien de réinitialisation est invalide ou a expiré.",
+    "expiredCta": "Demander un nouveau lien",
+    "noTokenTitle": "Lien invalide",
+    "noTokenMessage": "Ce lien de réinitialisation est manquant ou invalide. Veuillez en demander un nouveau.",
+    "noTokenCta": "Demander un nouveau lien",
+    "errorGeneric": "Une erreur est survenue. Veuillez demander un nouveau lien.",
+    "passwordError": "Indiquez un mot de passe valide.",
+    "confirmError": "Les mots de passe ne correspondent pas.",
+    "imageAlt": "Soins de la peau IOMA Paris",
+    "editorialBadge": "Sécurité du compte • IOMA",
+    "quote": "Votre peau est unique. Découvrez des soins adaptés à vos besoins.",
+    "secure": "Sécurisé par un chiffrement standard"
   },
   "Register": {
     "kicker": "Compte",
@@ -577,7 +663,17 @@
       "cancel": "Conserver mon compte",
       "submitting": "Envoi de la demande...",
       "requested": "Votre demande de suppression a été reçue. Notre équipe la traitera et reviendra vers vous si nécessaire."
-    }
+    },
+    "appointments": {
+      "title": "Mes rendez-vous",
+      "noAppointments": "Rencontrez un expert IOMA.",
+      "bookFirst": "Réserver une consultation",
+      "reschedule": "Reprogrammer",
+      "cancel": "Annuler le rendez-vous",
+      "cancelling": "Annulation…",
+      "confirmCancel": "Voulez-vous annuler ce rendez-vous ?"
+    },
+    "invalidField": "Veuillez vérifier ce champ."
   },
   "Diagnosis": {
     "landing": {
@@ -808,11 +904,19 @@
         },
         "sunExposure": {
           "title": "Quelle est votre exposition quotidienne au soleil ?",
-          "options": { "low": "Faible", "moderate": "Modérée", "high": "Élevée" }
+          "options": {
+            "low": "Faible",
+            "moderate": "Modérée",
+            "high": "Élevée"
+          }
         },
         "indoorClimateExposure": {
           "title": "Combien de temps passez-vous dans des espaces climatisés ?",
-          "options": { "low": "Peu", "moderate": "Modérément", "high": "Beaucoup" }
+          "options": {
+            "low": "Peu",
+            "moderate": "Modérément",
+            "high": "Beaucoup"
+          }
         }
       }
     },
@@ -935,7 +1039,29 @@
     "diagnosisOnly": "Diagnostic disponible",
     "useMyLocation": "Utiliser ma position",
     "noPartners": "Aucun partenaire trouvé correspondant à vos critères.",
-    "viewDetails": "Voir les détails"
+    "viewDetails": "Voir les détails",
+    "ctaKicker": "Partenariat & B2B",
+    "ctaTitle": "Devenez Partenaire IOMA",
+    "ctaBody": "Apportez l'excellence de la haute cosmétique personnalisée française à votre spa, clinique ou institut de beauté. Découvrez l'univers professionnel IOMA Paris.",
+    "ctaButton": "Devenir Partenaire",
+    "ctaBenefits": {
+      "pricing": {
+        "title": "Tarifs professionnels",
+        "body": "Une grille tarifaire B2B exclusive avec des conditions d'approvisionnement adaptées."
+      },
+      "protocols": {
+        "title": "Protocoles de cabine",
+        "body": "Des rituels de soin précis et brevetés pour votre équipe d'esthéticiennes."
+      },
+      "training": {
+        "title": "Formation d'excellence",
+        "body": "Des masterclasses certifiantes pour maîtriser la technologie et les protocoles IOMA."
+      },
+      "team": {
+        "title": "Accompagnement dédié",
+        "body": "Un support commercial et marketing privilégié basé à Dubai pour votre établissement."
+      }
+    }
   },
   "PartnerDetail": {
     "notFound": "Partenaire introuvable.",
@@ -949,7 +1075,11 @@
     "services": "Services",
     "noServices": "Aucun service listé.",
     "book": "Réserver",
-    "bookAppointment": "Prendre rendez-vous",
+    "contactPartner": "Contacter le Partenaire",
+    "getDirections": "Itinéraire",
+    "visitWebsite": "Visiter le Site Web",
+    "findPartner": "Trouver un Partenaire",
+    "bookAppointment": "Contacter le Partenaire",
     "types": {
       "spa": "Spa",
       "clinic": "Clinique",
@@ -1027,7 +1157,7 @@
   "Professionals": {
     "apply": {
       "title": "Candidature Professionnelle",
-      "subtitle": "Remplissez le formulaire ci-dessous pour demander l'accès au portail B2B. Notre équipe examinera votre candidature dans les 48 heures.",
+      "subtitle": "Demandez à devenir partenaire professionnel IOMA. Notre équipe examine chaque candidature avant d’accorder un accès.",
       "sections": {
         "company": "Informations sur l'entreprise",
         "contact": "Coordonnées",
@@ -1065,9 +1195,91 @@
         "newApplication": "Nouvelle candidature"
       },
       "success": {
-        "title": "Candidature Soumise",
-        "description": "Merci pour votre candidature. Notre équipe l'examinera et vous répondra dans les 48 heures.",
-        "backToHome": "Retour à l'accueil"
+        "title": "Votre candidature professionnelle a bien été reçue.",
+        "description": "L’équipe IOMA examinera vos informations et vos documents. Revenez sur cette page pour suivre l’examen ou fournir des documents complémentaires. L’accès professionnel reste indisponible jusqu’à l’approbation.",
+        "backToHome": "Retour à IOMA"
+      },
+      "progressLabel": "Étapes de la candidature",
+      "steps": {
+        "account": "Compte",
+        "application": "Candidature",
+        "review": "Examen"
+      },
+      "loading": "Chargement de votre candidature…",
+      "retry": "Réessayer",
+      "reference": "Référence de candidature",
+      "statusLabel": "Statut",
+      "portal": "Accéder au portail professionnel",
+      "terms": "Je confirme l’exactitude des informations et j’accepte les conditions générales.",
+      "readTerms": "Lire les conditions générales",
+      "account": {
+        "title": "Commencer votre candidature professionnelle",
+        "description": "Créez un compte ou connectez-vous pour renseigner votre entreprise, transmettre vos documents privés et suivre votre candidature. La création d’un compte ne donne pas accès au portail professionnel.",
+        "register": "Créer un compte pour candidater",
+        "signIn": "Se connecter pour continuer"
+      },
+      "statuses": {
+        "draft": "Brouillon",
+        "submitted": "En cours d’examen",
+        "pending_review": "En cours d’examen",
+        "documents_requested": "Documents complémentaires demandés",
+        "approved": "Approuvée",
+        "rejected": "Candidature refusée",
+        "suspended": "Accès professionnel suspendu"
+      },
+      "nextSteps": {
+        "approved": "Votre candidature est approuvée. Vous pouvez accéder au portail professionnel.",
+        "rejected": "Consultez le retour ci-dessous. Vous pouvez déposer une nouvelle candidature avec des informations actualisées.",
+        "suspended": "Votre accès professionnel est suspendu. Contactez IOMA pour connaître les prochaines étapes."
+      },
+      "documents": {
+        "title": "Documents professionnels",
+        "label": "Licence commerciale / document de l’entreprise",
+        "help": "Ajoutez votre licence commerciale ou justificatif d’immatriculation. PDF, JPEG, PNG ou WebP, 10 Mo maximum. Les documents sont privés et accessibles uniquement aux personnes habilitées.",
+        "uploading": "Envoi sécurisé en cours…",
+        "uploaded": "Document envoyé"
+      },
+      "errors": {
+        "load": "Impossible de charger votre candidature. Veuillez réessayer.",
+        "file": "Choisissez un fichier PDF, JPEG, PNG ou WebP de 10 Mo maximum.",
+        "upload": "Le document n’a pas pu être envoyé. Réessayez ; votre formulaire est conservé.",
+        "documentRequired": "Ajoutez le document professionnel requis avant l’envoi.",
+        "submit": "Votre candidature n’a pas pu être envoyée. Réessayez ou rechargez la page pour vérifier son statut ; votre formulaire est conservé."
+      },
+      "businessTypes": {
+        "spa": "Spa",
+        "clinic": "Clinique",
+        "beauty_institute": "Institut de beauté",
+        "hotel": "Hôtel",
+        "retail": "Détaillant",
+        "distributor": "Distributeur"
+      },
+      "emirates": {
+        "AUH": "Abou Dabi",
+        "DXB": "Dubaï",
+        "SHJ": "Charjah",
+        "AJM": "Ajman",
+        "UAQ": "Oumm al Qaïwaïn",
+        "RAK": "Ras el Khaïmah",
+        "FUJ": "Fujaïrah"
+      },
+      "validation": {
+        "companyName": "Indiquez le nom de l’entreprise.",
+        "contactPerson": "Indiquez la personne à contacter.",
+        "businessType": "Sélectionnez un type d’établissement.",
+        "tradeLicenceNumber": "Indiquez le numéro de licence commerciale.",
+        "vatNumber": "Indiquez un numéro de TVA valide.",
+        "email": "Indiquez une adresse e-mail valide.",
+        "phone": "Indiquez un numéro de téléphone valide (6 à 20 caractères, chiffres avec +, espaces ou tirets).",
+        "address": "Indiquez votre adresse.",
+        "emirate": "Sélectionnez un émirat.",
+        "city": "Indiquez une ville.",
+        "website": "Indiquez une URL valide.",
+        "socialMedia": "Indiquez des coordonnées de réseaux sociaux valides.",
+        "locationsCount": "Indiquez un nombre entier de sites, au moins 1.",
+        "expectedOrderVolume": "Indiquez le volume de commande prévu.",
+        "message": "Indiquez un message valide.",
+        "termsAccepted": "Acceptez les conditions avant l’envoi."
       }
     }
   },
@@ -1091,7 +1303,16 @@
       "myBookings": "Mes formations programmées",
       "cancelBooking": "Annuler",
       "cancelling": "Annulation...",
-      "noSessions": "Aucune session à venir disponible."
+      "noSessions": "Aucune session à venir disponible.",
+      "online": "En ligne",
+      "physical": "En présentiel",
+      "confirmCancel": "Annuler cette réservation de formation ?",
+      "statuses": {
+        "booked": "Réservé",
+        "cancelled": "Annulé",
+        "attended": "Terminé",
+        "no_show": "Non honoré"
+      }
     },
     "protocols": {
       "title": "Protocoles de Soin",
@@ -1102,7 +1323,9 @@
       "diagnostic": "Protocoles Diagnostic",
       "downloadPdf": "Télécharger le PDF du protocole",
       "watchVideo": "Regarder la vidéo technique",
-      "noProtocols": "Aucun protocole trouvé."
+      "noProtocols": "Aucun protocole trouvé.",
+      "homecare": "Soins à domicile",
+      "pdfPending": "PDF indisponible"
     },
     "dashboard": {
       "title": "Bienvenue, {name}",
@@ -1130,7 +1353,8 @@
       },
       "success": {
         "added": "Ajouté au panier"
-      }
+      },
+      "moq": "Minimum : {moq}"
     },
     "orders": {
       "title": "Mes Commandes",
@@ -1149,41 +1373,138 @@
       "learnMore": "Devenir partenaire"
     }
   },
-  "Admin": {
-    "professionals": {
-      "title": "Candidatures Professionnelles",
-      "subtitle": "Examinez et gérez les candidatures pour l'accès au portail B2B.",
-      "field": {
-        "businessType": "Type d'activité",
-        "emirate": "Émirat",
-        "tradeLicence": "Licence commerciale",
-        "locationsCount": "Succursales",
-        "expectedVolume": "Volume prévu",
-        "submitted": "Soumise le",
-        "documents": "Documents"
-      },
-      "actions": {
-        "approve": "Approuver",
-        "reject": "Rejeter"
-      },
-      "toast": {
-        "approved": "Candidature approuvée avec succès.",
-        "rejected": "Candidature rejetée.",
-        "rejectionReasonRequired": "Le motif du rejet est requis.",
-        "error": "Une erreur s'est produite."
-      },
-      "dialog": {
-        "approveTitle": "Approuver la candidature",
-        "rejectTitle": "Rejeter la candidature",
-        "notes": "Notes d'examen",
-        "approvePlaceholder": "Notes optionnelles pour le candidat...",
-        "rejectPlaceholder": "Motif du rejet (requis)...",
-        "cancel": "Annuler",
-        "processing": "Traitement...",
-        "confirmApprove": "Approuver",
-        "confirmReject": "Rejeter"
-      },
-      "noApplications": "Aucune candidature en attente d'examen."
-    }
+  "AccountExperience": {
+    "personal": "Mon IOMA",
+    "professional": "IOMA Professionnel",
+    "customer": "Client",
+    "overview": "Vue d’ensemble",
+    "skin": "Ma peau",
+    "shop": "Achats",
+    "services": "Services",
+    "settings": "Compte",
+    "expert": "Expert Peau IA",
+    "routines": "Routines enregistrées",
+    "notifications": "À suivre",
+    "partnerStatus": "Statut partenaire",
+    "company": "Profil entreprise",
+    "documents": "Mes documents",
+    "support": "Assistance professionnelle",
+    "menu": "Navigation du compte",
+    "intro": "Votre parcours beauté, vos rendez-vous et vos commandes dans un espace personnel.",
+    "journey": "Votre parcours peau",
+    "standard": "Diagnostic de peau",
+    "latestAi": "Dernière analyse IA",
+    "discover": "Découvrez les besoins de votre peau.",
+    "start": "Commencer un diagnostic",
+    "view": "Voir les détails",
+    "ask": "Consulter mon Expert Peau",
+    "ritual": "Votre rituel IOMA actuel",
+    "noRoutine": "Créez un rituel adapté aux besoins de votre peau.",
+    "morning": "Matin",
+    "evening": "Soir",
+    "addRoutine": "Ajouter le rituel au panier",
+    "adjust": "Ajuster avec mon Expert Peau",
+    "available": "Disponible",
+    "unavailable": "Indisponible",
+    "added": "Ajouté au panier",
+    "add": "Ajouter au panier",
+    "recentOrders": "Commandes personnelles récentes",
+    "allOrders": "Toutes les commandes",
+    "personalOrder": "Personnel · B2C",
+    "proOrder": "Professionnel · B2B",
+    "reorder": "Commander à nouveau",
+    "nextAppointment": "Votre prochain rendez-vous",
+    "wishlist": "Vos favoris",
+    "allWishlist": "Voir mes favoris",
+    "noWishlist": "Gardez vos soins IOMA favoris à portée de main.",
+    "shopCta": "Découvrir IOMA",
+    "partnerTitle": "Devenez partenaire professionnel IOMA",
+    "partnerIntro": "Offrez le soin personnalisé à votre clientèle. Demandez votre accès professionnel.",
+    "apply": "Demander un accès professionnel",
+    "enter": "Accéder au portail professionnel",
+    "reference": "Référence",
+    "submitted": "Soumise le",
+    "approvedOn": "Approuvée le",
+    "timeline": "Suivi de la candidature",
+    "application": "Candidature",
+    "review": "Examen IOMA",
+    "approval": "Approbation",
+    "complete": "Terminé",
+    "progress": "En cours",
+    "waiting": "En attente",
+    "action": "Action requise",
+    "contact": "Contacter IOMA",
+    "upload": "Envoyer les documents demandés",
+    "continue": "Continuer la candidature",
+    "reapply": "Déposer une nouvelle candidature",
+    "noActions": "Vous êtes à jour. Vos prochains rendez-vous et les mises à jour de votre compte apparaîtront ici.",
+    "noDocuments": "Aucun document envoyé pour le moment.",
+    "openDocument": "Ouvrir le document",
+    "companyNote": "Pour modifier les informations légales, contactez IOMA pour vérification.",
+    "supportNote": "Notre équipe vous accompagne pour votre partenariat, vos commandes, vos produits et vos formations.",
+    "proIntro": "Votre espace professionnel, relié à votre compte personnel IOMA.",
+    "proRecent": "Commandes professionnelles récentes",
+    "training": "Formations",
+    "upcomingTraining": "Prochaines formations",
+    "noTraining": "Découvrez les formations et réservez votre prochaine session.",
+    "protocols": "Bibliothèque de protocoles",
+    "catalog": "Boutique professionnelle",
+    "proCart": "Panier professionnel",
+    "emptyPro": "Votre catalogue professionnel est prêt.",
+    "quickOrder": "Réassort rapide",
+    "quantity": "Quantité",
+    "remove": "Retirer",
+    "total": "Total",
+    "checkout": "Passer la commande",
+    "directions": "Voir le lieu",
+    "success": "Modifications enregistrées",
+    "error": "Impossible de terminer cette demande. Veuillez réessayer.",
+    "statuses": {
+      "draft": "Brouillon",
+      "submitted": "Candidature envoyée",
+      "pending_review": "En cours d’examen",
+      "documents_requested": "Documents requis",
+      "approved": "Partenaire approuvé",
+      "rejected": "Candidature refusée",
+      "suspended": "Accès professionnel suspendu"
+    },
+    "descriptions": {
+      "draft": "Complétez votre candidature et joignez votre licence commerciale.",
+      "submitted": "Votre candidature professionnelle est en cours d’examen.",
+      "pending_review": "L’équipe IOMA examine votre candidature.",
+      "documents_requested": "IOMA demande des documents supplémentaires pour poursuivre l’examen.",
+      "approved": "Votre accès professionnel est ouvert. Votre espace personnel reste disponible.",
+      "rejected": "Votre candidature n’a pas pu être approuvée. Contactez IOMA ou déposez une nouvelle candidature.",
+      "suspended": "Votre accès professionnel est temporairement suspendu. Contactez IOMA."
+    },
+    "appointmentStatuses": {
+      "confirmed": "Confirmé",
+      "rescheduled": "Reporté",
+      "cancelled": "Annulé",
+      "completed": "Terminé",
+      "no_show": "Non honoré"
+    },
+    "back": "Conserver le rendez-vous",
+    "certificate": "Télécharger le certificat",
+    "updateContact": "Modifier le contact professionnel",
+    "save": "Enregistrer"
+  },
+  "Magazine": {
+    "title": "Le Magazine IOMA",
+    "subtitle": "La science de la peau, la Beautiful Longevity et les rituels d'exception décryptés par les experts IOMA Paris.",
+    "all": "Tous",
+    "searchPlaceholder": "Rechercher un article, un actif...",
+    "featured": "À la une",
+    "readArticle": "Lire l'article",
+    "readFullArticle": "Lire l'article complet",
+    "readingTime": "{minutes} min de lecture",
+    "backToMagazine": "Retour au Magazine",
+    "share": "Partager",
+    "copyLink": "Copier le lien",
+    "copied": "Copié !",
+    "relatedArticles": "Articles recommandés",
+    "continueReading": "Pour aller plus loin",
+    "noArticlesFound": "Aucun article trouvé",
+    "noArticlesFoundDesc": "Essayez de modifier votre recherche ou filtre."
   }
 }

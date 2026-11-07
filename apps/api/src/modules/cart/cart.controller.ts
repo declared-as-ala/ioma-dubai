@@ -76,6 +76,31 @@ export class CartController {
     return this.cartService.removeItem(resolveOwner(user, guestSessionId), sku);
   }
 
+  @Get("pro")
+  @UseGuards(JwtAuthGuard, ProfessionalApprovedGuard)
+  @RequireProfessional()
+  getProCart(@CurrentUser() user: JwtPayload) {
+    return this.cartService.getCart({ userId: user.sub, type: "b2b" });
+  }
+
+  @Patch("pro/items/:sku")
+  @UseGuards(JwtAuthGuard, ProfessionalApprovedGuard)
+  @RequireProfessional()
+  updateProItem(
+    @CurrentUser() user: JwtPayload,
+    @Param("sku") sku: string,
+    @Body() dto: UpdateCartItemDto,
+  ) {
+    return this.cartService.updateItem({ userId: user.sub, type: "b2b" }, sku, dto);
+  }
+
+  @Delete("pro/items/:sku")
+  @UseGuards(JwtAuthGuard, ProfessionalApprovedGuard)
+  @RequireProfessional()
+  removeProItem(@CurrentUser() user: JwtPayload, @Param("sku") sku: string) {
+    return this.cartService.removeItem({ userId: user.sub, type: "b2b" }, sku);
+  }
+
   // B2B cart endpoints — authenticated professionals only
   @Post("pro/items")
   @UseGuards(JwtAuthGuard, ProfessionalApprovedGuard)

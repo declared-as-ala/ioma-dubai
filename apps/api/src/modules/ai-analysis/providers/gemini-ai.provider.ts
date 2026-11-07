@@ -104,6 +104,7 @@ Format strictly as JSON without extra markdown backticks or commentary outside t
       ];
 
       let responseData: any = null;
+      let usedModel: string | undefined;
 
       for (const model of candidateModels) {
         try {
@@ -139,6 +140,7 @@ Format strictly as JSON without extra markdown backticks or commentary outside t
           );
 
           if (response.ok) {
+            usedModel = model;
             responseData = await response.json();
             this.logger.log(
               `Vision analysis completed successfully with model: ${model}`,
@@ -299,6 +301,7 @@ Format strictly as JSON without extra markdown backticks or commentary outside t
         primaryConcerns,
         diagnosticNarrative,
         isSimulated: false,
+        model: usedModel,
       };
     } catch (err) {
       this.logger.error("Error calling Gemini API for vision diagnosis:", err);

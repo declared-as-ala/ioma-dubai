@@ -8,11 +8,47 @@ import { useAuthStore } from "@/stores/auth-store";
 // own port directly.
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "";
 
+export async function apiUploadProgress<T>(
+  path: string,
+  formData: FormData,
+  onProgress: (percent: number) => void,
+): Promise<T> {
+  const send = (token: string | null) =>
+    new Promise<{ status: number; body: T & { message?: string } }>((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", `${API_BASE_URL}/api${path}`);
+      xhr.timeout = 120000;
+      if (token) xhr.setRequestHeader("Authorization", `Bearer ${token}`);
+      xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable) onProgress(Math.round((e.loaded / e.total) * 100));
+      };
+      xhr.onerror = xhr.ontimeout = () =>
+        reject(new ApiError(503, "Upload unavailable. Please retry."));
+      xhr.onload = () => {
+        try {
+          resolve({ status: xhr.status, body: JSON.parse(xhr.responseText) });
+        } catch {
+          reject(new ApiError(xhr.status, "Upload failed."));
+        }
+      };
+      xhr.send(formData);
+    });
+  let result = await send(useAuthStore.getState().accessToken);
+  if (result.status === 401) {
+    const token = await refreshAccessToken();
+    if (token) result = await send(token);
+  }
+  if (result.status < 200 || result.status >= 300)
+    throw new ApiError(result.status, result.body.message ?? "Upload failed.");
+  return result.body;
+}
+
 export class ApiError extends Error {
   constructor(
     public statusCode: number,
     message: string,
     public errorCode?: string,
+    public fields?: Array<{ field: string; message: string }>,
   ) {
     super(message);
     this.name = "ApiError";
@@ -87,18 +123,26 @@ export async function apiFetch<TResponse>(
 
   if (!response.ok) {
     const body = await response.json().catch(() => null);
-    throw new ApiError(
-      response.status,
-      body?.message ?? "An unexpected error occurred.",
-      body?.errorCode,
-    );
+    const rawMsg = body?.message;
+    const msg =
+      typeof rawMsg === "string"
+        ? rawMsg
+        : (rawMsg?.message ?? "An unexpected error occurred.");
+    const fields =
+      body?.fields ?? (typeof rawMsg === "object" ? rawMsg?.fields : undefined);
+    const formattedMsg = fields?.length
+      ? `${msg} (${fields.map((f: { field: string; message: string }) => `${f.field}: ${f.message}`).join(", ")})`
+      : msg;
+    throw new ApiError(response.status, formattedMsg, body?.errorCode, fields);
   }
 
   if (response.status === 204) {
     return undefined as TResponse;
   }
 
-  return response.json() as Promise<TResponse>;
+  const text = await response.text();
+  if (!text) return undefined as TResponse;
+  return JSON.parse(text) as Promise<TResponse>;
 }
 
 // FormData upload — never set a JSON Content-Type header here, the browser
@@ -135,5 +179,7 @@ export async function apiUpload<TResponse>(
     );
   }
 
-  return response.json() as Promise<TResponse>;
+  const text = await response.text();
+  if (!text) return undefined as TResponse;
+  return JSON.parse(text) as Promise<TResponse>;
 }

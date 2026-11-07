@@ -12,7 +12,7 @@ export type PartnerType =
   | "diagnostic_center"
   | "distributor";
 
-export type PartnerStatus = "active" | "inactive";
+export type PartnerStatus = "active" | "inactive" | "archived";
 
 class PartnerCoordinates {
   @Prop({ required: true })
@@ -46,8 +46,8 @@ export class Partner {
   @Prop({ type: String, required: true })
   name!: string;
 
-  @Prop({ type: { en: String, fr: String, ar: String }, required: true })
-  description!: { en: string; fr: string; ar: string };
+  @Prop({ type: Object, required: true })
+  description!: { en: string; fr?: string; ar: string };
 
   @Prop({ type: [String], default: [] })
   mediaIds!: string[];
@@ -73,8 +73,20 @@ export class Partner {
   @Prop({ type: String, default: null })
   email!: string | null;
 
+  @Prop({ type: String, default: null })
+  website!: string | null;
+
+  @Prop({ type: Object, default: null })
+  openingHours!: { en?: string; fr?: string; ar?: string } | string | null;
+
   @Prop({ type: [Types.ObjectId], ref: "Service", default: [] })
   serviceIds!: Types.ObjectId[];
+
+  @Prop({ type: [Types.ObjectId], ref: "Product", default: [] })
+  offeredProductIds!: Types.ObjectId[];
+
+  @Prop({ type: Types.ObjectId, ref: "User", default: null })
+  professionalAccountId!: Types.ObjectId | null;
 
   @Prop({ type: Boolean, default: false })
   diagnosisAvailable!: boolean;
@@ -82,7 +94,7 @@ export class Partner {
   @Prop({
     type: String,
     default: "active",
-    enum: ["active", "inactive"],
+    enum: ["active", "inactive", "archived"],
     index: true,
   })
   status!: PartnerStatus;

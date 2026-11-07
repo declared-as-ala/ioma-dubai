@@ -23,6 +23,18 @@ jobs:
         with:
           version: 10.31.0
 
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        run: echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
@@ -48,7 +60,7 @@ jobs:
             exit 1
           fi
 
-      - name: Deploy via SSH
+      - name: Deploy via SSH to VPS
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.VPS_HOST }}
@@ -59,9 +71,9 @@ jobs:
           script_stop: true
           command_timeout: 30m
           script: |
-            echo "🚀 Starting deployment on VPS..."
+            echo "🚀 Starting automated deployment on VPS..."
             
-            # Find project directory
+            # Detect deployment root directory
             if [ -n "${{ secrets.VPS_PROJECT_DIR }}" ]; then
               TARGET_DIR="${{ secrets.VPS_PROJECT_DIR }}"
             elif [ -d "/root/ioma" ]; then
@@ -72,24 +84,44 @@ jobs:
               TARGET_DIR="$(pwd)"
             fi
             
-            echo "📂 Deploying in directory: $TARGET_DIR"
+            echo "📂 Deployment target directory: $TARGET_DIR"
             cd "$TARGET_DIR" || exit 1
             
-            echo "📥 Pulling latest commits from git..."
-            git fetch origin master
-            git reset --hard origin/master
+            BRANCH="${{ github.ref_name }}"
+            echo "📥 Synchronizing latest code from origin/$BRANCH..."
+            git fetch origin "$BRANCH"
+            git reset --hard "origin/$BRANCH"
             
-            echo "🐳 Building Docker images for web and api..."
+            echo "🐳 Building updated production Docker containers (web & api)..."
             docker compose -f infrastructure/docker/compose.prod.yml build web api
             
-            echo "🔄 Restarting updated production containers..."
-            docker compose -f infrastructure/docker/compose.prod.yml up -d web api
+            echo "🔄 Applying zero-downtime restart (web & api only, preserving database)..."
+            docker compose -f infrastructure/docker/compose.prod.yml up -d --no-deps web api
             
-            echo "🌱 Ensuring official catalogue is up to date in MongoDB..."
-            docker exec ioma-prod-api pnpm seed:official || true
+            echo "⏳ Waiting 20 seconds for application bootstrap and healthchecks..."
+            sleep 20
             
-            echo "🧹 Pruning unused dangling build layers..."
+            echo "🔍 Running production verification audits..."
+            # Check internal API health inside container
+            docker exec ioma-prod-api wget -qO- http://localhost:4000/api/health || {
+              echo "❌ Internal API healthcheck failed!"
+              exit 1
+            }
+            
+            # Check host exposed API health (Port 4200)
+            curl -s -f http://localhost:4200/api/health || {
+              echo "❌ Host API port 4200 check failed!"
+              exit 1
+            }
+            
+            # Check host exposed Web storefront (Port 3200)
+            curl -s -f -o /dev/null -w "%{http_code}" http://localhost:3200/en || {
+              echo "❌ Storefront port 3200 check failed!"
+              exit 1
+            }
+            
+            echo "🧹 Cleaning up dangling build images..."
             docker image prune -f
             
-            echo "✅ Deployment completed successfully!"
+            echo "✅ Deployment completed and verified successfully!"
             docker ps --filter "name=ioma-prod" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"

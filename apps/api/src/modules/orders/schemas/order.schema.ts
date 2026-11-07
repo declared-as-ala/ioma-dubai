@@ -6,7 +6,7 @@ export type PaymentStatus = "pending" | "authorized" | "paid" | "failed" | "refu
 export type FulfillmentStatus =
   "pending" | "processing" | "shipped" | "delivered" | "cancelled";
 
-interface LocalizedText {
+export interface LocalizedText {
   en: string;
   fr: string;
   ar: string;
@@ -64,7 +64,7 @@ class StatusHistoryEntry {
   at!: Date;
 }
 
-// See DATA_MODEL.md "Order". `guestToken` (sparse-unique) is how a
+// See DATA_MODEL.md "Order". `guestToken` (unique for string tokens) is how a
 // non-account checkout can reload its own confirmation page — see
 // DECISIONS.md.
 @Schema({ timestamps: true })
@@ -75,7 +75,7 @@ export class Order {
   @Prop({ type: Types.ObjectId, ref: "User", default: null, index: true })
   userId!: Types.ObjectId | null;
 
-  @Prop({ type: String, default: null, unique: true, sparse: true })
+  @Prop({ type: String, default: null })
   guestToken!: string | null;
 
   @Prop({ type: String, default: "b2c", enum: ["b2c", "b2b"] })
@@ -120,9 +120,38 @@ export class Order {
   })
   fulfillmentStatus!: FulfillmentStatus;
 
+  @Prop({ type: String, default: null })
+  shippingProvider!: string | null;
+
+  @Prop({ type: String, default: null })
+  trackingNumber!: string | null;
+
+  @Prop({ type: String, default: null })
+  trackingUrl!: string | null;
+
+  @Prop({ type: String, default: null })
+  shippingNote!: string | null;
+
+  @Prop({ type: Date, default: null })
+  shipmentDate!: Date | null;
+
+  @Prop({ type: String, default: null })
+  adminNote!: string | null;
+
+  @Prop({ type: [Object], default: [] })
+  adminNotes!: { text: string; authorEmail: string; createdAt: Date }[];
+
   @Prop({ type: [StatusHistoryEntry], default: [] })
   statusHistory!: StatusHistoryEntry[];
 }
 
 export const OrderSchema = SchemaFactory.createForClass(Order);
+OrderSchema.index(
+  { guestToken: 1 },
+  {
+    name: "unique_guest_order_token",
+    unique: true,
+    partialFilterExpression: { guestToken: { $type: "string" } },
+  },
+);
 OrderSchema.index({ userId: 1, createdAt: -1 });

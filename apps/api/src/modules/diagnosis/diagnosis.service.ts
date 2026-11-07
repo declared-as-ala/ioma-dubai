@@ -132,6 +132,9 @@ export class DiagnosisService {
           sku: string;
           size: string;
           b2cPriceMinor: number;
+          quantityOnHand: number;
+          quantityReserved: number;
+          backorderAllowed: boolean;
           productId: Types.ObjectId;
         }[];
       }>("morningRoutine")
@@ -141,6 +144,9 @@ export class DiagnosisService {
           sku: string;
           size: string;
           b2cPriceMinor: number;
+          quantityOnHand: number;
+          quantityReserved: number;
+          backorderAllowed: boolean;
           productId: Types.ObjectId;
         }[];
       }>("eveningRoutine")
@@ -164,13 +170,16 @@ export class DiagnosisService {
       sku: v.sku,
       size: v.size,
       priceMinor: v.b2cPriceMinor,
+      inStock: v.quantityOnHand - v.quantityReserved > 0 || v.backorderAllowed,
       name: nameFor(v.productId),
+      image: products.find((p) => p._id.toString() === v.productId.toString())?.images[0],
     });
 
     return {
       id: doc._id.toString(),
       answers: doc.answers,
       resultProfile: doc.resultProfile,
+      ...doc.resultProfile,
       range: { slug: doc.recommendedRangeId.slug, name: doc.recommendedRangeId.name },
       morningRoutine: doc.morningRoutine.map(mapVariant),
       eveningRoutine: doc.eveningRoutine.map(mapVariant),

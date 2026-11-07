@@ -51,4 +51,19 @@ export class QueryProductsDto {
   @IsOptional()
   @IsString()
   bestSeller?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  skinType?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  productType?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  tag?: string;
 }

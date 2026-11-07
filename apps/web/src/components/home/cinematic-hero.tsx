@@ -1,191 +1,238 @@
 "use client";
 
-import { useRef, useState, useEffect } from "react";
-import { useTranslations, useLocale } from "next-intl";
+import { CINE, gsap, useMotion } from "@/components/motion/cine";
+import { useEffect, useRef, useState, useCallback } from "react";
 import Image from "next/image";
+import { useLocale } from "next-intl";
+import { ArrowRight, Pause, Play } from "lucide-react";
 import { Link } from "@/i18n/navigation";
-import { Button } from "@/components/ui/button";
-import { Sparkles, Scan, ChevronDown } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-export function CinematicHero() {
-  const t = useTranslations("Home");
+interface CinematicHeroProps {
+  onScrollClick?: () => void;
+}
+
+export function CinematicHero({ onScrollClick }: CinematicHeroProps) {
   const locale = useLocale();
-  const isRtl = locale === "ar";
+  const ar = locale === "ar";
+  const [playing, setPlaying] = useState(true);
+  const [reducedMotion, setReducedMotion] = useState(false);
+  const [videoLoaded, setVideoLoaded] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const sectionRef = useRef<HTMLElement>(null);
 
-  const [isVideoLoaded, setIsVideoLoaded] = useState(false);
-
+  // Sync reduced motion preference
   useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    // Battery & GPU efficiency: pause video when scrolled out of view
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            video.play().catch(() => {});
-          } else {
-            video.pause();
-          }
-        });
-      },
-      { threshold: 0.1 },
-    );
-
-    if (containerRef.current) {
-      observer.observe(containerRef.current);
-    }
-
-    return () => observer.disconnect();
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const sync = () => {
+      setReducedMotion(mq.matches);
+      if (mq.matches && videoRef.current) {
+        videoRef.current.pause();
+        setPlaying(false);
+      }
+    };
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
   }, []);
 
-  const scrollToNextSection = () => {
-    if (containerRef.current) {
-      const nextSection = containerRef.current.nextElementSibling;
-      if (nextSection) {
-        nextSection.scrollIntoView({ behavior: "smooth" });
-      }
+  // Intersection observer: pause video when hero is scrolled out of viewport
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry?.isIntersecting) {
+          videoRef.current?.pause();
+        } else if (playing && !reducedMotion) {
+          videoRef.current?.play().catch(() => {});
+        }
+      },
+      { threshold: 0.15 },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [playing, reducedMotion]);
+
+  const togglePlay = useCallback(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    if (video.paused) {
+      video
+        .play()
+        .then(() => setPlaying(true))
+        .catch(() => {});
+    } else {
+      video.pause();
+      setPlaying(false);
     }
-  };
+  }, []);
+
+  const handleScrollDown = useCallback(() => {
+    if (onScrollClick) {
+      onScrollClick();
+      return;
+    }
+    const nextSection = document.getElementById("brand-story");
+    if (nextSection) {
+      nextSection.scrollIntoView({ behavior: "smooth" });
+    } else {
+      window.scrollTo({
+        top: window.innerHeight * 0.9,
+        behavior: "smooth",
+      });
+    }
+  }, [onScrollClick]);
+
+  // Scroll-linked exit: the film slowly pushes in while the caption drifts up and fades (desktop, motion allowed).
+  useMotion(sectionRef, ({ desktop }) => {
+    if (!desktop) return;
+    const root = sectionRef.current!;
+    const st = {
+      trigger: root,
+      start: "top top",
+      end: "bottom top",
+      scrub: 0.6,
+    } as const;
+    gsap.to(root.querySelector("[data-hero=media]"), {
+      scale: 1.12,
+      yPercent: 6,
+      ease: CINE.scrub,
+      scrollTrigger: st,
+    });
+    gsap.to(root.querySelector("[data-hero=content]"), {
+      yPercent: -22,
+      autoAlpha: 0,
+      ease: CINE.scrub,
+      scrollTrigger: { ...st, end: "70% top" },
+    });
+  });
 
   return (
     <section
-      ref={containerRef}
+      ref={sectionRef}
       data-testid="cinematic-hero"
-      className="relative w-full min-h-[85vh] sm:min-h-[92vh] flex items-end overflow-hidden bg-ioma-black text-white"
+      aria-label="IOMA Paris Dubai"
+      className="relative isolate flex h-[88svh] sm:h-[92svh] lg:h-[96svh] min-h-[580px] max-h-[1200px] w-full flex-col justify-between overflow-hidden bg-ioma-black text-white"
     >
-      {/* ========================================================================= */}
-      {/* 1. 60FPS HARDWARE-ACCELERATED NATIVE VIDEO BACKGROUND                     */}
-      {/* ========================================================================= */}
-      <div className="absolute inset-0 size-full overflow-hidden">
-        {/* Instant high-res poster (0 delay) */}
+      {/* Background Video & Fallback Poster */}
+      <div data-hero="media" className="absolute inset-0 -z-10 will-change-transform">
         <Image
           src="/images/homepage/hero-video-poster.jpg"
-          alt="IOMA Paris Haute Cosmétique"
+          alt="IOMA Paris luxury skincare"
           fill
           priority
           sizes="100vw"
-          className={`object-cover object-center select-none transition-opacity duration-700 ${
-            isVideoLoaded ? "opacity-0 pointer-events-none" : "opacity-100"
-          }`}
+          className={cn(
+            "object-cover transition-opacity duration-1000",
+            videoLoaded ? "opacity-0 pointer-events-none" : "opacity-100",
+          )}
         />
-
-        {/* 60fps Native Looping Video */}
         <video
           ref={videoRef}
-          src="/videos/hero-campaign-opt.mp4"
-          playsInline
-          muted
           autoPlay
+          muted
           loop
-          preload="auto"
+          playsInline
           poster="/images/homepage/hero-video-poster.jpg"
-          onLoadedData={() => setIsVideoLoaded(true)}
-          onCanPlay={() => setIsVideoLoaded(true)}
-          className="absolute inset-0 size-full object-cover object-center select-none pointer-events-none"
+          preload="auto"
+          aria-hidden="true"
+          tabIndex={-1}
+          onCanPlay={() => setVideoLoaded(true)}
+          className="absolute inset-0 size-full select-none object-cover"
         >
-          <source src="/videos/hero-campaign-opt.mp4" type="video/mp4" />
+          <source
+            src="/videos/hero/home-mobile.mp4"
+            type="video/mp4"
+            media="(max-width: 767px)"
+          />
+          <source src="/videos/hero/home-desktop.mp4" type="video/mp4" />
         </video>
+
+        {/* Refined Luxury Vignette: subtle gradient keeping the central video luminous & unobstructed */}
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-black/35 pointer-events-none"
+        />
       </div>
 
-      {/* ========================================================================= */}
-      {/* 2. LUXURY EDITORIAL GRADIENTS & VIGNETTE                                 */}
-      {/* ========================================================================= */}
+      {/* Top spacer (reserves breathing room under fixed header) */}
+      <div className="pt-36 xl:pt-44" aria-hidden="true" />
+
+      {/* Center: Unobstructed cinematic canvas */}
+      <div className="flex-1" aria-hidden="true" />
+
+      {/* Bottom Luxury Dock: Editorial Caption, Scroll Cue & Actions */}
       <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ioma-black via-ioma-black/50 to-ioma-black/25"
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 bg-gradient-to-r from-ioma-black/70 via-transparent to-ioma-black/40"
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,transparent_20%,rgba(0,0,0,0.6)_85%)]"
-      />
-
-      {/* ========================================================================= */}
-      {/* 3. HERO EDITORIAL CONTENT & CALLS TO ACTION                               */}
-      {/* ========================================================================= */}
-      <div className="relative mx-auto w-full max-w-[1440px] px-4 md:px-8 lg:px-12 pb-16 sm:pb-20 pt-32 z-10">
-        <div className="max-w-3xl">
-          {/* Eyebrow badge */}
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/20 bg-white/10 backdrop-blur-md text-[11px] uppercase tracking-[0.2em] text-white/90 font-medium mb-4">
-            <span className="inline-block size-1.5 rounded-full bg-ioma-violet shadow-[0_0_8px_#aa9feb] animate-pulse" />
-            <span>{t("hero.kicker")}</span>
-          </div>
-
-          {/* Main Headline */}
-          <h1 className="font-display text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-normal leading-[1.08] tracking-tight text-white drop-shadow-[0_4px_20px_rgba(0,0,0,0.7)]">
-            {t("hero.title")}
-          </h1>
-
-          {/* Subtitle */}
-          <p className="mt-4 max-w-xl text-sm sm:text-base md:text-lg leading-relaxed text-white/90 font-light drop-shadow-md">
-            {t("hero.subtitle")}
-          </p>
-
-          {/* Action CTAs */}
-          <div className="mt-8 flex flex-wrap items-center gap-4">
-            <Button
-              asChild
-              size="lg"
-              data-testid="hero-primary-cta"
-              className="bg-ioma-violet hover:bg-ioma-violet/90 text-white uppercase tracking-widest font-semibold shadow-[0_4px_25px_rgba(170,159,235,0.4)] transition-all hover:scale-[1.02] active:scale-[0.98]"
-            >
-              <Link href="/diagnosis" className="inline-flex items-center gap-2">
-                <Sparkles className="size-4" />
-                <span>{t("hero.diagnosisCta")}</span>
-              </Link>
-            </Button>
-
-            <Button
-              asChild
-              size="lg"
-              variant="outline"
-              data-testid="hero-secondary-cta"
-              className="border-white/40 bg-black/30 backdrop-blur-sm text-white uppercase tracking-widest hover:bg-white/20 hover:text-white font-semibold transition-all hover:scale-[1.02] active:scale-[0.98]"
-            >
-              <Link href="/shop" className="inline-flex items-center gap-2">
-                <span>{t("hero.shopCta")}</span>
-              </Link>
-            </Button>
-          </div>
-
-          {/* Scientific Precision Quick Badges */}
-          <div className="mt-10 pt-6 border-t border-white/15 grid grid-cols-2 sm:grid-cols-3 gap-4 max-w-xl">
-            <div className="flex items-center gap-2 text-xs text-white/80">
-              <Scan className="size-4 text-ioma-violet shrink-0" />
-              <span>18 paramètres cutanés</span>
-            </div>
-            <div className="flex items-center gap-2 text-xs text-white/80">
-              <span className="size-2 rounded-full bg-emerald-400 shrink-0" />
-              <span>Sur-mesure In.Lab</span>
-            </div>
-            <div className="hidden sm:flex items-center gap-2 text-xs text-white/80">
-              <span className="font-semibold text-white">100%</span>
-              <span>Made in Paris, France</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ========================================================================= */}
-      {/* 4. FAST SCROLL CUE TO NEXT SECTION                                       */}
-      {/* ========================================================================= */}
-      <button
-        type="button"
-        onClick={scrollToNextSection}
-        aria-label="Scroll to discover products"
-        className="absolute bottom-4 end-6 sm:end-12 z-20 flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-white/60 hover:text-white transition-colors cursor-pointer group"
+        data-hero="content"
+        className="hero-intro relative z-10 mx-auto w-full max-w-[1440px] px-4 pb-8 sm:pb-10 md:px-8 lg:px-12"
       >
-        <span className="hidden sm:inline font-medium">Découvrir les soins</span>
-        <div className="size-8 rounded-full border border-white/20 bg-white/5 flex items-center justify-center group-hover:border-white/40 group-hover:bg-white/15 transition-all">
-          <ChevronDown className="size-4 text-white/80 group-hover:translate-y-0.5 transition-transform" />
+        <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+          {/* Bottom-left: Minimal Editorial Caption */}
+          <div className="max-w-md space-y-1.5 text-start">
+            <p className="flex items-center gap-2.5 text-[0.68rem] uppercase tracking-[0.28em] font-medium text-white/80">
+              <span className="h-px w-6 bg-white/50" aria-hidden="true" />
+              <span>{ar ? "آيوما باريس — دبي" : "IOMA PARIS — DUBAI"}</span>
+            </p>
+            <h1 className="font-serif italic text-lg sm:text-xl lg:text-2xl font-normal tracking-wide text-white/95">
+              {ar ? "فن العناية الشخصية بالبشرة." : "The art of personalised skincare."}
+            </h1>
+          </div>
+
+          {/* Bottom-center: Discreet Scroll Indicator */}
+          <div className="hidden md:flex flex-col items-center">
+            <button
+              type="button"
+              onClick={handleScrollDown}
+              aria-label={ar ? "انتقل إلى محتوى الصفحة" : "Scroll to content"}
+              className="group flex flex-col items-center gap-2 text-white/60 transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            >
+              <span className="text-[0.62rem] uppercase tracking-[0.26em] font-light text-white/70 group-hover:text-white transition-colors">
+                {ar ? "اكتشف" : "Discover"}
+              </span>
+              <div className="relative h-8 w-px overflow-hidden bg-white/20">
+                <span className="absolute top-0 left-0 h-3 w-full bg-white transition-transform duration-1000 ease-in-out motion-safe:animate-pulse" />
+              </div>
+            </button>
+          </div>
+
+          {/* Bottom-right: Refined Link & Video Control */}
+          <div className="flex items-center justify-between sm:justify-end gap-5">
+            <Link
+              href="/about"
+              data-testid="hero-discover-cta"
+              className="group inline-flex items-center gap-2.5 border-b border-white/40 pb-1 text-xs uppercase tracking-[0.22em] font-medium text-white transition-all hover:border-white hover:text-white/90 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
+            >
+              <span>{ar ? "اكتشف آيوما" : "Discover IOMA"}</span>
+              <ArrowRight
+                className="size-3.5 transition-transform group-hover:translate-x-1 rtl:rotate-180 rtl:group-hover:-translate-x-1"
+                aria-hidden="true"
+              />
+            </Link>
+
+            <button
+              type="button"
+              onClick={togglePlay}
+              aria-label={
+                playing
+                  ? ar
+                    ? "إيقاف الفيديو مؤقتاً"
+                    : "Pause video"
+                  : ar
+                    ? "تشغيل الفيديو"
+                    : "Play video"
+              }
+              className="grid size-9 shrink-0 place-items-center rounded-full border border-white/30 text-white/80 transition-all hover:border-white hover:bg-white/10 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            >
+              {playing ? (
+                <Pause className="size-3.5" aria-hidden="true" />
+              ) : (
+                <Play className="size-3.5" aria-hidden="true" />
+              )}
+            </button>
+          </div>
         </div>
-      </button>
+      </div>
     </section>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { ProductImage as Image } from "@/components/shop/product-image";
 import { useLocale, useTranslations } from "next-intl";
 import type { Locale } from "@ioma/config";
 import { Link } from "@/i18n/navigation";

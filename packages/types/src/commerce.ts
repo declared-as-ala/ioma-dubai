@@ -1,6 +1,18 @@
 import type { ProductRangeKey } from "@ioma/config";
 import type { LocalizedText } from "./api";
 
+export interface ProductMediaImage {
+  id: string;
+  url: string;
+  thumbnailUrl?: string;
+  cardUrl?: string;
+  width: number;
+  height: number;
+  alt: LocalizedText;
+  order: number;
+  isPrimary: boolean;
+}
+
 export interface RangeSummary {
   slug: ProductRangeKey;
   name: LocalizedText;
@@ -14,6 +26,8 @@ export interface ProductVariantSummary {
 }
 
 export interface ProductListItem {
+  media?: ProductMediaImage[];
+  primaryImage?: ProductMediaImage | null;
   slug: string;
   name: LocalizedText;
   shortBenefit: LocalizedText;
@@ -26,6 +40,10 @@ export interface ProductListItem {
   rating?: number;
   reviewCount?: number;
   uaeAvailability?: "AVAILABLE" | "PENDING";
+  productType?: string | null;
+  contenance?: string | null;
+  badges?: string[];
+  tags?: string[];
   variants?: ProductVariantSummary[];
 }
 
@@ -40,20 +58,58 @@ export interface ConcernSummary {
   icon: string;
 }
 
+export interface SkinTypeSummary {
+  slug: string;
+  name: LocalizedText;
+}
+
+export interface ActiveIngredientItem {
+  name: string;
+  percentage?: string | null;
+  description?: string | LocalizedText | null;
+}
+
 export interface ProductDetail {
+  seo?: { title: LocalizedText; description: LocalizedText } | null;
+  media?: ProductMediaImage[];
+  primaryImage?: ProductMediaImage | null;
   id: string;
   slug: string;
   range: RangeSummary;
   name: LocalizedText;
+  accroche?: LocalizedText | null;
   shortBenefit: LocalizedText;
   description: LocalizedText;
+  details?: LocalizedText | null;
+  texture?: LocalizedText | null;
+  results?: LocalizedText | null;
+  contenance?: string | null;
+  vendor?: string;
+  productType?: string | null;
+  tags?: string[];
+  badges?: string[];
+  hairTypes?: string[];
   howToUse: LocalizedText;
   routineStep: "morning" | "evening" | "both";
   fullIngredientsText: LocalizedText;
+  activeIngredientsList?: ActiveIngredientItem[];
   images: string[];
   categories: CategorySummary[];
   concerns: ConcernSummary[];
+  skinTypes?: SkinTypeSummary[];
   variants: ProductVariantSummary[];
+  isBestSeller?: boolean;
+  rating?: number;
+  reviewCount?: number;
+  uaeAvailability?: "AVAILABLE" | "PENDING";
+  sourceUrl?: string | null;
+  complementaryProducts?: Array<{
+    slug: string;
+    name: LocalizedText;
+    priceFromMinor: number | null;
+    primaryImage?: ProductMediaImage | null;
+    images: string[];
+  }>;
 }
 
 export interface CartItem {
@@ -73,6 +129,7 @@ export interface Cart {
 }
 
 export interface WishlistItem {
+  inStock?: boolean;
   sku: string;
   size: string;
   priceMinor: number;
@@ -93,6 +150,8 @@ export interface OrderAddress {
 }
 
 export interface OrderItem {
+  image?: string | null;
+  size?: string | null;
   sku: string;
   productNameSnapshot: LocalizedText;
   qty: number;

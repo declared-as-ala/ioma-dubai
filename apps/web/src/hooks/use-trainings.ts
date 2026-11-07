@@ -23,6 +23,7 @@ export interface TrainingSessionItem {
 }
 
 export interface TrainingBookingItem {
+  certificateAvailable?: boolean;
   id: string;
   sessionId: string;
   startsAt: string;

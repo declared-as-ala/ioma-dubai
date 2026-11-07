@@ -1,8 +1,32 @@
 # SPRINTS.md — IOMA Paris Dubai
 
+## Cinematic homepage redesign - **DONE** (2026-11-05)
+
+Reference-based header/hero composition implemented using official assets and existing footage. Responsive EN/AR checks at all five required widths, playback/menu/scroll interactions, and TypeScript verified. Live API integration remains a separate verification item in TODO.md; French route behavior remains unchanged.
+
 Status legend: `NOT STARTED` · `IN PROGRESS` · `DONE`. This file is kept in sync with `TODO.md` and `PROGRESS.md` — a sprint is `DONE` only when every acceptance criterion is checked in `TODO.md`.
 
+## Homepage video framing - **DONE** (verified 2026-11-05)
+
+Superseded by the cinematic homepage redesign above. Video/poster cover fitting and responsive layouts are verified in EN/AR at 390, 768, 1024, 1280 and 1440 pixels.
+
 ---
+
+## Documentation maintenance — **DONE** (2026-09-06)
+
+Preserved the user brief in `PROJECT_BRIEF.md`, established repository-wide session reading rules in `AGENTS.md`, and linked them from `CLAUDE.md`. Verified source fidelity and local documentation links. This documentation task does not change feature sprint completion or establish runtime verification.
+
+## Sprint 8 follow-up — B2B application CTA — **DONE** (2026-09-06)
+
+Bug #42 repairs the existing login/application journey, authenticated submission, private professional documents, admin review, duplicate protection and immediate suspension enforcement. The 16-case Playwright suite and backend/web unit tests pass; the final mobile layout and admin suspension UI passed the latest Docker build verification (16/16 cases). See `PROGRESS.md` for evidence and scope.
+
+## Account experience follow-up — **DONE** (2026-09-06)
+
+Implemented the supplied `ACCOUNT_REDESIGN_BRIEF.md`, retaining one identity and existing `/portal` modules. Verified 41 targeted browser cases, 113 API tests, 14 web tests, typecheck, lint, translation parity and production builds. Scope and optional integrations are recorded in `ACCOUNT_AUDIT.md`, `ACCOUNT_COMPLETION.md` and `PROGRESS.md`.
+
+## Admin dashboard and analytics follow-up — **IN PROGRESS** (2026-09-06)
+
+Implement `ADMIN_REDESIGN_BRIEF.md`: dedicated responsive shell, permission-scoped backend analytics and management, accessible charts, action center, role-based storefront link and controlled-data verification. Audit actual implementation in `ADMIN_AUDIT.md`; do not assume the old roadmap reflects working admin modules.
 
 ## Sprint 0 — Audit & Planning — **DONE** (2026-08-05)
 
@@ -294,3 +318,21 @@ Numbered 4.7 for the same reason as 4.5/4.6 — inserted without renumbering Spr
 **Acceptance criteria**: End-to-end user journey works against live MongoDB catalogue and Gemini vision provider; legacy questionnaire cleanly deprecated; 3 tiers generated with real database prices; chat provides interactive advice with suggested pills; add-to-cart adds exact variants; follow-up and before-after comparisons functional; passes full typecheck, lint, build, and Playwright test suite.
 
 **Tests**: Unit tests for all AI services (`vision-analysis`, `adaptive-consultation`, `recommendation-engine`, `ai-beauty-advisor`, `follow-up`); Playwright E2E journey in `e2e/ai-skin-expert.spec.ts`.
+
+## Product media extension — 2026-09-06
+
+Status: **COMPLETE** (final evidence below). Product media architecture, migration, dedicated administration and content-only navigation transitions are implemented. 63 products/177 images migrated; 531 derivative bytes verified; 138 API unit tests passed. Browser acceptance and final deployed-build checks remain. This extends the prior Carbon admin/dashboard checkpoint.
+
+## Product management completion — 2026-09-07
+
+Final local acceptance (2026-09-07): 19 product/media/bulk-action Playwright tests passed, 21 admin tests passed on an isolated rerun, and 64 public/account tests passed in the broader run. The initial concurrent run had an admin-access failure and skipped later admin tests; the isolated rerun passed all 21. API: 147 tests / 27 suites. All eight workspaces typecheck; lint has zero errors (74 existing warnings); EN/FR/AR have 1614 matching keys. Docker API/web build passed; both containers healthy and the fresh web rewrite targets http://api:4000. All 531 migrated derivatives decoded successfully. QA cleanup restored 63 products, 70 variants and 177 assets.
+
+Completed subsequent requests: product/order multiple selection and confirmed bulk deletion; inventory, stock movements and skin concerns consolidated into Product Management tabs. See [PRODUCT_MEDIA_COMPLETION.md](PRODUCT_MEDIA_COMPLETION.md). No commit or push.
+
+## Remove Needs attention page — 2026-09-07
+
+Removed the standalone admin notifications/Needs attention page, sidebar entry and header bell link across all locales. The former /[locale]/admin/notifications route explicitly resolves to not-found. Removed the unused attention-only dashboard rendering branch. Included in the successful local web build. Removal of links and the former route was verified across EN/FR/AR before testing was stopped.
+
+## Same-page product workspace — 2026-09-07
+
+Implemented and deployed locally. Product Detail now shares a single editor with Create, nine view/edit tabs, staged variant pricing, existing MediaAsset uploads, localized fields, search selectors, SEO preview, readiness checks, discard protection and immediate audited stock adjustment. The old /edit URL redirects to ?mode=edit. The Needs attention removal is included in this release. See PRODUCT_WORKSPACE_BRIEF.md and PRODUCT_WORKSPACE_AUDIT.md. The final web build succeeded. Further testing was stopped at the user's request; full browser acceptance remains incomplete. See PRODUCT_WORKSPACE_COMPLETION.md for completed checks and limitations.

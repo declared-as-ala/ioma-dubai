@@ -1,8 +1,8 @@
 import { defineRouting } from "next-intl/routing";
-import { SUPPORTED_LOCALES, DEFAULT_LOCALE } from "@ioma/config";
+import { SUPPORTED_LOCALES } from "@ioma/config";
 
 export const routing = defineRouting({
   locales: SUPPORTED_LOCALES,
-  defaultLocale: DEFAULT_LOCALE,
+  defaultLocale: "en",
   localePrefix: "always",
 });

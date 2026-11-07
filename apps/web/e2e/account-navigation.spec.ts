@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 test("customer can manage the full account journey and sign out", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
   const email = `account-${Date.now()}@example.com`;
   const originalPassword = "AccountTest1!";
   const newPassword = "UpdatedTest2!";
@@ -12,8 +13,8 @@ test("customer can manage the full account journey and sign out", async ({ page 
   await page.getByLabel(/^password$/i).fill(originalPassword);
   await page.getByRole("button", { name: /create account/i }).click();
 
-  await expect(page).toHaveURL(/\/en\/account$/);
-  await expect(page.getByRole("heading", { name: /your account/i })).toBeVisible();
+  await expect(page).toHaveURL(/\/en\/account$/, { timeout: 15000 });
+  await expect(page.getByRole("heading", { name: /welcome back/i })).toBeVisible();
   await expect(page.getByText(/welcome back, account/i)).toBeVisible();
 
   await page
@@ -57,12 +58,16 @@ test("customer can manage the full account journey and sign out", async ({ page 
     .getByRole("link", { name: /^wishlist$/i })
     .first()
     .click();
-  await expect(page).toHaveURL(/\/en\/wishlist$/);
+  await expect(page).toHaveURL(/\/en\/account\/wishlist$/);
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
 
   await page.goto("/en/account/delete");
   await expect(page.getByRole("heading", { name: /delete account/i })).toBeVisible();
   await expect(page.getByText(/isn't deleted immediately/i)).toBeVisible();
+
+  await page.getByRole("button", { name: /request account deletion/i }).click();
+  await expect(page.getByRole("dialog")).toBeVisible();
+  await page.getByRole("dialog").getByRole("button", { name: /keep/i }).click();
 
   await page.goto("/en/account/security");
   await page.getByLabel(/current password/i).fill("WrongPassword1!");

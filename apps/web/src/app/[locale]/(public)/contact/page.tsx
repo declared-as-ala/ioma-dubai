@@ -1,22 +1,49 @@
-import { useTranslations } from "next-intl";
-import { ContactForm } from "@/components/forms/contact-form";
+import { ServiceContactForm } from "@/components/forms/service-contact-form";
+import { ServiceHero } from "@/components/services/service-kit";
+import { Reveal } from "@/components/motion/cine";
+import { CONTACT as P } from "@/content/services";
+import { currentLoc, pageMetadata } from "@/lib/page-meta";
 
-export default function ContactPage() {
-  const t = useTranslations("ContactPage");
+export const generateMetadata = () => pageMetadata("/contact", P.seo);
 
+export default async function ContactPage() {
+  const loc = await currentLoc();
   return (
-    <main className="mx-auto max-w-xl px-4 md:px-6 py-24">
-      <p className="text-center text-xs uppercase tracking-heading text-muted-foreground">
-        {t("kicker")}
-      </p>
-      <h1 className="mt-4 text-center font-display text-4xl tracking-wide">
-        {t("title")}
-      </h1>
-      <p className="mt-4 text-center text-base leading-relaxed text-muted-foreground">
-        {t("intro")}
-      </p>
-      <div className="mt-12">
-        <ContactForm />
+    <main>
+      <ServiceHero
+        kicker={P.hero.kicker[loc]}
+        title={P.hero.title[loc]}
+        lede={P.hero.lede[loc]}
+      />
+      <div className="mx-auto grid max-w-[1440px] gap-14 px-4 py-16 md:px-8 md:py-24 lg:grid-cols-12 lg:gap-20">
+        <div className="lg:col-span-7">
+          <ServiceContactForm />
+        </div>
+        <Reveal as="aside" className="space-y-8 lg:col-span-5 lg:pt-4">
+          <h2 data-cine-item className="font-display text-2xl font-medium">
+            {P.sideTitle[loc]}
+          </h2>
+          <ul data-cine-item className="space-y-4">
+            {P.side.map((s) => (
+              <li
+                key={s.en}
+                className="flex gap-3 text-base leading-relaxed text-muted-foreground"
+              >
+                <span
+                  aria-hidden
+                  className="mt-2.5 size-1.5 shrink-0 rounded-full bg-sf-champagne"
+                />
+                {s[loc]}
+              </li>
+            ))}
+          </ul>
+          <p
+            data-cine-item
+            className="rounded-2xl bg-sf-ivory p-5 text-sm leading-relaxed text-muted-foreground"
+          >
+            {P.detailsNote[loc]}
+          </p>
+        </Reveal>
       </div>
     </main>
   );

@@ -50,6 +50,18 @@ export class AiIndicators {
 
 @Schema({ timestamps: true })
 export class AiAnalysis {
+  @Prop({ type: Date, default: null })
+  processingStartedAt!: Date | null;
+
+  @Prop({ type: Date, default: null })
+  completedAt!: Date | null;
+
+  @Prop({ type: Number, default: null })
+  processingMs!: number | null;
+
+  @Prop({ type: String, default: null })
+  providerModel!: string | null;
+
   @Prop({ type: Types.ObjectId, ref: "User", required: true, index: true })
   userId!: Types.ObjectId;
 

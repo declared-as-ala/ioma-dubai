@@ -16,7 +16,7 @@ export function OrganizationJsonLd() {
       telephone: "+971-4-000-0000",
       contactType: "customer service",
       areaServed: ["AE", "FR"],
-      availableLanguage: ["en", "fr", "ar"],
+      availableLanguage: ["en", "ar"],
     },
   };
 

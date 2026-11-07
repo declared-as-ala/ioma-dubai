@@ -92,16 +92,16 @@ export function PartnerLocatorMap({
               </div>
               <div style="
                 margin-top: 4px;
-                background: rgba(15, 15, 15, 0.9);
-                color: #ffffff;
-                padding: 2px 8px;
-                border-radius: 4px;
+                background: ${isSelected ? "#000000" : "#ffffff"};
+                color: ${isSelected ? "#ffffff" : "#000000"};
+                padding: 3px 10px;
+                border-radius: 999px;
                 font-size: 11px;
-                font-weight: 500;
-                letter-spacing: 0.03em;
+                font-weight: 600;
+                letter-spacing: 0.04em;
                 white-space: nowrap;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.25);
-                border: 1px solid rgba(255,255,255,0.15);
+                box-shadow: 0 2px 10px rgba(0,0,0,0.18);
+                border: 1px solid rgba(0,0,0,0.08);
               ">
                 ${partner.name}
               </div>
@@ -159,5 +159,5 @@ export function PartnerLocatorMap({
     );
   }, [selectedPartner]);
 
-  return <div ref={mapRef} className="w-full h-full" />;
+  return <div ref={mapRef} className="h-full w-full" />;
 }

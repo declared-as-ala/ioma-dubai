@@ -31,7 +31,11 @@ async function bootstrap() {
   app.enableShutdownHooks();
   app.use(helmet());
   app.enableCors({
-    origin: allowedOrigins(process.env.APP_URL),
+    // Storefront (APP_URL) and the separate admin app (ADMIN_APP_URL).
+    origin: [
+      ...allowedOrigins(process.env.APP_URL),
+      ...allowedOrigins(process.env.ADMIN_APP_URL),
+    ],
     credentials: true,
   });
 

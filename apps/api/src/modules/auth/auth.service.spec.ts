@@ -1,11 +1,15 @@
 import { Test } from "@nestjs/testing";
 import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
+import { getModelToken } from "@nestjs/mongoose";
 import { ConflictException, UnauthorizedException } from "@nestjs/common";
 import * as argon2 from "argon2";
 import { AuthService } from "./auth.service";
 import { UsersService } from "../users/users.service";
 import { RefreshTokenService } from "./refresh-token.service";
+import { MailService } from "../../common/mail/mail.service";
+import { PasswordResetToken } from "./schemas/password-reset-token.schema";
+import { REDIS_CLIENT } from "../../common/redis/redis.module";
 import type { UserDocument } from "../users/schemas/user.schema";
 
 // Mongoose's HydratedDocument<User> is too recursive for jest.Mocked<T> to
@@ -71,6 +75,27 @@ describe("AuthService", () => {
           provide: ConfigService,
           useValue: {
             get: (key: string) => configValues[key],
+          },
+        },
+        {
+          provide: MailService,
+          useValue: {
+            sendPasswordResetEmail: jest.fn().mockResolvedValue(undefined),
+          },
+        },
+        {
+          provide: getModelToken(PasswordResetToken.name),
+          useValue: {
+            create: jest.fn(),
+            findOne: jest.fn(),
+            updateMany: jest.fn(),
+          },
+        },
+        {
+          provide: REDIS_CLIENT,
+          useValue: {
+            keys: jest.fn().mockResolvedValue([]),
+            del: jest.fn().mockResolvedValue(0),
           },
         },
       ],
@@ -164,6 +189,40 @@ describe("AuthService", () => {
       await expect(
         authService.login({ email: "test@ioma.com", password: "CorrectPassword1" }),
       ).rejects.toBeInstanceOf(UnauthorizedException);
+    });
+  });
+
+  describe("login — back-office accounts", () => {
+    const adminUser = async () =>
+      ({
+        id: "admin-1",
+        email: "admin@ioma.com",
+        passwordHash: await argon2.hash("CorrectPassword1", { type: argon2.argon2id }),
+        roles: ["super_administrator"],
+        locale: "en",
+        emailVerifiedAt: null,
+        lockedUntil: null,
+      }) as unknown as UserDocument;
+
+    it("refuses an admin account on the storefront login with the generic error", async () => {
+      usersService.findByEmail.mockResolvedValue(await adminUser());
+
+      await expect(
+        authService.login({ email: "admin@ioma.com", password: "CorrectPassword1" }),
+      ).rejects.toThrow("Invalid email or password");
+      expect(usersService.recordSuccessfulLogin).not.toHaveBeenCalled();
+    });
+
+    it("lets an admin account sign in from the admin app", async () => {
+      usersService.findByEmail.mockResolvedValue(await adminUser());
+
+      const result = await authService.login(
+        { email: "admin@ioma.com", password: "CorrectPassword1" },
+        "admin",
+      );
+
+      expect(result.accessToken).toBe("mock-access-token");
+      expect(usersService.recordSuccessfulLogin).toHaveBeenCalled();
     });
   });
 

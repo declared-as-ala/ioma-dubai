@@ -25,6 +25,12 @@ export class ContactMessage {
   @Prop({ required: true })
   locale!: string;
 
+  @Prop({ type: String, enum: ["order", "return", "product", "account", "pro", "other"] })
+  category?: string;
+
+  @Prop({ type: String, trim: true, maxlength: 40 })
+  orderReference?: string;
+
   @Prop({ type: String, default: "new", enum: ["new", "read", "archived"] })
   status!: "new" | "read" | "archived";
 }

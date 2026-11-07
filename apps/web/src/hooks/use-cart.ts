@@ -10,10 +10,11 @@ function guestHeaders(): HeadersInit {
   return id ? { "X-Guest-Session-Id": id } : {};
 }
 
-export function useCartQuery() {
+export function useCartQuery(professional = false) {
   return useQuery({
-    queryKey: CART_KEY,
-    queryFn: () => apiFetch<Cart>("/cart", { headers: guestHeaders() }),
+    queryKey: professional ? ["b2b", "cart"] : CART_KEY,
+    queryFn: () =>
+      apiFetch<Cart>(professional ? "/cart/pro" : "/cart", { headers: guestHeaders() }),
   });
 }
 

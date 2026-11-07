@@ -1,5 +1,7 @@
 # DATA_MODEL.md — IOMA Paris Dubai
 
+Account checkout index correction (2026-09-06): `Order.guestToken` remains nullable, but uniqueness applies only to string tokens through the `unique_guest_order_token` partial index. Apply `infrastructure/scripts/migrate-account-order-index.js` to replace the legacy sparse unique index; see DEPLOYMENT.md. Order ownership filters explicitly use ObjectId to match stored account orders.
+
 MongoDB + Mongoose. Conventions: every collection has `createdAt`/`updatedAt` (Mongoose timestamps), audit fields `createdBy`/`updatedBy` (ObjectId ref `User`, nullable for system/seed writes) where the entity is user-mutable, and `deletedAt: Date | null` for soft deletion where a hard delete would break referential history (orders, appointments, documents, users). Collection names are `camelCase` plural. All monetary fields stored as integer minor units (fils, 1 AED = 100 fils) to avoid float rounding.
 
 ## Identity & Access
@@ -15,6 +17,8 @@ MongoDB + Mongoose. Conventions: every collection has `createdAt`/`updatedAt` (M
 **ProfessionalProfile** — `userId` (ref, unique, indexed), `applicationId` (ref `ProfessionalApplication`), `companyName`, `businessType`, `emirate`, `city`, `status` (`approved|suspended`), `priceListId` (ref `PriceList`), `teamMembers: {userId, role}[]`.
 
 **ProfessionalApplication** — `companyName`, `contactPerson`, `businessType`, `tradeLicenceNumber`, `vatNumber?`, `email`, `phone`, `address`, `emirate`, `city`, `website?`, `socialMedia?`, `locationsCount`, `expectedOrderVolume`, `message`, `documents: DocumentId[]`, `status` (`draft|submitted|pending_review|documents_requested|approved|rejected|suspended`), `reviewedBy` (ref `User`), `reviewNotes`. Index: `{ status: 1, createdAt: -1 }`.
+
+2026-09-06 application workflow: drafts permit incomplete company fields; shared Zod validation enforces complete submissions at the API boundary. Added nullable `termsAcceptedAt`, `submittedAt`, and `requestedDocumentsCount` (document count at the latest request). A partial unique index on `userId` permits one non-rejected application per user; rejected records remain history and permit a new application. Submission uses an atomic status/version predicate, and reviews use optimistic concurrency. Before applying this index to an existing production database, check for conflicting non-rejected records and resolve them explicitly; never silently delete application history. The local database was checked and had no conflicts.
 
 **Address** — `userId` (ref, indexed), `type` (`shipping|billing`), `label`, `line1`, `line2?`, `emirate`, `city`, `phone`, `isDefault`.
 
@@ -119,3 +123,23 @@ MongoDB + Mongoose. Conventions: every collection has `createdAt`/`updatedAt` (M
 ## Seed & Migration Strategy
 
 `infrastructure/scripts/seed.ts` populates demo data for every collection above (dev/staging only, gated behind `NODE_ENV !== 'production'`) so every screen is reviewable before real client content exists. `infrastructure/scripts/migrate.ts` runs versioned migration scripts from `apps/api/src/migrations/*.ts` tracked in a `_migrations` collection — no ad hoc production data edits.
+
+## Account experience refinements — 2026-09-06
+
+Cart lookup includes the existing type field alongside userId/sessionId. One user can retain a personal b2c cart and a separate b2b cart; adding an item never converts one into the other. Orders persist the checkout cart's type. Existing legacy cart contents are not silently deleted or rewritten.
+
+ProfessionalApplication adds nullable applicantMessage. New document requests/rejections explicitly record applicant-facing messages separately from internal reviewNotes and statusHistory notes. No fake application state, progress percentage or deadline is stored.
+
+TrainingBooking's existing certificateDocumentId is the source of certificate availability; only attended bookings with a real attachment expose a download. Capacity reservation and cancellation use conditional atomic MongoDB updates, and the existing session/attendee unique index blocks duplicate bookings.
+
+## Admin analytics and managed content additions (2026-09-06)
+
+`contentpages`: unique `(kind, slug)`, localized title/summary/SEO, typed text/image/link/FAQ blocks, draft/published status and timestamps. `stockmovements`: variantId, SKU, signed integer delta, reason, resulting quantity, actorId and timestamp; stock itself remains authoritative in productvariants. Existing audit records capture management action, actor and resource reference.
+
+AIAnalysis adds processingStartedAt, completedAt, processingMs and providerModel. Historical missing timing/model fields remain unavailable, not estimated. Protocol adds relatedProductIds; existing private PDF/video document references and applicableRangeKeys remain. Admin validates references against existing records and does not introduce a second customer or professional identity.
+
+## Product media extension (2026-09-06)
+
+Product adds media: [{assetId: ObjectId -> MediaAsset, alt: {en,fr,ar}}], mediaRevision: number (default 0), and seo: {title: localized, description: localized}. Order of media is authoritative; first is primary. images is a deprecated materialized stable-URL compatibility projection, atomically updated with media.
+
+MediaAsset (mediaassets): productId (original upload owner), bucket (logical public storage class), objectKey, originalKey, cardKey, thumbnailKey, originalFilename, mimeType, width, height, size, checksum, sourceUrl, uploadedBy, createdAt, updatedAt. Unique compound index (productId, checksum). No image bytes or expiring URLs. A duplicate product may reference the original immutable asset. Detached assets are retained to preserve historical references.

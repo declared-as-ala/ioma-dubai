@@ -1,17 +1,9 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { motion } from "motion/react";
 import { Link } from "@/i18n/navigation";
-import {
-  Building2,
-  Cpu,
-  BookOpen,
-  MapPin,
-  Briefcase,
-  Calendar,
-  ArrowRight,
-} from "lucide-react";
+import { Building2, Cpu, BookOpen, MapPin, Briefcase, ArrowRight } from "lucide-react";
 
 interface InsideIomaDropdownProps {
   isOpen: boolean;
@@ -20,45 +12,50 @@ interface InsideIomaDropdownProps {
 
 export function InsideIomaDropdown({ isOpen, onClose }: InsideIomaDropdownProps) {
   const t = useTranslations("Nav");
+  const ar = useLocale() === "ar";
 
   if (!isOpen) return null;
 
   const links = [
     {
-      href: "/maison",
+      href: "/about",
       title: t("maison"),
-      desc: "L'histoire de la haute cosmétique sur mesure et notre philosophie parisienne.",
+      desc: ar
+        ? "قصة مستحضرات التجميل الراقية المصممة خصيصًا وفلسفتنا الباريسية."
+        : "The story of bespoke high cosmetics and our Parisian philosophy.",
       icon: Building2,
     },
     {
       href: "/technology",
       title: t("technology"),
-      desc: "Capteurs MEMS, brevets micro-électroniques et précision diagnostique prouvée.",
+      desc: ar
+        ? "حساسات MEMS وبراءات اختراع إلكترونية دقيقة ودقة تشخيصية مثبتة."
+        : "MEMS sensors, micro-electronic patents and proven diagnostic precision.",
       icon: Cpu,
     },
     {
-      href: "/journal",
+      href: "/magazine",
       title: t("journal"),
-      desc: "Conseils d'experts, science des actifs et rituels adaptés au climat des Émirats.",
+      desc: ar
+        ? "نصائح الخبراء، وعلم البشرة المتقدم، وطقوس تناسب مناخ الإمارات."
+        : "Expert advice, advanced skin science, and bespoke beauty rituals.",
       icon: BookOpen,
     },
     {
       href: "/partners",
       title: t("partners"),
-      desc: "Découvrez les instituts et spas partenaires agréés IOMA Paris aux EAU.",
+      desc: ar
+        ? "اكتشف المعاهد والسبا الشريكة المعتمدة لآيوما باريس في الإمارات."
+        : "Discover the IOMA Paris approved partner institutes and spas in the UAE.",
       icon: MapPin,
     },
     {
       href: "/professionals",
       title: t("professionals"),
-      desc: "Protocoles de cabine, formation d'excellence et commandes professionnelles B2B.",
+      desc: ar
+        ? "بروتوكولات الكابينة وتدريب متميز وطلبات مهنية B2B."
+        : "Cabin protocols, premium training and professional B2B orders.",
       icon: Briefcase,
-    },
-    {
-      href: "/booking",
-      title: t("bookAppointment"),
-      desc: "Réservez votre diagnostic complet et soin sur mesure en institut partenaire.",
-      icon: Calendar,
     },
   ];
 

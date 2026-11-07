@@ -72,6 +72,7 @@ export class OrdersService {
 
     const order = await this.orderModel.create({
       orderNumber: this.generateOrderNumber(),
+      type: owner.type ?? "b2c",
       userId: owner.userId ? new Types.ObjectId(owner.userId) : null,
       guestToken: owner.userId ? null : nanoid(32),
       items: orderItems,
@@ -130,12 +131,18 @@ export class OrdersService {
     if (order.paymentStatus !== "failed") {
       throw new BadRequestException("Only a failed order can be retried.");
     }
-    await this.attemptPayment(order, paymentMethod === "mock_failure", owner);
+    await this.attemptPayment(order, paymentMethod === "mock_failure", {
+      ...owner,
+      type: order.type,
+    });
     return order.toObject();
   }
 
   async listOwn(userId: string) {
-    return this.orderModel.find({ userId }).sort({ createdAt: -1 }).lean();
+    return this.orderModel
+      .find({ userId: new Types.ObjectId(userId), type: "b2c" })
+      .sort({ createdAt: -1 })
+      .lean();
   }
 
   async listAll() {
@@ -143,12 +150,35 @@ export class OrdersService {
   }
 
   async listB2B(userId: string) {
-    return this.orderModel.find({ userId, type: "b2b" }).sort({ createdAt: -1 }).lean();
+    return this.orderModel
+      .find({ userId: new Types.ObjectId(userId), type: "b2b" })
+      .sort({ createdAt: -1 })
+      .lean();
   }
 
   async getOrder(orderNumber: string, owner: CartOwner & { guestToken?: string }) {
     const order = await this.findOwnedOrder(orderNumber, owner);
-    return order.toObject();
+    const variants = await this.variantModel
+      .find({ _id: { $in: order.items.map((item) => item.variantId) } })
+      .lean();
+    const products = await this.productModel
+      .find({ _id: { $in: variants.map((v) => v.productId) } })
+      .lean();
+    const plainOrder = order.toObject();
+    return {
+      ...plainOrder,
+      items: plainOrder.items.map((item) => {
+        const variant = variants.find((v) => String(v._id) === String(item.variantId));
+        const product = products.find(
+          (p) => String(p._id) === String(variant?.productId),
+        );
+        return {
+          ...item,
+          image: product?.images?.[0] ?? null,
+          size: variant?.size ?? null,
+        };
+      }),
+    };
   }
 
   async cancel(orderNumber: string, owner: CartOwner & { guestToken?: string }) {
@@ -169,6 +199,8 @@ export class OrdersService {
     const order = await this.orderModel.findOne({ orderNumber });
     if (!order) throw new NotFoundException("Order not found.");
 
+    if (order.type === "b2b" && !owner.professionalApproved)
+      throw new ForbiddenException("Professional access required.");
     const ownedByUser = owner.userId && order.userId?.toString() === owner.userId;
     const ownedByGuestToken =
       !order.userId && owner.guestToken && owner.guestToken === order.guestToken;

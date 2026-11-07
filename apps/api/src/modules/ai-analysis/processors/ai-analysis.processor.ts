@@ -49,6 +49,7 @@ export class AiAnalysisProcessor extends WorkerHost {
     }
 
     analysis.status = "processing";
+    analysis.processingStartedAt = new Date();
     await analysis.save();
 
     try {
@@ -84,6 +85,10 @@ export class AiAnalysisProcessor extends WorkerHost {
       analysis.recommendedRangeId = rangeDoc?._id || null;
       analysis.suggestedQuestions = this.beautyAdvisor.defaultSuggestedQuestions("en");
       analysis.status = "completed";
+      analysis.completedAt = new Date();
+      analysis.processingMs =
+        analysis.completedAt.getTime() - analysis.processingStartedAt.getTime();
+      analysis.providerModel = result.model ?? null;
 
       await analysis.save();
       this.logger.log(`Analysis ${analysis._id.toString()} completed successfully.`);
@@ -92,6 +97,9 @@ export class AiAnalysisProcessor extends WorkerHost {
         `Analysis ${analysis._id.toString()} failed: ${(err as Error).message}`,
       );
       analysis.status = "failed";
+      analysis.completedAt = new Date();
+      analysis.processingMs =
+        analysis.completedAt.getTime() - analysis.processingStartedAt.getTime();
       analysis.failureReason = (err as Error).message;
       await analysis.save();
     }

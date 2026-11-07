@@ -181,6 +181,19 @@ export class AiAnalysisService {
 
     const activeTier = (doc.activeTier as RoutineTier) || "complete";
     const routines = doc.routines;
+    if (routines) {
+      const steps = Object.values(routines).flatMap((tier) => [
+        ...tier.morningSteps,
+        ...tier.eveningSteps,
+      ]);
+      const ids = steps
+        .map((step) => step.productId)
+        .filter((value) => /^[a-f\d]{24}$/i.test(value));
+      const products = await this.productModel.find({ _id: { $in: ids } }).lean();
+      const images = new Map(products.map((p) => [String(p._id), p.images?.[0] ?? null]));
+      // Never trust an old/generated image URL: hydrate through the stored product ID.
+      for (const step of steps) step.image = images.get(step.productId) ?? undefined;
+    }
 
     const morningRoutine =
       routines?.[activeTier]?.morningSteps.map((s) => ({

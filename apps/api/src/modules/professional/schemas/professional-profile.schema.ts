@@ -18,13 +18,14 @@ export class ProfessionalProfile {
   @Prop({ required: true, trim: true })
   companyName!: string;
 
-  @Prop({ required: true })
+  // Collected by phone for trade-access leads, so not known at validation time.
+  @Prop({ type: String, default: "" })
   businessType!: string;
 
-  @Prop({ required: true })
+  @Prop({ type: String, default: "" })
   emirate!: string;
 
-  @Prop({ required: true, trim: true })
+  @Prop({ type: String, trim: true, default: "" })
   city!: string;
 
   @Prop({
@@ -34,6 +35,29 @@ export class ProfessionalProfile {
     index: true,
   })
   status!: ProfessionalStatus;
+
+  // Derived from orders by ProAccessService; stored for reporting and the admin lead list.
+  @Prop({
+    type: String,
+    enum: ["validated", "customer"],
+    default: "validated",
+    index: true,
+  })
+  accessLevel!: "validated" | "customer";
+
+  @Prop({ type: Date, default: null })
+  firstOrderAt!: Date | null;
+
+  @Prop({ type: Types.ObjectId, default: null })
+  firstOrderId!: Types.ObjectId | null;
+
+  // Dedicated IOMA contact shown to customers (falls back to the default in B2bSettings).
+  @Prop({
+    type: { name: String, phone: String, email: String },
+    default: () => ({ name: "", phone: "", email: "" }),
+    _id: false,
+  })
+  contact!: { name: string; phone: string; email: string };
 
   @Prop({ type: Types.ObjectId, ref: "PriceList", default: null })
   priceListId!: Types.ObjectId | null;

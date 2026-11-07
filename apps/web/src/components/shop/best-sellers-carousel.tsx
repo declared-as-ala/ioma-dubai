@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { ProductCardMedia } from "@/components/shop/product-card-media";
 import { useLocale, useTranslations } from "next-intl";
 import type { Locale } from "@ioma/config";
 import { useProductsQuery } from "@/hooks/use-catalog-queries";
@@ -9,7 +9,7 @@ import { Link } from "@/i18n/navigation";
 import { useAddCartItem } from "@/hooks/use-cart";
 import { useCartDrawerStore } from "@/stores/cart-drawer-store";
 import { Button } from "@/components/ui/button";
-import { Star, ArrowRight } from "lucide-react";
+import { Star, ArrowRight, ShoppingBag } from "lucide-react";
 
 export function BestSellersCarousel() {
   const locale = useLocale() as Locale;
@@ -44,7 +44,7 @@ export function BestSellersCarousel() {
 
   return (
     <div className="mt-8">
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 gap-x-4 gap-y-10 md:grid-cols-4 md:gap-x-6 md:gap-y-12">
         {displayProducts.map((product) => {
           const firstVariant = product.variants?.[0];
           const hasMultipleSizes = (product.variants?.length || 0) > 1;
@@ -60,78 +60,87 @@ export function BestSellersCarousel() {
             }
           };
 
+          const primaryMedia = product.primaryImage || product.media?.[0] || null;
+          const primarySrc = product.images?.[0] || primaryMedia?.url || null;
+          const secondaryMedia = product.media?.[1] || null;
+          const secondarySrc = product.images?.[1] || secondaryMedia?.url || null;
+
           return (
-            <div
-              key={product.slug}
-              className="group flex flex-col justify-between rounded-sm border border-border/60 bg-card p-4 transition-all duration-300 hover:shadow-lg hover:border-ioma-violet/40"
-            >
-              <Link href={`/shop/${product.slug}`} className="flex flex-col flex-1">
-                {/* Image Box */}
-                <div className="relative aspect-[3/4] w-full overflow-hidden rounded-sm bg-white p-4">
-                  {product.images[0] ? (
-                    <Image
-                      src={product.images[0]}
-                      alt={product.name[locale]}
-                      fill
-                      sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
-                      className="object-contain p-2 transition-transform duration-500 group-hover:scale-105"
-                    />
-                  ) : (
-                    <div className="h-full w-full bg-muted flex items-center justify-center text-xs text-muted-foreground">
-                      IOMA Paris
-                    </div>
-                  )}
-
-                  {/* Best seller badge */}
-                  <span className="absolute top-2 start-2 inline-flex items-center gap-1 rounded-full bg-foreground/90 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-wider text-background backdrop-blur-sm">
-                    <Star className="size-2.5 fill-amber-400 text-amber-400" />
-                    Best-Seller
-                  </span>
-                </div>
-
-                {/* Info */}
-                <div className="mt-4 flex flex-col flex-1">
-                  <span className="text-[0.65rem] uppercase tracking-widest text-muted-foreground font-semibold">
-                    {product.range.name[locale]}
-                  </span>
-                  <h3 className="mt-1 font-display text-base font-medium text-foreground group-hover:text-ioma-violet transition-colors line-clamp-1">
-                    {product.name[locale]}
-                  </h3>
-                  <p className="mt-1 text-xs text-muted-foreground line-clamp-2 leading-relaxed">
-                    {product.shortBenefit[locale]}
-                  </p>
-
-                  <div className="mt-auto pt-3 flex items-center justify-between">
-                    {product.priceFromMinor !== null ? (
-                      <span className="text-sm font-semibold text-foreground">
-                        {hasMultipleSizes ? `Dès ` : ""}
-                        {formatMinor(product.priceFromMinor, locale)}
-                      </span>
-                    ) : (
-                      <span className="text-xs text-muted-foreground">
-                        Prix sur mesure
-                      </span>
-                    )}
-
-                    <span className="text-[0.7rem] text-muted-foreground">
-                      {firstVariant?.size}
+            <article key={product.slug} className="group relative flex flex-col">
+              {/* Image: the second photo covers the whole card on hover */}
+              <div className="relative">
+                <Link
+                  href={`/shop/${product.slug}`}
+                  className="block"
+                  aria-label={product.name[locale]}
+                >
+                  <ProductCardMedia
+                    primarySrc={primarySrc}
+                    primaryMedia={primaryMedia}
+                    secondarySrc={secondarySrc}
+                    secondaryMedia={secondaryMedia}
+                    alt={product.name[locale]}
+                    className="shadow-none"
+                  >
+                    <span className="pointer-events-none absolute start-3 top-3 z-10 inline-flex select-none items-center gap-1 rounded-full bg-white/95 px-2.5 py-1 text-[0.62rem] font-semibold uppercase tracking-[0.14em] text-foreground shadow-sm">
+                      <Star
+                        className="size-2.5 fill-amber-400 text-amber-400"
+                        aria-hidden
+                      />
+                      {locale === "ar" ? "الأكثر مبيعًا" : "Best seller"}
                     </span>
-                  </div>
+                  </ProductCardMedia>
+                </Link>
+
+                {/* Quick add: round button on touch screens, full-width bar on hover for desktop */}
+                <button
+                  type="button"
+                  onClick={handleQuickAdd}
+                  disabled={!firstVariant || addCartItem.isPending}
+                  aria-label={`${t("addToBag")} — ${product.name[locale]}`}
+                  className="absolute bottom-3 end-3 z-20 inline-flex size-11 items-center justify-center rounded-full bg-foreground text-background shadow-lg transition-all hover:bg-sf-champagne hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-foreground disabled:opacity-50 md:inset-x-3 md:bottom-3 md:size-auto md:min-h-11 md:translate-y-3 md:gap-2 md:rounded-lg md:px-4 md:opacity-0 md:group-hover:translate-y-0 md:group-hover:opacity-100 md:group-focus-within:translate-y-0 md:group-focus-within:opacity-100 motion-reduce:transition-none"
+                >
+                  <ShoppingBag className="size-4" aria-hidden />
+                  <span className="hidden text-xs font-semibold uppercase tracking-[0.14em] md:inline">
+                    {t("addToBag")}
+                  </span>
+                </button>
+              </div>
+
+              {/* Info */}
+              <Link href={`/shop/${product.slug}`} className="mt-5 flex flex-1 flex-col">
+                <span className="text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-sf-champagne">
+                  {product.range.name[locale]}
+                </span>
+                <h3 className="mt-1.5 line-clamp-2 font-display text-lg leading-snug text-foreground transition-colors group-hover:text-sf-champagne">
+                  {product.name[locale]}
+                </h3>
+                <p className="mt-2 line-clamp-2 text-[0.8rem] leading-relaxed text-muted-foreground">
+                  {product.shortBenefit[locale]}
+                </p>
+                <div className="mt-auto flex items-baseline justify-between gap-3 pt-4">
+                  {product.priceFromMinor !== null ? (
+                    <span className="text-[0.95rem] font-semibold text-foreground">
+                      {hasMultipleSizes
+                        ? locale === "ar"
+                          ? "ابتداءً من "
+                          : "From "
+                        : ""}
+                      {formatMinor(product.priceFromMinor, locale)}
+                    </span>
+                  ) : (
+                    <span className="text-xs text-muted-foreground">
+                      {locale === "ar" ? "سعر حسب الطلب" : "Bespoke pricing"}
+                    </span>
+                  )}
+                  {firstVariant?.size && (
+                    <span className="text-xs text-muted-foreground">
+                      {firstVariant.size}
+                    </span>
+                  )}
                 </div>
               </Link>
-
-              {/* Action */}
-              <div className="mt-3 pt-3 border-t border-border/40 flex items-center gap-2">
-                <Button
-                  onClick={handleQuickAdd}
-                  size="sm"
-                  variant="outline"
-                  className="w-full text-xs uppercase tracking-wider font-medium hover:bg-ioma-violet hover:text-white hover:border-ioma-violet transition-all"
-                >
-                  {t("addToBag")}
-                </Button>
-              </div>
-            </div>
+            </article>
           );
         })}
       </div>
@@ -144,7 +153,9 @@ export function BestSellersCarousel() {
           className="uppercase tracking-widest font-semibold"
         >
           <Link href="/shop?bestSeller=true" className="inline-flex items-center gap-2">
-            <span>Découvrir toutes les meilleures ventes</span>
+            <span>
+              {locale === "ar" ? "اكتشف جميع الأكثر مبيعًا" : "Discover all best sellers"}
+            </span>
             <ArrowRight className="size-4 rtl:rotate-180" />
           </Link>
         </Button>

@@ -7,6 +7,7 @@ export interface AnalyzeImageParams {
 }
 
 export interface AnalyzeImageResult {
+  model?: string;
   indicators: Record<AiIndicatorKey, number>;
   observations: VisionObservations;
   imageQuality: ImageQualityAssessment;

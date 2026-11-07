@@ -1,10 +1,11 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { AuthResult } from "@ioma/types";
 import type { LoginInput, RegisterInput } from "@ioma/validation";
 import { apiFetch } from "@/lib/api";
 import { useAuthStore } from "@/stores/auth-store";
 
 export function useLoginMutation() {
+  const qc = useQueryClient();
   const setSession = useAuthStore((s) => s.setSession);
   return useMutation({
     mutationFn: (input: LoginInput) =>
@@ -12,11 +13,15 @@ export function useLoginMutation() {
         method: "POST",
         body: JSON.stringify(input),
       }),
-    onSuccess: setSession,
+    onSuccess: (session) => {
+      qc.clear();
+      setSession(session);
+    },
   });
 }
 
 export function useRegisterMutation() {
+  const qc = useQueryClient();
   const setSession = useAuthStore((s) => s.setSession);
   return useMutation({
     mutationFn: (input: RegisterInput) =>
@@ -24,11 +29,15 @@ export function useRegisterMutation() {
         method: "POST",
         body: JSON.stringify(input),
       }),
-    onSuccess: setSession,
+    onSuccess: (session) => {
+      qc.clear();
+      setSession(session);
+    },
   });
 }
 
 export function useLogout() {
+  const qc = useQueryClient();
   const clearSession = useAuthStore((s) => s.clearSession);
   return useMutation({
     mutationFn: async () => {
@@ -40,7 +49,29 @@ export function useLogout() {
         }).catch(() => undefined);
       }
     },
-    onSuccess: clearSession,
-    onError: clearSession,
+    onSettled: () => {
+      qc.clear();
+      clearSession();
+    },
+  });
+}
+
+export function useForgotPasswordMutation() {
+  return useMutation({
+    mutationFn: (input: { email: string }) =>
+      apiFetch<{ message: string }>("/auth/forgot-password", {
+        method: "POST",
+        body: JSON.stringify(input),
+      }),
+  });
+}
+
+export function useResetPasswordMutation() {
+  return useMutation({
+    mutationFn: (input: { token: string; password: string }) =>
+      apiFetch<{ message: string }>("/auth/reset-password", {
+        method: "POST",
+        body: JSON.stringify(input),
+      }),
   });
 }

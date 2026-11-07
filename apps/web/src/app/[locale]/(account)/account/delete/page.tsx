@@ -36,7 +36,10 @@ export default function DeleteAccountPage() {
 
   return (
     <section aria-labelledby="delete-title" className="max-w-2xl">
-      <h1 id="delete-title" className="font-display text-3xl text-destructive">
+      <h1
+        id="delete-title"
+        className="font-display text-3xl font-light md:text-4xl text-destructive"
+      >
         {t("deletion.title")}
       </h1>
       <div className="mt-8 border-s-2 border-destructive ps-5">
@@ -68,7 +71,7 @@ export default function DeleteAccountPage() {
                     rows={5}
                     aria-invalid={fieldState.invalid}
                   />
-                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                  {fieldState.invalid && <FieldError>{t("invalidField")}</FieldError>}
                 </Field>
               )}
             />

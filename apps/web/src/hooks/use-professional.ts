@@ -2,18 +2,22 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiFetch, apiUpload } from "@/lib/api";
+import { useAuthStore } from "@/stores/auth-store";
 import type {
   ProfessionalApplication,
   B2BProductListItem,
   B2BOrderListItem,
+  ProfessionalProfile,
 } from "@ioma/types";
 
 // --- Application hooks ---
 
 export function useApplications() {
+  const userId = useAuthStore((s) => s.user?.id);
   return useQuery({
-    queryKey: ["professional", "applications"],
+    queryKey: ["professional", "applications", userId],
     queryFn: () => apiFetch<ProfessionalApplication[]>("/professional/applications"),
+    enabled: !!userId,
   });
 }
 
@@ -48,10 +52,10 @@ export function useSubmitApplicationMutation() {
   });
 }
 
-export function useUploadDocumentMutation(applicationId: string) {
+export function useUploadDocumentMutation() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (file: File) => {
+    mutationFn: ({ applicationId, file }: { applicationId: string; file: File }) => {
       const formData = new FormData();
       formData.append("file", file);
       return apiUpload<{ documentId: string; originalName: string }>(
@@ -59,46 +63,9 @@ export function useUploadDocumentMutation(applicationId: string) {
         formData,
       );
     },
-    onSuccess: () =>
-      qc.invalidateQueries({ queryKey: ["professional", "applications", applicationId] }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["professional", "applications"] }),
   });
 }
-
-// --- Admin hooks ---
-
-export function usePendingApplications() {
-  return useQuery({
-    queryKey: ["professional", "admin", "applications"],
-    queryFn: () =>
-      apiFetch<ProfessionalApplication[]>("/professional/admin/applications"),
-  });
-}
-
-export function useApproveApplicationMutation() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: ({ id, reviewNotes }: { id: string; reviewNotes?: string }) =>
-      apiFetch(`/professional/admin/applications/${id}/approve`, {
-        method: "PATCH",
-        body: JSON.stringify({ reviewNotes }),
-      }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["professional", "admin"] }),
-  });
-}
-
-export function useRejectApplicationMutation() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: ({ id, reviewNotes }: { id: string; reviewNotes: string }) =>
-      apiFetch(`/professional/admin/applications/${id}/reject`, {
-        method: "PATCH",
-        body: JSON.stringify({ reviewNotes }),
-      }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["professional", "admin"] }),
-  });
-}
-
-// --- B2B Catalog ---
 
 export function useB2BCatalog(params?: { range?: string; q?: string }) {
   const searchParams = new URLSearchParams();
@@ -107,6 +74,7 @@ export function useB2BCatalog(params?: { range?: string; q?: string }) {
   const qs = searchParams.toString();
   return useQuery({
     queryKey: ["b2b", "catalog", params],
+    refetchInterval: 60000,
     queryFn: () => apiFetch<B2BProductListItem[]>(`/pro/catalog${qs ? `?${qs}` : ""}`),
   });
 }
@@ -130,6 +98,6 @@ export function useAddToCartB2BMutation() {
         method: "POST",
         body: JSON.stringify({ sku, qty }),
       }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["cart"] }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["b2b", "cart"] }),
   });
 }

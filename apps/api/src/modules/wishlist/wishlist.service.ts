@@ -42,6 +42,9 @@ export class WishlistService {
         sku: variant.sku,
         size: variant.size,
         priceMinor: variant.b2cPriceMinor,
+        inStock:
+          variant.quantityOnHand - variant.quantityReserved > 0 ||
+          variant.backorderAllowed,
         product: product
           ? { slug: product.slug, name: product.name, images: product.images }
           : null,

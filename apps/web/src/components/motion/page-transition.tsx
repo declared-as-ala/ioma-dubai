@@ -1,27 +1,20 @@
 "use client";
 
-import { motion, useReducedMotion } from "motion/react";
 import { usePathname } from "next/navigation";
-import { VARIANTS, TRANSITIONS, getMotionVariant } from "@/lib/motion-tokens";
 
 interface PageTransitionProps {
   children: React.ReactNode;
 }
 
+// Route content reveal. This is deliberately a CSS animation (see `.ioma-page-enter`
+// in globals.css) rather than a JS-driven one: the server-rendered page is visible as
+// soon as the stylesheet loads, so a slow or failed hydration can never leave the page
+// body invisible under the header. Reduced motion disables the animation entirely.
 export function PageTransition({ children }: PageTransitionProps) {
   const pathname = usePathname();
-  const shouldReduceMotion = useReducedMotion();
-  const variant = getMotionVariant(VARIANTS.pageContent, !!shouldReduceMotion);
-
   return (
-    <motion.div
-      key={pathname}
-      initial={variant.initial}
-      animate={variant.animate}
-      transition={TRANSITIONS.page}
-      className="w-full flex-1"
-    >
+    <div key={pathname} className="ioma-page-enter w-full flex-1">
       {children}
-    </motion.div>
+    </div>
   );
 }

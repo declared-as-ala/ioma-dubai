@@ -11,7 +11,13 @@ export interface PartnerListItem {
   address: string;
   coordinates: { lat: number; lng: number };
   phone: string;
+  whatsapp?: string | null;
+  email?: string | null;
+  website?: string | null;
   diagnosisAvailable: boolean;
+  /** First partner photo (local /api/media URL), if any. */
+  image?: string | null;
+  mediaIds?: string[];
   services: { slug: string; name: LocalizedText; durationMinutes: number }[];
   distanceMeters: number | null;
 }
@@ -29,6 +35,8 @@ export interface PartnerDetail {
   phone: string;
   whatsapp: string | null;
   email: string | null;
+  website?: string | null;
+  openingHours?: { en?: string; ar?: string; fr?: string } | string | null;
   diagnosisAvailable: boolean;
   services: {
     id: string;

@@ -1,6 +1,6 @@
 "use client";
 
-import { Heart, House, Sparkles, Store, User } from "lucide-react";
+import { Heart, House, Store, User } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { motion, useReducedMotion } from "motion/react";
 import { Link, usePathname } from "@/i18n/navigation";
@@ -40,12 +40,6 @@ export function BottomTabBar() {
       label: t("shop"),
       icon: Store,
       active: pathname.startsWith("/shop"),
-    },
-    {
-      href: "/diagnosis",
-      label: t("diagnosis"),
-      icon: Sparkles,
-      active: pathname.startsWith("/diagnosis"),
     },
     {
       href: "/wishlist",

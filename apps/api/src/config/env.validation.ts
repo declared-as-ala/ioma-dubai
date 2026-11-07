@@ -6,6 +6,8 @@ export const envSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   PORT: z.coerce.number().default(4000),
   APP_URL: z.string().url(),
+  // Origin of the separate admin app (apps/admin); allowed by CORS.
+  ADMIN_APP_URL: z.string().url().optional(),
   API_URL: z.string().url(),
 
   MONGO_URI: z.string().min(1),
@@ -29,6 +31,7 @@ export const envSchema = z.object({
   MINIO_BUCKET_PUBLIC: z.string().default("ioma-public"),
   MINIO_BUCKET_PRIVATE: z.string().default("ioma-private"),
   MINIO_SIGNED_URL_TTL_SECONDS: z.coerce.number().default(300),
+  MINIO_SIGNED_URL_ENDPOINT: z.string().url().optional(),
 
   JWT_ACCESS_SECRET: z.string().min(32),
   JWT_REFRESH_SECRET: z.string().min(32),
@@ -39,9 +42,9 @@ export const envSchema = z.object({
   PAYMENT_API_KEY: z.string().optional(),
   PAYMENT_WEBHOOK_SECRET: z.string().optional(),
 
-  AI_PROVIDER: z.string().default("mock"),
+  AI_PROVIDER: z.string().optional(),
   AI_PROVIDER_API_KEY: z.string().optional(),
-  AI_ANALYSIS_RETENTION_DAYS: z.coerce.number().default(90),
+  AI_ANALYSIS_RETENTION_DAYS: z.coerce.number().optional(),
 
   MAP_PROVIDER: z.string().default("osm"),
   MAPS_API_KEY: z.string().optional(),
@@ -52,13 +55,16 @@ export const envSchema = z.object({
   SMTP_USER: z.string().optional(),
   SMTP_PASS: z.string().optional(),
   EMAIL_FROM: z.string().default("no-reply@ioma-dev.local"),
+  // Where new contact-form messages are announced. Optional: messages are always stored either way.
+  CONTACT_NOTIFY_EMAIL: z.string().email().optional(),
+  PASSWORD_RESET_TTL_MINUTES: z.coerce.number().default(45),
 
   SENTRY_DSN: z.string().optional(),
   LOG_LEVEL: z.string().default("debug"),
 
   SEARCH_PROVIDER: z.string().default("mongo"),
   DEFAULT_LOCALE: z.string().default("en"),
-  SUPPORTED_LOCALES: z.string().default("en,fr,ar"),
+  SUPPORTED_LOCALES: z.string().default("en,ar"),
 });
 
 export type EnvConfig = z.infer<typeof envSchema>;

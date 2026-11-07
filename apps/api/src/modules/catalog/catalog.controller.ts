@@ -26,6 +26,16 @@ export class CatalogController {
     return this.catalogService.listConcerns();
   }
 
+  @Get("skin-types")
+  listSkinTypes() {
+    return this.catalogService.listSkinTypes();
+  }
+
+  @Get("product-types")
+  listProductTypes() {
+    return this.catalogService.listProductTypes();
+  }
+
   @Get("products")
   listProducts(@Query() query: QueryProductsDto) {
     return this.catalogService.listProducts(query);

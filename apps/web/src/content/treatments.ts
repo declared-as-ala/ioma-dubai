@@ -31,15 +31,15 @@ export const TREATMENTS: Treatment[] = [
     },
     body: {
       en: [
-        "Every treatment at an IOMA partner institute begins the same way: with a diagnosis, not an assumption. A trained specialist reads your skin's current state and either confirms a self-guided or AI-assisted diagnosis you've already completed, or performs one with you from the start.",
+        "Every treatment at an IOMA partner institute begins the same way: with a diagnosis, not an assumption. A trained specialist reads your skin's current state with high-precision diagnostic devices, confirming your skin profile and parameters from the start.",
         "You'll leave with a clear explanation of your skin's profile and a specific recommendation — whether that's a home routine, a specific in-cabin treatment, or both.",
       ],
       fr: [
-        "Chaque soin dans un institut partenaire IOMA commence de la même façon : par un diagnostic, jamais par une supposition. Un spécialiste formé lit l'état actuel de votre peau et confirme un diagnostic autonome ou assisté par IA déjà réalisé, ou en effectue un avec vous dès le départ.",
+        "Chaque soin dans un institut partenaire IOMA commence de la même façon : par un diagnostic, jamais par une supposition. Un spécialiste formé lit l'état actuel de votre peau à l'aide d'appareils de diagnostic haute précision, confirmant vos paramètres cutanés dès le départ.",
         "Vous repartez avec une explication claire du profil de votre peau et une recommandation précise — qu'il s'agisse d'une routine à domicile, d'un soin en cabine spécifique, ou des deux.",
       ],
       ar: [
-        "يبدأ كل علاج في معهد شريك لآيوما بالطريقة ذاتها: بتشخيص، لا بافتراض. يقرأ أخصائي مدرب الحالة الحالية لبشرتكِ ويؤكد تشخيصاً ذاتياً أو مدعوماً بالذكاء الاصطناعي أجريتِه مسبقاً، أو يجريه معكِ من البداية.",
+        "يبدأ كل علاج في معهد شريك لآيوما بالطريقة ذاتها: بتشخيص، لا بافتراض. يقرأ أخصائي مدرب الحالة الحالية لبشرتكِ باستخدام أجهزة تشخيص عالية الدقة، مؤكداً خصائص بشرتكِ ومعاييرها منذ البداية.",
         "ستغادرين بشرح واضح لملف بشرتكِ وتوصية محددة — سواء كانت روتيناً منزلياً، علاجاً محدداً في الكابينة، أو كليهما.",
       ],
     },

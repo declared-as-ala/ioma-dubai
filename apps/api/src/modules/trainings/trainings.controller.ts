@@ -1,3 +1,4 @@
+import { RequireProfessional } from "../../common/guards/auth.decorators";
 import { Controller, Get, Post, Patch, Param, UseGuards } from "@nestjs/common";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { ProfessionalApprovedGuard } from "../../common/guards/professional-approved.guard";
@@ -6,6 +7,8 @@ import type { JwtPayload } from "../auth/strategies/jwt.strategy";
 import { TrainingsService } from "./trainings.service";
 
 @Controller()
+@RequireProfessional()
+@UseGuards(JwtAuthGuard, ProfessionalApprovedGuard)
 export class TrainingsController {
   constructor(private readonly trainingsService: TrainingsService) {}
 
@@ -34,6 +37,11 @@ export class TrainingsController {
   @UseGuards(JwtAuthGuard, ProfessionalApprovedGuard)
   async bookSession(@CurrentUser() user: JwtPayload, @Param("id") sessionId: string) {
     return this.trainingsService.bookSession(user.sub, sessionId);
+  }
+
+  @Get("trainings/my-bookings/:id/certificate")
+  certificate(@CurrentUser() user: JwtPayload, @Param("id") id: string) {
+    return this.trainingsService.certificate(user.sub, id);
   }
 
   @Patch("trainings/my-bookings/:id/cancel")

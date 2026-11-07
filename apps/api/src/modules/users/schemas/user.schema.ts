@@ -19,6 +19,23 @@ export const USER_ROLES: UserRole[] = [
   "super_administrator",
 ];
 
+export class AdminNoteEntry {
+  @Prop({ required: true })
+  id!: string;
+
+  @Prop({ required: true })
+  text!: string;
+
+  @Prop({ required: true })
+  authorId!: string;
+
+  @Prop({ required: true })
+  authorEmail!: string;
+
+  @Prop({ required: true })
+  createdAt!: Date;
+}
+
 // See DATA_MODEL.md "User" and SECURITY.md "Authentication & Sessions".
 @Schema({ timestamps: true })
 export class User {
@@ -60,6 +77,9 @@ export class User {
 
   @Prop({ type: Date, default: null })
   deletedAt!: Date | null;
+
+  @Prop({ type: [AdminNoteEntry], default: [] })
+  adminNotes!: AdminNoteEntry[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

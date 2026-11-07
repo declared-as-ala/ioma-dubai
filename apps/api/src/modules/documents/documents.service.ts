@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { Injectable, NotFoundException, ForbiddenException } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model, Types } from "mongoose";
 import { StorageService, type StorageBucket } from "../../common/storage/storage.service";
@@ -70,6 +70,24 @@ export class DocumentsService {
       throw new NotFoundException("Document not found.");
     }
     return this.storage.getSignedUrl(this.storageBucket(doc.bucket), doc.objectKey);
+  }
+
+  async assertApplicationOwnership(
+    documentId: string,
+    applicationId: string,
+    userId: string,
+  ) {
+    const doc = await this.documentModel.findById(documentId);
+    if (
+      !doc ||
+      doc.deletedAt ||
+      doc.bucket !== "ioma-private" ||
+      doc.ownerType !== "professional_application" ||
+      doc.ownerId.toString() !== applicationId ||
+      doc.uploadedBy?.toString() !== userId
+    ) {
+      throw new ForbiddenException("Document does not belong to this application.");
+    }
   }
 
   // Actually removes the underlying MinIO object, not just a soft-delete

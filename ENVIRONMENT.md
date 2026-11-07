@@ -26,6 +26,8 @@ Defaults below target the _documented default dev workflow_ (`DEPLOYMENT.md`): i
 
 ## Object Storage (MinIO / S3-compatible)
 
+`MINIO_SIGNED_URL_ENDPOINT` (optional): browser-reachable origin used to sign private document URLs, independently of the internal storage host. Development Compose defaults to `http://localhost:9010`; production should use the configured HTTPS MinIO/reverse-proxy origin. Credentials remain server-side and buckets remain private. The signer uses MinIO's default `us-east-1` region. If omitted, signing uses the internal MinIO client as before.
+
 | Variable                       | Required | Dev default                   | Notes                                                                                                                                                                              |
 | ------------------------------ | -------- | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `MINIO_ENDPOINT`               | yes      | `localhost`                   | See note above — Docker Compose overrides to `minio` when containerized                                                                                                            |
@@ -115,3 +117,7 @@ Defaults below target the _documented default dev workflow_ (`DEPLOYMENT.md`): i
 5. Sentry DSN (recommended, not blocking)
 
 None of the above block development — every one has a working mock/default per `DECISIONS.md`'s provider-abstraction pattern. They block only production go-live for their specific feature, tracked again in `DEPLOYMENT.md`.
+
+## Internal catalogue media proxy
+
+`INTERNAL_API_URL` is the server-only API origin used by Next.js rewrites. Use `http://api:4000` inside Docker, and `http://localhost:4000` for host development. The web Dockerfile sets it during build and runtime. Turbo build env includes INTERNAL_API_URL, API_URL, NEXT_PUBLIC_API_URL and DOCKER_BUILD so the compiled rewrite targets the API service. Rebuild web after changing this origin.

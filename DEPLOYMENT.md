@@ -116,3 +116,17 @@ docker compose -f infrastructure/docker/compose.prod.yml up -d --build web api
 # 3. Restore Pre-Deployment Database Dump (if schema migration occurred)
 ./infrastructure/scripts/restore.sh /backups/pre_deployment_backup.tar.gz
 ```
+
+## Account redesign: guest order index migration
+
+Deploy the updated API schema and run the idempotent `infrastructure/scripts/migrate-account-order-index.js` against the target `ioma` database. For the local Docker environment:
+
+```powershell
+Get-Content -LiteralPath infrastructure/scripts/migrate-account-order-index.js -Raw | docker exec -i ioma-dev-mongo-1 mongosh ioma --quiet
+```
+
+The script first creates `unique_guest_order_token`, a unique partial index covering string guest tokens, then removes the legacy unique/sparse `guestToken_1` index. The old index incorrectly permits only one signed-in order with `guestToken: null`. No order records are deleted or rewritten. Do not restart an old API image after migration: its schema can recreate the legacy index. Use the appropriate container/database and credentials for other environments.
+
+## Managed product media rollout
+
+Deploy the API with MediaAsset support, run the backed-up product-media migration with --apply, then deploy the web build. Preserve the Extended JSON backup and original assets. Confirm `.next/routes-manifest.json` forwards /api to the reachable internal API origin and fetch a real /api/media/products/{id}/card through the web origin. Docker build requires INTERNAL_API_URL=http://api:4000; Turbo must pass it through. Local Docker verification is not a production deployment.

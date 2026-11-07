@@ -1,4 +1,10 @@
-import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
+import { DocumentsService } from "../documents/documents.service";
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model, Types } from "mongoose";
 import { Training, TrainingDocument } from "./schemas/training.schema";
@@ -26,6 +32,7 @@ export class TrainingsService {
     private readonly bookingModel: Model<TrainingBookingDocument>,
     @InjectModel(ProfessionalProfile.name)
     private readonly profileModel: Model<ProfessionalProfileDocument>,
+    private readonly documentsService: DocumentsService,
   ) {}
 
   async listTrainings() {
@@ -69,15 +76,49 @@ export class TrainingsService {
       userId: new Types.ObjectId(userId),
     });
 
-    const booking = await this.bookingModel.create({
-      sessionId: session._id,
-      attendeeUserId: new Types.ObjectId(userId),
-      professionalProfileId: profile ? profile._id : null,
-      status: "booked",
-    });
-
-    session.seatsBooked += 1;
-    await session.save();
+    const reserved = await this.sessionModel.findOneAndUpdate(
+      {
+        _id: session._id,
+        startsAt: { $gt: new Date() },
+        $expr: { $lt: ["$seatsBooked", "$capacity"] },
+      },
+      { $inc: { seatsBooked: 1 } },
+      { new: true },
+    );
+    if (!reserved)
+      throw new BadRequestException("This session is unavailable or fully booked.");
+    let booking;
+    try {
+      booking = await this.bookingModel.findOneAndUpdate(
+        {
+          sessionId: session._id,
+          attendeeUserId: new Types.ObjectId(userId),
+          status: "cancelled",
+        },
+        {
+          $set: {
+            professionalProfileId: profile?._id ?? null,
+            status: "booked",
+          },
+        },
+        { new: true },
+      );
+      if (!booking)
+        booking = await this.bookingModel.create({
+          sessionId: session._id,
+          attendeeUserId: new Types.ObjectId(userId),
+          professionalProfileId: profile ? profile._id : null,
+          status: "booked",
+        });
+    } catch (error) {
+      await this.sessionModel.updateOne(
+        { _id: session._id },
+        { $inc: { seatsBooked: -1 } },
+      );
+      if ((error as { code?: number }).code === 11000)
+        throw new BadRequestException("You have already booked this session.");
+      throw error;
+    }
 
     return {
       id: booking._id.toString(),
@@ -110,27 +151,42 @@ export class TrainingsService {
       endsAt: doc.sessionId.endsAt,
       location: doc.sessionId.location,
       status: doc.status,
+      certificateAvailable: doc.status === "attended" && !!doc.certificateDocumentId,
     }));
+  }
+
+  async certificate(userId: string, bookingId: string) {
+    const booking = await this.bookingModel.findById(bookingId);
+    if (!booking || booking.attendeeUserId.toString() !== userId)
+      throw new ForbiddenException("Certificate access denied.");
+    if (booking.status !== "attended" || !booking.certificateDocumentId)
+      throw new NotFoundException("Certificate unavailable.");
+    return {
+      url: await this.documentsService.getSignedUrl(booking.certificateDocumentId),
+    };
   }
 
   async cancelBooking(userId: string, bookingId: string) {
     const booking = await this.bookingModel.findById(bookingId);
     if (!booking) throw new NotFoundException("Booking not found.");
     if (booking.attendeeUserId.toString() !== userId) {
-      throw new BadRequestException("You can only cancel your own booking.");
+      throw new ForbiddenException("You can only cancel your own booking.");
     }
-    if (booking.status === "cancelled") {
+    if (booking.status !== "booked") {
       throw new BadRequestException("Booking is already cancelled.");
     }
 
+    const cancelled = await this.bookingModel.findOneAndUpdate(
+      { _id: booking._id, status: "booked" },
+      { $set: { status: "cancelled" } },
+      { new: true },
+    );
+    if (!cancelled) throw new BadRequestException("Booking is already cancelled.");
+    await this.sessionModel.updateOne(
+      { _id: booking.sessionId, seatsBooked: { $gt: 0 } },
+      { $inc: { seatsBooked: -1 } },
+    );
     booking.status = "cancelled";
-    await booking.save();
-
-    const session = await this.sessionModel.findById(booking.sessionId);
-    if (session && session.seatsBooked > 0) {
-      session.seatsBooked -= 1;
-      await session.save();
-    }
 
     return { id: booking._id.toString(), status: booking.status };
   }

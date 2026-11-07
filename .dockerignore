@@ -19,3 +19,25 @@ coverage
 .idea
 playwright-report
 test-results
+**/test-results
+**/playwright-report
+scratch
+artifacts
+backups
+IOMA_*
+Exemple_*
+\#*
+*.xlsx
+*.pdf
+*.png
+*.jpg
+*.jpeg
+
+# Client source assets (already integrated as optimized files under apps/web/public)
+IOMA_Visuels_*
+Exemple_creas_PLV_Trade
+IOMA_Identite-*
+\#*
+scratch
+backups
+.claude

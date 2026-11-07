@@ -5,3 +5,4 @@ export * from "./account";
 export * from "./diagnosis";
 export * from "./booking";
 export * from "./professional";
+export * from "./shopify-rich-text";

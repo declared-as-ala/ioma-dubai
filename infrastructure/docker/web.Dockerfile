@@ -1,7 +1,7 @@
 # See api.Dockerfile for why this uses `turbo prune` rather than manual
 # layer copying.
 FROM node:22-alpine AS base
-RUN corepack enable
+RUN corepack enable && corepack prepare pnpm@10.31.0 --activate
 RUN npm install -g turbo@^2
 WORKDIR /repo
 
@@ -22,12 +22,15 @@ COPY --from=pruner /repo/out/full/ .
 # has no reverse proxy in front of these two containers.
 ARG NEXT_PUBLIC_API_URL=""
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+ARG INTERNAL_API_URL="http://api:4000"
+ENV INTERNAL_API_URL=$INTERNAL_API_URL
 RUN turbo run build --filter=@ioma/web...
 
 FROM node:22-alpine AS runner
 RUN corepack enable
 WORKDIR /repo
 ENV NODE_ENV=production
+ENV INTERNAL_API_URL=http://api:4000
 COPY --from=installer /repo .
 
 EXPOSE 3000

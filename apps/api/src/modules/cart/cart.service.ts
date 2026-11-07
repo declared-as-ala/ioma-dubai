@@ -14,6 +14,8 @@ import type { UpdateCartItemDto } from "./dto/update-cart-item.dto";
 export interface CartOwner {
   userId?: string;
   sessionId?: string;
+  type?: "b2c" | "b2b";
+  professionalApproved?: boolean;
 }
 
 @Injectable()
@@ -28,8 +30,9 @@ export class CartService {
   ) {}
 
   private ownerFilter(owner: CartOwner) {
-    if (owner.userId) return { userId: new Types.ObjectId(owner.userId) };
-    if (owner.sessionId) return { sessionId: owner.sessionId };
+    if (owner.userId)
+      return { userId: new Types.ObjectId(owner.userId), type: owner.type ?? "b2c" };
+    if (owner.sessionId) return { sessionId: owner.sessionId, type: "b2c" };
     throw new BadRequestException(
       "A logged-in session or X-Guest-Session-Id header is required for cart operations.",
     );
@@ -55,6 +58,8 @@ export class CartService {
     cartType: "b2c" | "b2b" = "b2c",
     priceListId?: string,
   ) {
+    if (!Number.isInteger(dto.qty) || dto.qty < 1)
+      throw new BadRequestException("Invalid quantity.");
     const skuTarget = dto.sku.trim();
     const variant =
       (await this.variantModel.findOne({ sku: skuTarget })) ||
@@ -74,6 +79,14 @@ export class CartService {
       throw new BadRequestException("Not enough stock available for this variant.");
     }
 
+    const product = await this.productModel.findById(variant.productId);
+    if (
+      !product ||
+      product.status !== "published" ||
+      (cartType === "b2c" && product.visibility === "b2b_cabin")
+    )
+      throw new BadRequestException("Product unavailable in this catalogue.");
+
     // B2B: enforce MOQ
     if (cartType === "b2b") {
       const moq = this.resolveMoq(variant, priceListId);
@@ -82,14 +95,16 @@ export class CartService {
       }
     }
 
-    const cart = await this.getOrCreateCart(owner);
-    if (cart.type !== cartType) {
-      cart.type = cartType;
-    }
+    const cart = await this.getOrCreateCart({ ...owner, type: cartType });
 
     const priceMinor = this.resolvePrice(variant, cartType, priceListId);
     const existing = cart.items.find((item) => item.variantId.toString() === variant.id);
     if (existing) {
+      if (
+        !variant.backorderAllowed &&
+        existing.qty + dto.qty > variant.quantityOnHand - variant.quantityReserved
+      )
+        throw new BadRequestException("Not enough stock available.");
       existing.qty += dto.qty;
       existing.priceMinorSnapshot = priceMinor;
     } else {
@@ -110,6 +125,13 @@ export class CartService {
     const cart = await this.getOrCreateCart(owner);
     const item = cart.items.find((i) => i.variantId.toString() === variant.id);
     if (!item) throw new NotFoundException("Item not in cart.");
+    if (
+      !Number.isInteger(dto.qty) ||
+      dto.qty < 1 ||
+      (!variant.backorderAllowed &&
+        dto.qty > variant.quantityOnHand - variant.quantityReserved)
+    )
+      throw new BadRequestException("Invalid quantity or insufficient stock.");
     item.qty = dto.qty;
     await cart.save();
     return this.toResponse(cart);

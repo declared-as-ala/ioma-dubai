@@ -26,6 +26,8 @@ describe("ProfessionalService", () => {
       findById: jest.fn(),
       find: jest.fn(),
       create: jest.fn(),
+      findOneAndUpdate: jest.fn(),
+      updateOne: jest.fn(),
     };
     mockProfileModel = {
       findOne: jest.fn(),
@@ -75,10 +77,10 @@ describe("ProfessionalService", () => {
         toObject: () => mockCreated,
       };
       mockApplicationModel.findOne.mockResolvedValue(null);
-      mockApplicationModel.create.mockResolvedValue(mockCreated);
+      mockApplicationModel.findOneAndUpdate.mockResolvedValue(mockCreated);
 
       const result = await service.getOrCreateDraft(userId);
-      expect(mockApplicationModel.create).toHaveBeenCalled();
+      expect(mockApplicationModel.findOneAndUpdate).toHaveBeenCalled();
       expect(result.status).toBe("draft");
     });
   });
@@ -89,6 +91,7 @@ describe("ProfessionalService", () => {
         _id: new Types.ObjectId(applicationId),
         userId: new Types.ObjectId(userId),
         status: "draft",
+        documents: [{ documentId: new Types.ObjectId() }],
         statusHistory: [],
         save: jest.fn().mockResolvedValue(true),
         toObject: function () {
@@ -109,11 +112,15 @@ describe("ProfessionalService", () => {
         city: "Dubai",
         locationsCount: 1,
         expectedOrderVolume: "50k-100k AED",
+        termsAccepted: true,
       };
 
+      mockApplicationModel.findOneAndUpdate.mockResolvedValue({
+        toObject: () => ({ ...dto, status: "submitted" }),
+      });
       const result = await service.submitApplication(userId, applicationId, dto);
 
-      expect(mockApp.status).toBe("submitted");
+      expect(result.status).toBe("submitted");
       expect(mockUsersService.addRole).toHaveBeenCalledWith(
         userId,
         "professional_pending",

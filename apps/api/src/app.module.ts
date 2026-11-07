@@ -8,25 +8,30 @@ import { join } from "path";
 import { validateEnv, type EnvConfig } from "./config/env.validation";
 import { RedisModule } from "./common/redis/redis.module";
 import { StorageModule } from "./common/storage/storage.module";
+import { MailModule } from "./common/mail/mail.module";
 import { HealthModule } from "./modules/health/health.module";
 import { UsersModule } from "./modules/users/users.module";
 import { AuthModule } from "./modules/auth/auth.module";
 import { ContactModule } from "./modules/contact/contact.module";
 import { NewsletterModule } from "./modules/newsletter/newsletter.module";
 import { CatalogModule } from "./modules/catalog/catalog.module";
+import { CatalogSyncModule } from "./modules/catalog-sync/catalog-sync.module";
 import { CartModule } from "./modules/cart/cart.module";
 import { WishlistModule } from "./modules/wishlist/wishlist.module";
 import { PaymentsModule } from "./modules/payments/payments.module";
 import { OrdersModule } from "./modules/orders/orders.module";
 import { AccountModule } from "./modules/account/account.module";
-import { DiagnosisModule } from "./modules/diagnosis/diagnosis.module";
-import { AiAnalysisModule } from "./modules/ai-analysis/ai-analysis.module";
 import { PartnersModule } from "./modules/partners/partners.module";
-import { AppointmentsModule } from "./modules/appointments/appointments.module";
+// AppointmentsModule deactivated: consumer appointment booking system removed.
+// Schemas and historical data are preserved in database without dropping.
 import { ProfessionalModule } from "./modules/professional/professional.module";
+import { ProContentModule } from "./modules/pro-content/pro-content.module";
+import { HeroModule } from "./modules/hero/hero.module";
 import { TrainingsModule } from "./modules/trainings/trainings.module";
 import { ProtocolsModule } from "./modules/protocols/protocols.module";
 import { AuditModule } from "./modules/audit/audit.module";
+import { AdminModule } from "./modules/admin/admin.module";
+import { MediaModule } from "./modules/media/media.module";
 
 @Module({
   imports: [
@@ -67,25 +72,28 @@ import { AuditModule } from "./modules/audit/audit.module";
     }),
     RedisModule,
     StorageModule,
+    MailModule,
+    MediaModule,
     HealthModule,
     UsersModule,
     AuthModule,
     ContactModule,
     NewsletterModule,
     CatalogModule,
+    CatalogSyncModule,
     CartModule,
     WishlistModule,
     PaymentsModule,
     OrdersModule,
     AccountModule,
-    DiagnosisModule,
-    AiAnalysisModule,
     PartnersModule,
-    AppointmentsModule,
     ProfessionalModule,
+    ProContentModule,
+    HeroModule,
     TrainingsModule,
     ProtocolsModule,
     AuditModule,
+    AdminModule,
   ],
   providers: [
     {

@@ -1,4 +1,17 @@
 {
+  "CinematicHero": {
+    "brand": "IOMA PARIS — DUBAI",
+    "tagline": "The art of personalised skincare.",
+    "discover": "Discover IOMA",
+    "scroll": "Explore the collection",
+    "chapters": "Film chapters",
+    "pause": "Pause video",
+    "play": "Play video",
+    "measure": "Measure",
+    "inlab": "In.Lab",
+    "precision": "Precision",
+    "book": "Book"
+  },
   "Home": {
     "hero": {
       "kicker": "IOMA Paris — Dubai",
@@ -7,6 +20,10 @@
       "diagnosisCta": "Start my diagnosis",
       "shopCta": "Discover the products",
       "scrollIndicator": "Scroll to discover",
+      "badgeParams": "18 skin parameters",
+      "badgeBespoke": "In.Lab bespoke care",
+      "badgeMade": "Made in Paris, France",
+      "scrollCue": "Discover the care",
       "phase2Tag": "IOMA SPHERE TECHNOLOGY — PARIS",
       "phase2Metric1": "Hydration Analysis",
       "phase2Metric1Val": "94% Optimal",
@@ -17,13 +34,14 @@
       "phase3Title": "Personalized. Precise. IOMA.",
       "phase3Subtitle": "Skin intelligence transformed into your bespoke daily formula.",
       "phase3Cta": "Start your diagnosis",
-      "phase3Badge": "IOMA WORLD ATLAS — 1M+ DIAGNOSTICS"
+      "phase3Badge": "IOMA WORLD ATLAS — 1M+ DIAGNOSTICS",
+      "technologyCta": "Our technology"
     },
     "maison": {
-      "label": "La Maison",
+      "label": "About",
       "title": "Parisian precision, written for the Gulf climate.",
       "body": "Founded in Paris out of one conviction — no two skins are alike — IOMA measures before it formulates. Our diagnosis method accounts for heat, sun, and air conditioning as real factors shaping a skin's daily needs.",
-      "cta": "Discover La Maison"
+      "cta": "Discover IOMA"
     },
     "diagnosis": {
       "label": "Skin Diagnosis",
@@ -92,10 +110,13 @@
       "title": "Book your diagnosis appointment",
       "body": "Prefer an in-person diagnosis? Book a session with a partner near you.",
       "cta": "Choose a time slot"
+    },
+    "technology": {
+      "cta": "Discover our technology"
     }
   },
   "MaisonPage": {
-    "kicker": "La Maison",
+    "kicker": "About",
     "title": "A house built on precision",
     "intro": "IOMA was founded in Paris on a conviction that still guides every formula today: skincare should be prescribed, not guessed at.",
     "philosophyTitle": "Diagnosis before formula",
@@ -108,7 +129,7 @@
     "pillar3Title": "Considered formulas",
     "pillar3Body": "Every range is built around a clear purpose — hydration, renewal, calm — rather than a long list of unrelated promises.",
     "ctaTitle": "Experience it for yourself",
-    "ctaBody": "The best way to understand La Maison IOMA is through your own diagnosis.",
+    "ctaBody": "The best way to understand IOMA is through your own diagnosis.",
     "cta": "Start your diagnosis"
   },
   "TechnologyPage": {
@@ -174,16 +195,16 @@
   "FaqPage": {
     "kicker": "FAQ",
     "title": "Frequently asked questions",
-    "q1Title": "How does the diagnosis work?",
-    "q1Body": "You answer a short, precise questionnaire — or visit a partner for an in-person session. Your answers determine the range and routine that fit your skin.",
-    "q2Title": "Is the AI skin analysis a medical diagnosis?",
-    "q2Body": "No. It's a simulated, informational analysis intended to guide your routine — never a substitute for medical advice. Results are always clearly labeled.",
+    "q1Title": "How does skin diagnosis work at IOMA?",
+    "q1Body": "At our partner spas and institutes across the UAE, certified specialists use high-precision diagnostic devices to read your skin's parameters and recommend a targeted, personalized routine.",
+    "q2Title": "How are IOMA bespoke skincare formulas created?",
+    "q2Body": "With IOMA In.Lab, bespoke formulas are prepared drop by drop using pure, concentrated active capsules tailored to your skin's unique needs, created fresh on demand.",
     "q3Title": "Do you deliver across the UAE?",
     "q3Body": "Delivery details and coverage are confirmed at checkout once our shop is live — see Shipping Policy for the latest information.",
     "q4Title": "How do I become an IOMA professional partner?",
     "q4Body": "Visit the Professionals page and submit an application. Our team reviews every request and follows up with next steps.",
-    "q5Title": "Can I delete my diagnosis or AI analysis data?",
-    "q5Body": "Yes — you can delete your saved diagnoses and AI analysis images and results at any time from your account.",
+    "q5Title": "How can I manage or delete my account data?",
+    "q5Body": "You can view and update your personal profile, addresses, and security preferences, or request account deletion at any time from your account dashboard.",
     "contactCta": "Still have a question? Contact us"
   },
   "Health": {
@@ -209,7 +230,7 @@
     "routinesKits": "Kits & Routines",
     "insideIoma": "Inside IOMA",
     "diagnosis": "Skin Diagnosis",
-    "maison": "La Maison",
+    "maison": "About",
     "technology": "Technology",
     "treatments": "Treatments",
     "partners": "Find a Partner",
@@ -218,7 +239,8 @@
     "account": "Account",
     "search": "Search",
     "bag": "Bag",
-    "bookAppointment": "Book an appointment",
+    "findPartner": "Find a Partner",
+    "bookAppointment": "Find a Partner",
     "region": "United Arab Emirates",
     "currency": "Prices in AED",
     "bottomNavigation": "Bottom navigation",
@@ -231,6 +253,7 @@
     "concernFirmness": "Firmness",
     "concernPores": "Pores",
     "goAction": "Go",
+    "loadingLive": "Loading live data…",
     "concernsTitle": "Your Concerns",
     "categoriesTitle": "Our Categories",
     "rangesTitle": "Our Ranges",
@@ -253,7 +276,9 @@
     "shopTitle": "Shop",
     "supportTitle": "Support",
     "legalTitle": "Legal",
-    "maison": "La Maison IOMA",
+    "maison": "About IOMA",
+    "founder": "Jean Michel Karam",
+    "iomaPrive": "IOMA Privé",
     "technology": "Our Technology",
     "diagnosis": "Skin Diagnosis",
     "treatments": "Treatments",
@@ -279,7 +304,8 @@
     "newsletterSuccess": "You're subscribed.",
     "newsletterError": "Something went wrong. Please try again.",
     "region": "United Arab Emirates",
-    "currency": "Prices in AED"
+    "currency": "Prices in AED",
+    "magazine": "Magazine"
   },
   "Legal": {
     "pendingNotice": "This page is a structural placeholder — the final legal text will be supplied by IOMA Paris and reviewed by counsel before go-live. Nothing below is binding.",
@@ -447,7 +473,71 @@
     "submitting": "Signing in...",
     "noAccount": "Don't have an account?",
     "registerLink": "Create one",
-    "errorGeneric": "That email and password combination doesn't match our records."
+    "errorGeneric": "That email and password combination doesn't match our records.",
+    "privatePortal": "IOMA Paris • Private Portal",
+    "description": "Sign in to manage your skin consultations and personalized routines.",
+    "clientTab": "Client Account",
+    "proTab": "Pro Partner",
+    "professionalPrompt": "Professional clinic or spa?",
+    "applyLink": "Apply for B2B partner access",
+    "forgotPassword": "Forgot password?",
+    "hidePassword": "Hide password",
+    "showPassword": "Show password",
+    "secure": "Your private IOMA account",
+    "imageAlt": "IOMA Paris skincare",
+    "editorialBadge": "Skincare expertise • Paris",
+    "quote": "Your skin is unique. Discover skincare tailored to you.",
+    "diagnosisBenefit": "Your skin consultations",
+    "routineBenefit": "Personalized routines",
+    "locations": "Paris • Dubai",
+    "emailError": "Enter a valid email address.",
+    "passwordError": "Enter your password."
+  },
+  "ForgotPassword": {
+    "kicker": "Account Recovery",
+    "title": "Forgot password?",
+    "description": "Enter the email associated with your IOMA account and we'll send you a secure link to reset your password.",
+    "emailLabel": "Email address",
+    "submit": "Send reset link",
+    "submitting": "Sending...",
+    "backToLogin": "Back to sign in",
+    "sentTitle": "Check your inbox",
+    "sentMessage": "If an account exists for this email, a password reset link has been sent. Please also check your spam folder.",
+    "sentBack": "Return to sign in",
+    "errorGeneric": "Something went wrong. Please try again.",
+    "emailError": "Enter a valid email address.",
+    "imageAlt": "IOMA Paris skincare",
+    "editorialBadge": "Account Security • IOMA",
+    "quote": "Your privacy and security are our highest priority.",
+    "secure": "Secured with industry-standard encryption"
+  },
+  "ResetPassword": {
+    "kicker": "Account Recovery",
+    "title": "Set new password",
+    "description": "Choose a strong new password for your IOMA account.",
+    "newPasswordLabel": "New password",
+    "confirmPasswordLabel": "Confirm new password",
+    "requirements": "At least 10 characters, with an uppercase letter, a lowercase letter, and a number.",
+    "submit": "Reset password",
+    "submitting": "Updating...",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "successTitle": "Password updated",
+    "successMessage": "Your password has been changed successfully. You can now sign in with your new password.",
+    "successCta": "Sign in",
+    "expiredTitle": "Link expired",
+    "expiredMessage": "This password reset link is invalid or has expired.",
+    "expiredCta": "Request a new link",
+    "noTokenTitle": "Invalid link",
+    "noTokenMessage": "This password reset link is missing or malformed. Please request a new one.",
+    "noTokenCta": "Request a new link",
+    "errorGeneric": "Something went wrong. Please request a new reset link.",
+    "passwordError": "Enter a valid password.",
+    "confirmError": "Passwords do not match.",
+    "imageAlt": "IOMA Paris skincare",
+    "editorialBadge": "Account Security • IOMA",
+    "quote": "Your skin is unique. Discover skincare tailored to you.",
+    "secure": "Secured with industry-standard encryption"
   },
   "Register": {
     "kicker": "Account",
@@ -567,7 +657,17 @@
       "cancel": "Keep my account",
       "submitting": "Sending request...",
       "requested": "Your deletion request has been received. Our team will process it and follow up if needed."
-    }
+    },
+    "appointments": {
+      "title": "My appointments",
+      "noAppointments": "Meet an IOMA expert.",
+      "bookFirst": "Book a skin consultation",
+      "reschedule": "Reschedule",
+      "cancel": "Cancel appointment",
+      "cancelling": "Cancelling…",
+      "confirmCancel": "Are you sure you want to cancel this appointment?"
+    },
+    "invalidField": "Please check this field."
   },
   "Diagnosis": {
     "landing": {
@@ -798,11 +898,19 @@
         },
         "sunExposure": {
           "title": "How much daily sun exposure do you get?",
-          "options": { "low": "Low", "moderate": "Moderate", "high": "High" }
+          "options": {
+            "low": "Low",
+            "moderate": "Moderate",
+            "high": "High"
+          }
         },
         "indoorClimateExposure": {
           "title": "How much time do you spend in air-conditioned spaces?",
-          "options": { "low": "Low", "moderate": "Moderate", "high": "High" }
+          "options": {
+            "low": "Low",
+            "moderate": "Moderate",
+            "high": "High"
+          }
         }
       }
     },
@@ -910,22 +1018,69 @@
   "Partners": {
     "kicker": "Find a Partner",
     "title": "Where to find IOMA in the UAE.",
-    "subtitle": "Diagnosis counters, spas, and partner institutes across the Emirates.",
+    "subtitle": "Spas, clinics, hotels and partner institutes across the Emirates — find your nearest IOMA address.",
     "filterEmirate": "Filter by emirate",
     "filterAllEmirates": "All Emirates",
     "filterType": "Filter by type",
     "filterTypes": {
-      "all": "All types",
-      "spa": "Spa",
-      "clinic": "Clinic",
-      "institute": "Beauty Institute",
-      "hotel": "Hotel",
+      "all": "All",
+      "spa": "Spas",
+      "clinic": "Clinics",
+      "institute": "Institutes",
+      "hotel": "Hotels",
       "retail": "Retail"
     },
-    "diagnosisOnly": "Diagnosis available",
     "useMyLocation": "Use my location",
     "noPartners": "No partners found matching your criteria.",
-    "viewDetails": "View details"
+    "viewDetails": "View details",
+    "heroStats": {
+      "partners": "Partner addresses",
+      "emirates": "Emirates",
+      "cities": "Cities"
+    },
+    "resultsCount": "{count, plural, =0 {No partners} one {# partner} other {# partners}}",
+    "clearFilters": "Clear filters",
+    "locating": "Locating…",
+    "nearMeActive": "Near me · 50 km",
+    "locationError": "We could not access your location. Check your browser permissions.",
+    "directions": "Directions",
+    "call": "Call",
+    "book": "Book",
+    "moreServices": "+{count} more",
+    "typeLabels": {
+      "spa": "Spa",
+      "clinic": "Clinic",
+      "beauty_institute": "Beauty institute",
+      "hotel": "Hotel",
+      "retail": "Retail",
+      "diagnostic_center": "Diagnostic centre",
+      "distributor": "Distributor"
+    },
+    "noPartnersHint": "Try another emirate or partner type, or clear your filters.",
+    "ctaKicker": "Partnership & B2B",
+    "ctaTitle": "Become an IOMA Partner",
+    "ctaBody": "Bring the excellence of French personalised skincare to your spa, clinic or beauty institute. Discover the professional world of IOMA Paris.",
+    "ctaButton": "Become a Partner",
+    "mapLabel": "Partner locations map",
+    "ctaBenefits": {
+      "pricing": {
+        "title": "Professional pricing",
+        "body": "A dedicated B2B price list with clear minimum order quantities."
+      },
+      "protocols": {
+        "title": "Cabin protocols",
+        "body": "Step-by-step treatment protocols for your cabin team."
+      },
+      "training": {
+        "title": "Training",
+        "body": "Training sessions to get your team confident with IOMA."
+      },
+      "team": {
+        "title": "Dedicated team",
+        "body": "A partner team to support you after you join."
+      }
+    },
+    "ctaSecondary": "Learn more"
   },
   "PartnerDetail": {
     "notFound": "Partner not found.",
@@ -939,7 +1094,11 @@
     "services": "Services",
     "noServices": "No services listed.",
     "book": "Book",
-    "bookAppointment": "Book an appointment",
+    "contactPartner": "Contact Partner",
+    "getDirections": "Get Directions",
+    "visitWebsite": "Visit Website",
+    "findPartner": "Find a Partner",
+    "bookAppointment": "Contact Partner",
     "types": {
       "spa": "Spa",
       "clinic": "Clinic",
@@ -1017,7 +1176,7 @@
   "Professionals": {
     "apply": {
       "title": "Professional Application",
-      "subtitle": "Complete the form below to apply for B2B portal access. Our team will review your application within 48 hours.",
+      "subtitle": "Apply to become an IOMA professional partner. Our team reviews each application before granting access.",
       "sections": {
         "company": "Company Information",
         "contact": "Contact Details",
@@ -1055,9 +1214,91 @@
         "newApplication": "Submit New Application"
       },
       "success": {
-        "title": "Application Submitted",
-        "description": "Thank you for your application. Our team will review it and get back to you within 48 hours.",
-        "backToHome": "Back to Home"
+        "title": "Your professional application has been received.",
+        "description": "The IOMA team will review your information and documents. Return to this page to follow the review or provide additional documents. Professional access remains unavailable until approval.",
+        "backToHome": "Back to IOMA"
+      },
+      "progressLabel": "Application steps",
+      "steps": {
+        "account": "Account",
+        "application": "Application",
+        "review": "Review"
+      },
+      "loading": "Loading your application…",
+      "retry": "Try again",
+      "reference": "Application reference",
+      "statusLabel": "Status",
+      "portal": "Open professional portal",
+      "terms": "I confirm the information is accurate and accept the terms and conditions.",
+      "readTerms": "Read terms and conditions",
+      "account": {
+        "title": "Start your professional application",
+        "description": "Create an account or sign in to complete your company details, upload private documents and track your application. An account alone does not grant professional access.",
+        "register": "Create an account to apply",
+        "signIn": "Sign in to continue"
+      },
+      "statuses": {
+        "draft": "Draft",
+        "submitted": "Pending review",
+        "pending_review": "Pending review",
+        "documents_requested": "Additional documents requested",
+        "approved": "Approved",
+        "rejected": "Application rejected",
+        "suspended": "Professional access suspended"
+      },
+      "nextSteps": {
+        "approved": "Your application is approved. You can now access the professional portal.",
+        "rejected": "Please review the feedback below. You may submit a new application with updated information.",
+        "suspended": "Your professional access is suspended. Contact IOMA to discuss the next steps."
+      },
+      "documents": {
+        "title": "Professional documents",
+        "label": "Trade licence / company document",
+        "help": "Upload a trade licence or registration document. PDF, JPEG, PNG or WebP, up to 10 MB. Documents are stored privately and reviewed only by authorized staff.",
+        "uploading": "Uploading securely…",
+        "uploaded": "Uploaded"
+      },
+      "errors": {
+        "load": "We could not load your application. Please try again.",
+        "file": "Choose a PDF, JPEG, PNG or WebP file up to 10 MB.",
+        "upload": "The document could not be uploaded. Please try again; your form is preserved.",
+        "documentRequired": "Upload the required professional document before submitting.",
+        "submit": "We could not submit your application. Please retry or reload to check its status; your form is preserved."
+      },
+      "businessTypes": {
+        "spa": "Spa",
+        "clinic": "Clinic",
+        "beauty_institute": "Beauty Institute",
+        "hotel": "Hotel",
+        "retail": "Retailer",
+        "distributor": "Distributor"
+      },
+      "emirates": {
+        "AUH": "Abu Dhabi",
+        "DXB": "Dubai",
+        "SHJ": "Sharjah",
+        "AJM": "Ajman",
+        "UAQ": "Umm Al Quwain",
+        "RAK": "Ras Al Khaimah",
+        "FUJ": "Fujairah"
+      },
+      "validation": {
+        "companyName": "Enter a company name.",
+        "contactPerson": "Enter the contact person.",
+        "businessType": "Select a business type.",
+        "tradeLicenceNumber": "Enter a trade licence number.",
+        "vatNumber": "Enter a valid VAT number.",
+        "email": "Enter a valid email address.",
+        "phone": "Enter a valid phone number (6–20 characters, digits with optional +, spaces or hyphens).",
+        "address": "Enter your address.",
+        "emirate": "Select an emirate.",
+        "city": "Enter a city.",
+        "website": "Enter a valid website URL.",
+        "socialMedia": "Enter valid social media details.",
+        "locationsCount": "Enter a whole number of locations, at least 1.",
+        "expectedOrderVolume": "Enter your expected order volume.",
+        "message": "Enter a valid message.",
+        "termsAccepted": "Accept the terms before submitting."
       }
     }
   },
@@ -1081,7 +1322,16 @@
       "myBookings": "My Scheduled Trainings",
       "cancelBooking": "Cancel",
       "cancelling": "Cancelling...",
-      "noSessions": "No upcoming sessions available."
+      "noSessions": "No upcoming sessions available.",
+      "online": "Online",
+      "physical": "In person",
+      "confirmCancel": "Cancel this training booking?",
+      "statuses": {
+        "booked": "Booked",
+        "cancelled": "Cancelled",
+        "attended": "Completed",
+        "no_show": "Missed"
+      }
     },
     "protocols": {
       "title": "Treatment Protocols",
@@ -1092,7 +1342,9 @@
       "diagnostic": "Diagnostic Protocols",
       "downloadPdf": "Download Protocol PDF",
       "watchVideo": "Watch Technique Video",
-      "noProtocols": "No protocols found."
+      "noProtocols": "No protocols found.",
+      "homecare": "Home care",
+      "pdfPending": "PDF not available"
     },
     "dashboard": {
       "title": "Welcome, {name}",
@@ -1120,7 +1372,8 @@
       },
       "success": {
         "added": "Added to cart"
-      }
+      },
+      "moq": "Minimum: {moq}"
     },
     "orders": {
       "title": "My Orders",
@@ -1139,41 +1392,138 @@
       "learnMore": "Learn About Becoming a Partner"
     }
   },
-  "Admin": {
-    "professionals": {
-      "title": "Professional Applications",
-      "subtitle": "Review and manage professional applications for B2B portal access.",
-      "field": {
-        "businessType": "Business Type",
-        "emirate": "Emirate",
-        "tradeLicence": "Trade Licence",
-        "locationsCount": "Locations",
-        "expectedVolume": "Expected Volume",
-        "submitted": "Submitted",
-        "documents": "Documents"
-      },
-      "actions": {
-        "approve": "Approve",
-        "reject": "Reject"
-      },
-      "toast": {
-        "approved": "Application approved successfully.",
-        "rejected": "Application rejected.",
-        "rejectionReasonRequired": "Rejection reason is required.",
-        "error": "An error occurred."
-      },
-      "dialog": {
-        "approveTitle": "Approve Application",
-        "rejectTitle": "Reject Application",
-        "notes": "Review Notes",
-        "approvePlaceholder": "Optional notes for the applicant...",
-        "rejectPlaceholder": "Reason for rejection (required)...",
-        "cancel": "Cancel",
-        "processing": "Processing...",
-        "confirmApprove": "Approve",
-        "confirmReject": "Reject"
-      },
-      "noApplications": "No pending applications to review."
-    }
+  "AccountExperience": {
+    "personal": "My IOMA",
+    "professional": "IOMA Professional",
+    "customer": "Customer",
+    "overview": "Overview",
+    "skin": "My skin",
+    "shop": "Shopping",
+    "services": "Services",
+    "settings": "Account",
+    "expert": "AI Skin Expert",
+    "routines": "Saved routines",
+    "notifications": "Action center",
+    "partnerStatus": "Partner status",
+    "company": "Company profile",
+    "documents": "My documents",
+    "support": "Professional support",
+    "menu": "Account navigation",
+    "intro": "Your skincare journey, appointments and orders, together in one personal space.",
+    "journey": "Your skin journey",
+    "standard": "Skin diagnosis",
+    "latestAi": "Latest AI analysis",
+    "discover": "Discover what your skin needs.",
+    "start": "Start a diagnosis",
+    "view": "View details",
+    "ask": "Ask my Skin Expert",
+    "ritual": "Your current IOMA ritual",
+    "noRoutine": "Create a routine around your skin’s needs.",
+    "morning": "Morning",
+    "evening": "Evening",
+    "addRoutine": "Add routine to bag",
+    "adjust": "Adjust with my Skin Expert",
+    "available": "Available",
+    "unavailable": "Unavailable",
+    "added": "Added to bag",
+    "add": "Add to bag",
+    "recentOrders": "Recent personal orders",
+    "allOrders": "All orders",
+    "personalOrder": "Personal · B2C",
+    "proOrder": "Professional · B2B",
+    "reorder": "Reorder",
+    "nextAppointment": "Your next appointment",
+    "wishlist": "Your wishlist",
+    "allWishlist": "View wishlist",
+    "noWishlist": "Keep your favorite IOMA care close.",
+    "shopCta": "Explore IOMA",
+    "partnerTitle": "Become an IOMA professional partner",
+    "partnerIntro": "Bring personalized skincare to your business. Apply for professional access.",
+    "apply": "Apply for professional access",
+    "enter": "Enter professional portal",
+    "reference": "Reference",
+    "submitted": "Submitted on",
+    "approvedOn": "Approved on",
+    "timeline": "Application progress",
+    "application": "Application",
+    "review": "IOMA review",
+    "approval": "Approval",
+    "complete": "Completed",
+    "progress": "In progress",
+    "waiting": "Pending",
+    "action": "Action required",
+    "contact": "Contact IOMA",
+    "upload": "Upload requested documents",
+    "continue": "Continue application",
+    "reapply": "Reapply",
+    "noActions": "You’re all caught up. Your upcoming appointments and account updates will appear here.",
+    "noDocuments": "No documents have been uploaded yet.",
+    "openDocument": "Open document",
+    "companyNote": "For changes to legal company information, contact IOMA for verification.",
+    "supportNote": "Our team can help with your partnership, professional orders, products and training.",
+    "proIntro": "Your professional space, connected to your personal IOMA account.",
+    "proRecent": "Recent professional orders",
+    "training": "Training",
+    "upcomingTraining": "Upcoming training",
+    "noTraining": "Explore the available courses and reserve your next session.",
+    "protocols": "Protocol library",
+    "catalog": "Professional shop",
+    "proCart": "Professional bag",
+    "emptyPro": "Your professional catalogue is ready.",
+    "quickOrder": "Quick reorder",
+    "quantity": "Quantity",
+    "remove": "Remove",
+    "total": "Total",
+    "checkout": "Continue to checkout",
+    "directions": "View location",
+    "success": "Changes saved",
+    "error": "We couldn’t complete this request. Please try again.",
+    "statuses": {
+      "draft": "Draft",
+      "submitted": "Application submitted",
+      "pending_review": "Under review",
+      "documents_requested": "Documents required",
+      "approved": "Approved partner",
+      "rejected": "Application declined",
+      "suspended": "Professional access suspended"
+    },
+    "descriptions": {
+      "draft": "Complete your application and upload your trade licence.",
+      "submitted": "Your professional application is under review.",
+      "pending_review": "The IOMA team is reviewing your application.",
+      "documents_requested": "IOMA requires additional documentation to continue reviewing your application.",
+      "approved": "Your professional access is ready. Your personal account remains available.",
+      "rejected": "Your application could not be approved at this time. Contact IOMA or submit a new application.",
+      "suspended": "Your professional access is temporarily suspended. Contact IOMA for assistance."
+    },
+    "appointmentStatuses": {
+      "confirmed": "Confirmed",
+      "rescheduled": "Rescheduled",
+      "cancelled": "Cancelled",
+      "completed": "Completed",
+      "no_show": "Missed"
+    },
+    "back": "Keep appointment",
+    "certificate": "Download certificate",
+    "updateContact": "Update professional contact",
+    "save": "Save changes"
+  },
+  "Magazine": {
+    "title": "IOMA Magazine",
+    "subtitle": "Skin science, Beautiful Longevity, and bespoke skincare rituals decoded by IOMA Paris experts.",
+    "all": "All",
+    "searchPlaceholder": "Search articles, actives, routines...",
+    "featured": "Featured",
+    "readArticle": "Read article",
+    "readFullArticle": "Read full article",
+    "readingTime": "{minutes} min read",
+    "backToMagazine": "Back to Magazine",
+    "share": "Share",
+    "copyLink": "Copy link",
+    "copied": "Copied!",
+    "relatedArticles": "Related Articles",
+    "continueReading": "Continue Reading",
+    "noArticlesFound": "No articles found",
+    "noArticlesFoundDesc": "Try adjusting your search terms or filters."
   }
 }

@@ -1,5 +1,7 @@
 # CLAUDE.md — IOMA Paris Dubai Digital Platform
 
+> Start each session with [AGENTS.md](AGENTS.md) and [PROJECT_BRIEF.md](PROJECT_BRIEF.md). The user brief preserved on 2026-09-06 supersedes conflicting older guidance below, including admin styling and independent standard diagnosis requirements. See `AGENTS.md` for the documentation reading workflow and precedence rules.
+
 This file governs how work is done in this repository. It overrides default behavior. Read it before touching any code.
 
 ## Project Context

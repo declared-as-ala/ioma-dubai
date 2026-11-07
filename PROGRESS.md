@@ -1,6 +1,63 @@
 # PROGRESS.md — IOMA Paris Dubai
 
-**Last updated**: 2026-08-22
+## 2026-11-06 — Complete IOMA Paris Magazine Migration & Multilingual Experience — VERIFIED
+
+- **Full Magazine Extraction & Content Migration**:
+  - Scraped 100% of articles from the official IOMA Paris Magazine (https://ioma-paris.com/blogs/ioma-mag).
+  - 78 total articles extracted with 0 failures: titles, excerpts, high-resolution cover images, publication dates, author attribution, categories, and complete rich prose HTML bodies.
+  - Retained authentic French (fr) as authoritative source text.
+- **Multilingual Translation Pipeline (French -> English & Modern Standard Arabic)**:
+  - Translated all 78 articles into English (en) with scientific cosmetic editorial rigor.
+  - Authored authentic Modern Standard Arabic (ar) tailored for the luxury UAE market.
+  - 100% HTML formatting tags preserved (<p>, <h2>, <h3>, <ul>, <li>, <strong>, <em>, <a>, <img>).
+  - Cleaned all product hyperlinks from legacy /products/... to active store catalog /shop/...
+  - Categories localized across 8 taxonomies (Beautiful Longevity, Skin Science, Facial Care, Actives & Ingredients, Skin & Lifestyle, Brand & Innovation, Hair & Scalp, Body Care).
+- **MongoDB Persistence & Idempotent Seeder**:
+  - Created repeatable seeder script apps/api/src/scripts/seed-ioma-magazine.ts (npm script seed:ioma-magazine).
+  - Upserted all 78 articles into collection contentpages with kind: 'journal', status: 'published', reading time, cover image, and SEO metadata.
+- **Backend Content API**:
+  - Extended apps/api/src/modules/admin/content.controller.ts with GET /api/content/magazine and GET /api/content/journal.
+  - Real-time search, category slug filtering, pagination, and single article lookup.
+- **Luxury Public Frontend (apps/web)**:
+  - Magazine index page /[locale]/magazine with editorial hero, category filter pills, live search bar, featured hero article, 3-column card grid, and pagination.
+  - Article reader /[locale]/magazine/[slug] with sticky reading progress bar, breadcrumb hierarchy, author/date meta, rich typography, social share bar (WhatsApp, X, LinkedIn, Copy Link), and related article recommendations.
+  - SEO: Schema.org Article and BreadcrumbList JSON-LD, Open Graph, Twitter cards, canonical and hreflang tags.
+  - Full RTL support for Arabic (dir='rtl').
+  - Backward compatibility: /journal redirects to /magazine.
+- **Admin Management (apps/admin)**:
+  - Configured magazine resource in ADMIN_RESOURCES with dedicated columns, search, and field schema.
+  - Added Magazine navigation link to Website group in admin-shell.tsx.
+- **Verification**:
+  - pnpm --filter=@ioma/api build: passed (0 errors).
+  - pnpm --filter=@ioma/web typecheck: passed (0 errors).
+  - pnpm --filter=@ioma/admin typecheck: passed (0 errors).
+  - Docker containers ioma-dev-api-1 and ioma-dev-web-1 healthy and verified live on ports 4000 and 3000.
+
+## 2026-11-06 — IOMA Privé Luxury Experience Page & Lookbook Removal — VERIFIED
+
+- **IOMA Privé Luxury Experience Page (`/[locale]/ioma-prive`)**:
+  - Created dedicated luxury editorial experience at [`apps/web/src/app/[locale]/(public)/ioma-prive/page.tsx`](<file:///c:/Users/Ala/Desktop/ioma/apps/web/src/app/[locale]/(public)/ioma-prive/page.tsx>) with client component [`apps/web/src/components/prive/prive-experience.tsx`](file:///c:/Users/Ala/Desktop/ioma/apps/web/src/components/prive/prive-experience.tsx).
+  - Built factual content repository [`apps/web/src/content/ioma-prive.ts`](file:///c:/Users/Ala/Desktop/ioma/apps/web/src/content/ioma-prive.ts) preserving official IOMA Paris & Maison DESSANGE details:
+    - **Hero**: Immersive dark luxury hero with subtle violet accents and headline _"Your skin is unique. Your ritual should be too."_
+    - **Section 1 (Beautiful Longevity)**: Scientific philosophy, cellular preservation, and Empreinte Cutanée mapping.
+    - **Section 2 (Three Acts)**: 01 — Your Skin Signature, 02 — Your Formula by In.Lab, 03 — Your Personalised Ritual.
+    - **Section 3 (Treatment Collection)**: Interactive card selector for all 7 verified official treatments (Longévité AMOI In.Lab 90m 230€, Rituel Longévité Absolue 90m 180€, Le Lifting Naturel 60m 160€, Rituel Glass Skin 60m 127€, L'Éclat Absolu 60m 127€, Bouclier Longévité 60m 90€, Votre peau votre formule 15m 145€).
+    - **Section 4 (In.Lab Experience)**: Robotic live compounding, zero oxidation, 40,000+ formulas, and MEMS precision sensors.
+    - **Section 5 (Continue Ritual at Home)**: Personalised skincare continuation linking to bespoke products (Ma Crème Jour, Ma Crème Nuit, Mon Soin Yeux).
+    - **Section 6 (The Paris Address)**: Maison DESSANGE Flagship Mondial at 4, rue Marbeuf, 75008 Paris, with verified contact info and transparent geographic notice regarding Paris vs. UAE partner treatments.
+    - **Section 7 (Official FAQs)**: Expandable accordions detailing the cabin experience, In.Lab technology, and UAE localisation.
+  - Added footer link **IOMA Privé** under the _Discover_ column alongside _Jean Michel Karam_ in [`footer.tsx`](file:///c:/Users/Ala/Desktop/ioma/apps/web/src/components/layout/footer.tsx).
+  - Added translations across `en.json`, `fr.json`, and `ar.json` with full RTL support.
+  - Added canonical tags, Open Graph meta, and Schema.org structured data (`HealthAndBeautyBusiness` & `FAQPage`).
+  - Added `/ioma-prive` to [`sitemap.ts`](file:///c:/Users/Ala/Desktop/ioma/apps/web/src/app/sitemap.ts).
+  - Typecheck passed: `pnpm --filter=@ioma/web typecheck` (0 errors).
+
+- **Lookbook Page Removal**:
+  - Removed route `apps/web/src/app/[locale]/(public)/lookbook/page.tsx` and component `lookbook.tsx`.
+  - Removed "Lookbook" from header inside-ioma dropdown, footer navigation, and sitemap.
+  - Configured 307/308 redirects from `/lookbook` to `/maison` in `next.config.ts`.
+
+**Last updated**: 2026-11-06
 
 ## Sprint 13 — AI Skin Expert 2.0 (COMPLETE)
 
@@ -367,3 +424,11 @@ Sprints 0–11 (including 4.5, 4.6, 4.7, and Homepage Cinematic Hero) are all co
 ## Notes
 
 This is a large, multi-sprint build. Progress is committed incrementally and this file is updated after every meaningful task, not batched at the end, so the project is auditable and resumable at any point. Sprint 1's biggest lesson, recorded here deliberately: a task-runner or background-process "success" summary is not proof of correctness — bug #12 above only surfaced because the running container was checked with real HTTP requests, not because any build step reported an error. Every subsequent sprint's Docker/CI claims in this file are made only after that same live check.
+
+## Services, legal pages, cookie consent and new footer — 2026-11-06
+
+New routes (EN/AR; French is no longer a served locale): `/loyalty`, `/contact` (rebuilt), `/shipping-returns`, `/secure-payment`, `/careers`, `/terms`, `/legal-notice`; `/cookie-policy` now holds the real consent controls; `/privacy-policy` unchanged. Old `/shipping-policy`, `/return-policy`, `/terms-and-conditions` redirect (301). Content is in `content/services.ts` and only restates verified facts from the official pages: the French loyalty mechanics are shown as a labelled France reference (nothing can be earned in the UAE), delivery/returns/payment pages state that UAE terms and the payment provider are not confirmed (checkout is still `mock`), the legal pages are unpublished-style drafts (`noindex`, not in the sitemap) that list the information still needed, and no French fee, delay, entity or jurisdiction was copied. Careers links to ievagroup.com/job in a new tab (no vacancies invented). Cookie consent (`lib/consent.ts`, banner + dialog + footer "Cookie settings"): accept all / reject optional / customise, 180-day cookie, `ConsentGate` and `loadScriptWithConsent` for any future tag; no analytics or marketing tool is installed today. Contact form: category, optional order reference, honeypot, server rate limit (5/min), staff notification by email when `CONTACT_NOTIFY_EMAIL` is set (always stored); API tests added. Footer rebuilt on black: four groups (accordion on phones), scroll reveal, logo reveal, underline hover, claim + footnote, UAE/AED, language switcher (EN/AR), official social accounts. Checked: tsc, API unit tests, both locales of every new route return 200. Not checked in a browser (1440/1024/768/390). Admin-managed overrides: a published CMS page with the same slug replaces a built-in page (existing `ManagedPage`); legal version history/approval workflow, footer/social/contact settings in the admin, and a per-page FAQ editor are NOT built.
+
+## Product catalogue sync and import center — 2026-11-06
+
+See `docs/IOMA_PRODUCT_API_MAPPING.md` for the verified source schema, the field-ownership matrix and the dry run against the real 63-product export. Built: `modules/catalog-sync` (parse, diff with ownership/conflicts, preview, apply with approvals, rollback, history, CSV report, real-count stats), `products.source` + `importRuns` (additive), admin Import center (`/admin/products/import`), database-counted health ribbon on `/admin/products`, Source & Sync card in the editor. 23 tests pass (12 unit, 11 on a real throw-away MongoDB). Not built from the brief: full list/editor redesign, collections/attributes admin, inventory adjustment history, bulk stock actions, translation side-by-side, B2B tab additions. Live source fetch was rate limited (429) from this machine: use the JSON file path or retry later.

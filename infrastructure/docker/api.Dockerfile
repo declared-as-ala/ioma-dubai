@@ -6,7 +6,7 @@
 # them selectively silently breaks resolution — see DECISIONS.md incident
 # notes for how this went wrong the first time).
 FROM node:22-alpine AS base
-RUN corepack enable
+RUN corepack enable && corepack prepare pnpm@10.31.0 --activate
 RUN npm install -g turbo@^2
 WORKDIR /repo
 

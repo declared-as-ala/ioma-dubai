@@ -24,12 +24,34 @@ export function IomaLogo({
   const [imageError, setImageError] = useState(false);
   const color = variant === "white" ? "text-ioma-white" : "text-ioma-black";
 
+  // The official lockup (logo + claim between the "i" and "PARIS", per the charter) is used whenever the claim shows.
+  if (withClaim && !imageError) {
+    return (
+      <span className={cn("inline-flex", className)}>
+        <img
+          src={
+            variant === "white"
+              ? "/images/brand/logo-claim-white.svg"
+              : "/images/brand/logo-claim-black.svg"
+          }
+          alt="IOMA Paris — N°1 de la Cosmétique Personnalisée*"
+          width={Math.round(height * 2.34)}
+          height={height}
+          onError={() => setImageError(true)}
+          className="h-16 w-auto object-contain"
+        />
+      </span>
+    );
+  }
+
   return (
     <span className={cn("inline-flex flex-col items-center gap-0.5", className)}>
       {!imageError ? (
         <img
-          src="/images/ioma-logo.png"
-          alt="IOMA Paris"
+          src={
+            variant === "white" ? "/images/ioma-logo-white.png" : "/images/ioma-logo.png"
+          }
+          alt="IOMA Paris Dubai"
           width={width}
           height={height}
           onError={() => setImageError(true)}
@@ -40,12 +62,18 @@ export function IomaLogo({
         />
       ) : (
         <span
-          className={cn(
-            "inline-flex select-none flex-col items-start gap-0.5 leading-none",
-            color,
-          )}
+          className={cn("inline-flex select-none items-center gap-2 leading-none", color)}
         >
-          <span className="flex items-baseline gap-2">
+          <img
+            src={
+              variant === "white"
+                ? "/images/burj-emblem-white.png"
+                : "/images/burj-emblem.png"
+            }
+            alt="Burj Emblem"
+            className="h-7 w-auto object-contain"
+          />
+          <span className="flex items-baseline gap-1.5">
             <span className="font-display text-2xl italic tracking-tight lowercase">
               ioma
             </span>

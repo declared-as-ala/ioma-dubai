@@ -1,6 +1,7 @@
-import {
+﻿import {
   BadRequestException,
   ForbiddenException,
+  ConflictException,
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
@@ -28,19 +29,48 @@ export class ProfessionalService {
 
   // --- Application lifecycle ---
 
+  async updateContact(
+    userId: string,
+    id: string,
+    contact: { contactPerson: string; email: string; phone: string },
+  ) {
+    await this.getApplication(userId, id);
+    await this.applicationModel.updateOne(
+      { _id: id, userId: new Types.ObjectId(userId) },
+      { $set: contact },
+    );
+    return contact;
+  }
+
   async getOrCreateDraft(userId: string) {
-    let app = await this.applicationModel.findOne({
-      userId: new Types.ObjectId(userId),
-      status: "draft",
+    const owner = new Types.ObjectId(userId);
+    const existing = await this.applicationModel.findOne({
+      userId: owner,
+      status: { $ne: "rejected" },
     });
-    if (!app) {
-      app = await this.applicationModel.create({
-        userId: new Types.ObjectId(userId),
-        status: "draft",
-        statusHistory: [{ status: "draft", at: new Date() }],
+    if (existing) return existing.toObject();
+    try {
+      const app = await this.applicationModel.findOneAndUpdate(
+        { userId: owner, status: "draft" },
+        {
+          $setOnInsert: {
+            userId: owner,
+            status: "draft",
+            statusHistory: [{ status: "draft", at: new Date(), note: null }],
+          },
+        },
+        { upsert: true, new: true, setDefaultsOnInsert: true },
+      );
+      return app!.toObject();
+    } catch (error) {
+      if ((error as { code?: number }).code !== 11000) throw error;
+      const existing = await this.applicationModel.findOne({
+        userId: owner,
+        status: { $ne: "rejected" },
       });
+      if (!existing) throw new ConflictException("Please retry your application.");
+      return existing.toObject();
     }
-    return app.toObject();
   }
 
   async getApplication(userId: string, applicationId: string) {
@@ -75,16 +105,33 @@ export class ProfessionalService {
       );
     }
 
-    // Update fields
-    Object.assign(app, dto);
-    app.status = "submitted";
-    app.statusHistory.push({ status: "submitted", at: new Date(), note: null });
-    await app.save();
-
-    // Ensure user has professional_pending role
+    if (!dto.termsAccepted) throw new BadRequestException("Terms must be accepted.");
+    if (!app.documents.length)
+      throw new BadRequestException("A trade licence document is required.");
+    if (app.status === "documents_requested") {
+      if (app.documents.length <= app.requestedDocumentsCount) {
+        throw new BadRequestException(
+          "Please upload the requested documents before resubmitting.",
+        );
+      }
+    }
+    const { termsAccepted: _terms, ...fields } = dto;
+    const now = new Date();
+    const updated = await this.applicationModel.findOneAndUpdate(
+      { _id: app._id, userId: app.userId, status: app.status, __v: app.__v },
+      {
+        $set: { ...fields, status: "submitted", termsAcceptedAt: now, submittedAt: now },
+        $push: { statusHistory: { status: "submitted", at: now, note: null } },
+        $inc: { __v: 1 },
+      },
+      { new: true, runValidators: true },
+    );
+    if (!updated)
+      throw new ConflictException(
+        "Application changed. Reload its status before retrying.",
+      );
     await this.usersService.addRole(userId, "professional_pending");
-
-    return app.toObject();
+    return updated.toObject();
   }
 
   async addDocument(
@@ -104,16 +151,37 @@ export class ProfessionalService {
     if (app.status !== "draft" && app.status !== "documents_requested") {
       throw new BadRequestException("Cannot add documents to this application.");
     }
-    app.documents.push({
+    const entry = {
       documentId: new Types.ObjectId(document.documentId),
       originalName: document.originalName,
       mimeType: document.mimeType,
-    });
-    await app.save();
-    return app.toObject();
+    };
+    const updated = await this.applicationModel.findOneAndUpdate(
+      {
+        _id: app._id,
+        userId: app.userId,
+        status: { $in: ["draft", "documents_requested"] },
+        "documents.documentId": { $ne: entry.documentId },
+      },
+      { $push: { documents: entry }, $inc: { __v: 1 } },
+      { new: true },
+    );
+    if (!updated) throw new ConflictException("Application is no longer editable.");
+    return updated.toObject();
   }
 
   // --- Admin review ---
+
+  private async saveReview(app: ProfessionalApplicationDocument) {
+    try {
+      await app.save();
+    } catch (error) {
+      if (error instanceof Error && error.name === "VersionError") {
+        throw new ConflictException("Application changed. Reload before reviewing it.");
+      }
+      throw error;
+    }
+  }
 
   async listPendingApplications() {
     return this.applicationModel
@@ -152,7 +220,7 @@ export class ProfessionalService {
       at: new Date(),
       note: reviewNotes ?? null,
     });
-    await app.save();
+    await this.saveReview(app);
 
     // Update user roles
     await this.usersService.removeRole(app.userId.toString(), "professional_pending");
@@ -182,8 +250,9 @@ export class ProfessionalService {
     app.status = "rejected";
     app.reviewedBy = new Types.ObjectId(adminId);
     app.reviewNotes = reviewNotes;
+    app.applicantMessage = reviewNotes;
     app.statusHistory.push({ status: "rejected", at: new Date(), note: reviewNotes });
-    await app.save();
+    await this.saveReview(app);
 
     await this.usersService.removeRole(app.userId.toString(), "professional_pending");
 
@@ -198,14 +267,16 @@ export class ProfessionalService {
     }
 
     app.status = "documents_requested";
+    app.requestedDocumentsCount = app.documents.length;
     app.reviewedBy = new Types.ObjectId(adminId);
     app.reviewNotes = reviewNotes;
+    app.applicantMessage = reviewNotes;
     app.statusHistory.push({
       status: "documents_requested",
       at: new Date(),
       note: reviewNotes,
     });
-    await app.save();
+    await this.saveReview(app);
 
     return app.toObject();
   }
@@ -216,6 +287,17 @@ export class ProfessionalService {
 
     profile.status = "suspended";
     await profile.save();
+    await this.applicationModel.updateOne(
+      { _id: profile.applicationId },
+      {
+        $set: {
+          status: "suspended",
+          reviewNotes: _reason,
+          reviewedBy: new Types.ObjectId(_adminId),
+        },
+        $push: { statusHistory: { status: "suspended", at: new Date(), note: _reason } },
+      },
+    );
 
     await this.usersService.removeRole(
       profile.userId.toString(),
@@ -257,4 +339,5 @@ export interface SubmitApplicationDto {
   locationsCount: number;
   expectedOrderVolume: string;
   message?: string;
+  termsAccepted: boolean;
 }

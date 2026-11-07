@@ -1,3 +1,4 @@
+import { DocumentsService } from "../documents/documents.service";
 import { Test, TestingModule } from "@nestjs/testing";
 import { getModelToken } from "@nestjs/mongoose";
 import { BadRequestException, NotFoundException } from "@nestjs/common";
@@ -30,6 +31,8 @@ describe("TrainingsService", () => {
     sessionModel = {
       find: jest.fn().mockReturnThis(),
       findById: jest.fn(),
+      findOneAndUpdate: jest.fn().mockResolvedValue({}),
+      updateOne: jest.fn().mockResolvedValue({}),
       sort: jest.fn().mockReturnThis(),
       lean: jest.fn(),
     };
@@ -39,6 +42,7 @@ describe("TrainingsService", () => {
       find: jest.fn().mockReturnThis(),
       findById: jest.fn(),
       create: jest.fn(),
+      findOneAndUpdate: jest.fn().mockResolvedValue(null),
       populate: jest.fn().mockReturnThis(),
       sort: jest.fn().mockReturnThis(),
       lean: jest.fn(),
@@ -51,6 +55,7 @@ describe("TrainingsService", () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         TrainingsService,
+        { provide: DocumentsService, useValue: { getSignedUrl: jest.fn() } },
         { provide: getModelToken(Training.name), useValue: trainingModel },
         { provide: getModelToken(TrainingSession.name), useValue: sessionModel },
         { provide: getModelToken(TrainingBooking.name), useValue: bookingModel },
@@ -63,6 +68,42 @@ describe("TrainingsService", () => {
 
   it("should be defined", () => {
     expect(service).toBeDefined();
+  });
+
+  it("does not expose another attendee's certificate", async () => {
+    bookingModel.findById.mockResolvedValue({
+      attendeeUserId: new Types.ObjectId(),
+      status: "attended",
+      certificateDocumentId: new Types.ObjectId(),
+    });
+    await expect(
+      service.certificate(mockUserId, new Types.ObjectId().toString()),
+    ).rejects.toThrow("Certificate access denied");
+  });
+
+  it("does not invent a certificate for a completed booking without an attachment", async () => {
+    bookingModel.findById.mockResolvedValue({
+      attendeeUserId: new Types.ObjectId(mockUserId),
+      status: "attended",
+      certificateDocumentId: null,
+    });
+    await expect(
+      service.certificate(mockUserId, new Types.ObjectId().toString()),
+    ).rejects.toThrow("Certificate unavailable");
+  });
+
+  it("does not create a booking if another request takes the last seat", async () => {
+    sessionModel.findById.mockResolvedValue({
+      _id: new Types.ObjectId(mockSessionId),
+      capacity: 1,
+      seatsBooked: 0,
+    });
+    bookingModel.findOne.mockResolvedValue(null);
+    sessionModel.findOneAndUpdate.mockResolvedValue(null);
+    await expect(service.bookSession(mockUserId, mockSessionId)).rejects.toThrow(
+      "fully booked",
+    );
+    expect(bookingModel.create).not.toHaveBeenCalled();
   });
 
   describe("bookSession", () => {
@@ -120,8 +161,11 @@ describe("TrainingsService", () => {
 
       const result = await service.bookSession(mockUserId, mockSessionId);
 
-      expect(mockSession.seatsBooked).toBe(3);
-      expect(mockSession.save).toHaveBeenCalled();
+      expect(sessionModel.findOneAndUpdate).toHaveBeenCalledWith(
+        expect.objectContaining({ _id: mockSession._id }),
+        { $inc: { seatsBooked: 1 } },
+        { new: true },
+      );
       expect(result.id).toBe(createdBookingId.toString());
       expect(result.status).toBe("booked");
     });
@@ -143,12 +187,19 @@ describe("TrainingsService", () => {
       };
 
       bookingModel.findById.mockResolvedValue(mockBooking);
+      bookingModel.findOneAndUpdate.mockResolvedValue({
+        ...mockBooking,
+        status: "cancelled",
+      });
       sessionModel.findById.mockResolvedValue(mockSession);
 
       const result = await service.cancelBooking(mockUserId, mockBooking._id.toString());
 
       expect(mockBooking.status).toBe("cancelled");
-      expect(mockSession.seatsBooked).toBe(2);
+      expect(sessionModel.updateOne).toHaveBeenCalledWith(
+        expect.objectContaining({ _id: mockBooking.sessionId }),
+        { $inc: { seatsBooked: -1 } },
+      );
       expect(result.status).toBe("cancelled");
     });
   });

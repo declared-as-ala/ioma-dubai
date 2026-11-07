@@ -13,6 +13,7 @@ import {
   useDeleteAddressMutation,
   useUpdateAddressMutation,
 } from "@/hooks/use-account";
+import { MapPin, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -103,7 +104,7 @@ export default function AddressesPage() {
   return (
     <section aria-labelledby="addresses-title">
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <h1 id="addresses-title" className="font-display text-3xl">
+        <h1 id="addresses-title" className="font-display text-3xl font-light md:text-4xl">
           {t("addresses.title")}
         </h1>
         {!formOpen && <Button onClick={startAdd}>{t("addresses.addNew")}</Button>}
@@ -119,7 +120,7 @@ export default function AddressesPage() {
             {editingId ? t("addresses.editTitle") : t("addresses.addNew")}
           </h2>
           <FieldGroup className="mt-6">
-            <div className="grid gap-5 sm:grid-cols-2">
+            <div className="grid gap-5 md:grid-cols-2">
               <Controller
                 name="type"
                 control={form.control}
@@ -141,7 +142,7 @@ export default function AddressesPage() {
                         <SelectItem value="billing">{t("addresses.billing")}</SelectItem>
                       </SelectContent>
                     </Select>
-                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                    {fieldState.invalid && <FieldError>{t("invalidField")}</FieldError>}
                   </Field>
                 )}
               />
@@ -158,12 +159,12 @@ export default function AddressesPage() {
                       id="address-label"
                       aria-invalid={fieldState.invalid}
                     />
-                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                    {fieldState.invalid && <FieldError>{t("invalidField")}</FieldError>}
                   </Field>
                 )}
               />
             </div>
-            <div className="grid gap-5 sm:grid-cols-2">
+            <div className="grid gap-5 md:grid-cols-2">
               <Controller
                 name="fullName"
                 control={form.control}
@@ -178,7 +179,7 @@ export default function AddressesPage() {
                       autoComplete="name"
                       aria-invalid={fieldState.invalid}
                     />
-                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                    {fieldState.invalid && <FieldError>{t("invalidField")}</FieldError>}
                   </Field>
                 )}
               />
@@ -194,10 +195,11 @@ export default function AddressesPage() {
                       {...field}
                       id="address-phone"
                       type="tel"
+                      dir="ltr"
                       autoComplete="tel"
                       aria-invalid={fieldState.invalid}
                     />
-                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                    {fieldState.invalid && <FieldError>{t("invalidField")}</FieldError>}
                   </Field>
                 )}
               />
@@ -216,7 +218,7 @@ export default function AddressesPage() {
                     autoComplete="address-line1"
                     aria-invalid={fieldState.invalid}
                   />
-                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                  {fieldState.invalid && <FieldError>{t("invalidField")}</FieldError>}
                 </Field>
               )}
             />
@@ -235,11 +237,11 @@ export default function AddressesPage() {
                     autoComplete="address-line2"
                     aria-invalid={fieldState.invalid}
                   />
-                  {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                  {fieldState.invalid && <FieldError>{t("invalidField")}</FieldError>}
                 </Field>
               )}
             />
-            <div className="grid gap-5 sm:grid-cols-2">
+            <div className="grid gap-5 md:grid-cols-2">
               <Controller
                 name="emirate"
                 control={form.control}
@@ -264,7 +266,7 @@ export default function AddressesPage() {
                         ))}
                       </SelectContent>
                     </Select>
-                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                    {fieldState.invalid && <FieldError>{t("invalidField")}</FieldError>}
                   </Field>
                 )}
               />
@@ -280,7 +282,7 @@ export default function AddressesPage() {
                       autoComplete="address-level2"
                       aria-invalid={fieldState.invalid}
                     />
-                    {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                    {fieldState.invalid && <FieldError>{t("invalidField")}</FieldError>}
                   </Field>
                 )}
               />
@@ -321,62 +323,105 @@ export default function AddressesPage() {
       )}
 
       {addresses.isLoading ? (
-        <div className="mt-8 h-40 animate-pulse bg-ioma-grey-100" aria-busy="true" />
+        <div className="mt-8 grid gap-4 sm:grid-cols-2" aria-busy="true">
+          <div className="h-48 animate-pulse rounded-2xl bg-muted/50" />
+          <div className="h-48 animate-pulse rounded-2xl bg-muted/50" />
+        </div>
       ) : addresses.isError ? (
-        <div className="mt-8" role="alert">
+        <div
+          className="mt-8 rounded-2xl border border-destructive/20 bg-destructive/5 p-6 text-center"
+          role="alert"
+        >
           <p className="text-sm text-destructive">{t("loadError")}</p>
           <Button
             variant="outline"
             size="sm"
-            className="mt-3"
+            className="mt-3 uppercase tracking-wider text-xs"
             onClick={() => addresses.refetch()}
           >
             {t("retry")}
           </Button>
         </div>
       ) : addresses.data?.length === 0 ? (
-        <p className="mt-8 text-sm text-muted-foreground">{t("addresses.empty")}</p>
+        <div className="mt-8 rounded-2xl border border-dashed border-border/80 bg-muted/10 p-12 text-center">
+          <div className="mx-auto flex size-12 items-center justify-center rounded-2xl bg-muted/60 text-muted-foreground">
+            <MapPin className="size-5" />
+          </div>
+          <h3 className="mt-4 font-display text-lg font-light text-foreground">
+            {t("addresses.empty")}
+          </h3>
+          <p className="mx-auto mt-1 max-w-sm text-xs text-muted-foreground leading-relaxed">
+            Enregistrez vos adresses de livraison aux Émirats pour vos commandes privées
+            et livraisons express IOMA Paris.
+          </p>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="mt-6 rounded-full uppercase tracking-wider text-xs gap-2"
+            onClick={startAdd}
+          >
+            <Plus className="size-3.5" />
+            <span>{t("addresses.addNew")}</span>
+          </Button>
+        </div>
       ) : (
-        <ul className="mt-8 grid gap-px border border-border bg-border sm:grid-cols-2">
+        <div className="mt-8 grid gap-5 sm:grid-cols-2">
           {addresses.data?.map((address) => (
-            <li key={address._id} className="flex flex-col bg-background p-6">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <h2 className="font-medium">{address.label}</h2>
-                  <p className="mt-1 text-xs uppercase tracking-widest text-muted-foreground">
-                    {t(`addresses.${address.type}`)}
-                  </p>
+            <article
+              key={address._id}
+              className="flex flex-col justify-between rounded-2xl border border-border/80 bg-card p-6 shadow-xs transition-all duration-200 hover:border-foreground/40 hover:shadow-sm"
+            >
+              <div>
+                <div className="flex items-start justify-between gap-3 border-b border-border/60 pb-4">
+                  <div>
+                    <h2 className="font-display text-base font-medium text-foreground">
+                      {address.label}
+                    </h2>
+                    <p className="mt-0.5 text-[11px] uppercase tracking-wider text-muted-foreground">
+                      {t(`addresses.${address.type}`)}
+                    </p>
+                  </div>
+                  {address.isDefault && (
+                    <span className="inline-flex items-center rounded-full bg-foreground px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-wider text-background shadow-xs">
+                      {t("addresses.defaultBadge")}
+                    </span>
+                  )}
                 </div>
-                {address.isDefault && (
-                  <span className="border border-border px-2 py-1 text-xs">
-                    {t("addresses.defaultBadge")}
+
+                <address className="mt-4 text-xs not-italic leading-relaxed text-muted-foreground">
+                  <span className="font-medium text-foreground block text-sm mb-1">
+                    {address.fullName}
                   </span>
-                )}
+                  <span>{address.line1}</span>
+                  {address.line2 && <span className="block">{address.line2}</span>}
+                  <span className="block mt-1 font-medium text-foreground/80">
+                    {address.city},{" "}
+                    {EMIRATES.find((item) => item.code === address.emirate)?.name[locale]}
+                  </span>
+                  <span
+                    className="block mt-1 text-[11px] text-muted-foreground/80"
+                    dir="ltr"
+                  >
+                    {address.phone}
+                  </span>
+                </address>
               </div>
-              <address className="mt-5 flex-1 text-sm not-italic leading-6 text-muted-foreground">
-                {address.fullName}
-                <br />
-                {address.line1}
-                <br />
-                {address.line2 ? (
-                  <>
-                    {address.line2}
-                    <br />
-                  </>
-                ) : null}
-                {address.city},{" "}
-                {EMIRATES.find((item) => item.code === address.emirate)?.name[locale]}
-                <br />
-                {address.phone}
-              </address>
-              <div className="mt-6 flex flex-wrap gap-2 border-t border-border pt-4">
-                <Button variant="outline" size="sm" onClick={() => startEdit(address)}>
+
+              <div className="mt-6 flex flex-wrap items-center gap-2 border-t border-border/60 pt-4">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="rounded-full text-xs uppercase tracking-wider"
+                  onClick={() => startEdit(address)}
+                >
                   {t("addresses.edit")}
                 </Button>
                 {!address.isDefault && (
                   <Button
                     variant="ghost"
                     size="sm"
+                    className="rounded-full text-xs uppercase tracking-wider"
                     disabled={updateAddress.isPending}
                     onClick={() =>
                       updateAddress.mutate({
@@ -391,15 +436,15 @@ export default function AddressesPage() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="text-destructive hover:text-destructive"
+                  className="rounded-full text-xs text-destructive hover:bg-destructive/10 hover:text-destructive ms-auto"
                   onClick={() => setDeleteTarget(address)}
                 >
                   {t("addresses.remove")}
                 </Button>
               </div>
-            </li>
+            </article>
           ))}
-        </ul>
+        </div>
       )}
 
       <Dialog

@@ -31,7 +31,7 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
 
   return (
     <main className="mx-auto max-w-[1440px] px-4 md:px-6 py-10 md:py-16">
-      <div className="account-experience grid gap-8 lg:gap-14 lg:grid-cols-[240px_minmax(0,1fr)]">
+      <div className="account-experience grid gap-8 lg:gap-12 lg:grid-cols-[260px_minmax(0,1fr)]">
         <AccountNav />
         <div className="min-w-0">{children}</div>
       </div>

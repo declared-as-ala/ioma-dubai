@@ -1,0 +1,10 @@
+import { Suspense } from "react";
+import { AdminOrders } from "@/components/admin/admin-orders";
+
+export default function Page() {
+  return (
+    <Suspense>
+      <AdminOrders />
+    </Suspense>
+  );
+}

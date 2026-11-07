@@ -34,9 +34,13 @@ export interface ProfessionalApplication {
   status: ApplicationStatus;
   reviewedBy: string | null;
   reviewNotes: string | null;
+  applicantMessage?: string | null;
   statusHistory: StatusHistoryEntry[];
   createdAt: string;
   updatedAt: string;
+  submittedAt?: string | null;
+  termsAcceptedAt?: string | null;
+  requestedDocumentsCount?: number;
 }
 
 export interface ApplicationDocument {

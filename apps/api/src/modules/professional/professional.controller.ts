@@ -20,41 +20,12 @@ import { Roles } from "../../common/guards/auth.decorators";
 import { RolesGuard } from "../../common/guards/roles.guard";
 import { DocumentsService } from "../documents/documents.service";
 import { Types } from "mongoose";
-
-const ALLOWED_DOC_TYPES = ["application/pdf", "image/jpeg", "image/png", "image/webp"];
-const MAX_DOC_SIZE = 10 * 1024 * 1024; // 10 MB
-
-export class SubmitApplicationBody {
-  companyName!: string;
-  contactPerson!: string;
-  businessType!: string;
-  tradeLicenceNumber!: string;
-  vatNumber?: string;
-  email!: string;
-  phone!: string;
-  address!: string;
-  emirate!: string;
-  city!: string;
-  website?: string;
-  socialMedia?: string;
-  locationsCount!: number;
-  expectedOrderVolume!: string;
-  message?: string;
-}
-
-export class AddDocumentBody {
-  documentId!: string;
-  originalName!: string;
-  mimeType!: string;
-}
-
-export class ReviewBody {
-  reviewNotes?: string;
-}
-
-export class SuspendBody {
-  reason!: string;
-}
+import { z } from "zod";
+import {
+  parseApplication,
+  parseReview,
+  validateApplicationFile,
+} from "./application-validation";
 
 @ApiTags("professional")
 @UseGuards(JwtAuthGuard)
@@ -67,64 +38,121 @@ export class ProfessionalController {
 
   // --- Applicant endpoints ---
 
+  @Patch("applications/:id/contact")
+  async updateContact(
+    @CurrentUser() user: JwtPayload,
+    @Param("id") id: string,
+    @Body() body: unknown,
+  ) {
+    const parsed = z
+      .object({
+        contactPerson: z.string().trim().min(1).max(150),
+        email: z.string().email(),
+        phone: z.string().regex(/^\+?[\d\s()-]{7,20}$/),
+      })
+      .strict()
+      .safeParse(body);
+    if (!parsed.success) throw new BadRequestException("Invalid contact details.");
+    return this.professionalService.updateContact(user.sub, id, parsed.data);
+  }
+
+  @Get("profile")
+  profile(@CurrentUser() user: JwtPayload) {
+    return this.professionalService.getProfileByUserId(user.sub);
+  }
+
+  @Get("applications/:id/documents/:documentId")
+  async ownDocument(
+    @CurrentUser() user: JwtPayload,
+    @Param("id") id: string,
+    @Param("documentId") documentId: string,
+  ) {
+    const app = await this.professionalService.getApplication(user.sub, id);
+    if (!app.documents.some((doc) => doc.documentId.toString() === documentId))
+      throw new BadRequestException("Document does not belong to this application.");
+    await this.documentsService.assertApplicationOwnership(documentId, id, user.sub);
+    return {
+      url: await this.documentsService.getSignedUrl(new Types.ObjectId(documentId)),
+    };
+  }
+
   @Get("applications")
   listMyApplications(@CurrentUser() user: JwtPayload) {
-    return this.professionalService.listMyApplications(user.sub);
+    return this.professionalService
+      .listMyApplications(user.sub)
+      .then((apps) => apps.map(publicApplication));
   }
 
   @Get("applications/:id")
   getApplication(@CurrentUser() user: JwtPayload, @Param("id") id: string) {
-    return this.professionalService.getApplication(user.sub, id);
+    return this.professionalService.getApplication(user.sub, id).then(publicApplication);
   }
 
   @Post("applications/draft")
   getOrCreateDraft(@CurrentUser() user: JwtPayload) {
-    return this.professionalService.getOrCreateDraft(user.sub);
+    return this.professionalService.getOrCreateDraft(user.sub).then(publicApplication);
   }
 
   @Post("applications/:id/submit")
   submitApplication(
     @CurrentUser() user: JwtPayload,
     @Param("id") id: string,
-    @Body() dto: SubmitApplicationBody,
+    @Body() dto: unknown,
   ) {
-    return this.professionalService.submitApplication(user.sub, id, dto);
+    return this.professionalService.submitApplication(
+      user.sub,
+      id,
+      parseApplication(dto),
+    );
   }
 
   @Post("applications/:id/documents")
-  addDocument(
+  async addDocument(
     @CurrentUser() user: JwtPayload,
     @Param("id") id: string,
-    @Body() dto: AddDocumentBody,
+    @Body() body: unknown,
   ) {
-    return this.professionalService.addDocument(user.sub, id, {
-      documentId: dto.documentId,
-      originalName: dto.originalName,
-      mimeType: dto.mimeType,
-    });
+    const parsed = z
+      .object({
+        documentId: z.string().regex(/^[a-f0-9]{24}$/i),
+        originalName: z.string().min(1).max(255),
+        mimeType: z.string(),
+      })
+      .strict()
+      .safeParse(body);
+    if (!parsed.success) throw new BadRequestException("Invalid document.");
+    await this.professionalService.getApplication(user.sub, id);
+    await this.documentsService.assertApplicationOwnership(
+      parsed.data.documentId,
+      id,
+      user.sub,
+    );
+    return this.professionalService.addDocument(user.sub, id, parsed.data);
   }
 
   @Post("applications/:id/upload")
-  @UseInterceptors(FileInterceptor("file"))
+  @UseInterceptors(
+    FileInterceptor("file", { limits: { fileSize: 10 * 1024 * 1024, files: 1 } }),
+  )
   async uploadDocument(
     @CurrentUser() user: JwtPayload,
     @Param("id") applicationId: string,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    if (!file) throw new BadRequestException("No file provided.");
-    if (!ALLOWED_DOC_TYPES.includes(file.mimetype)) {
-      throw new BadRequestException(
-        "File type not allowed. Accepted: PDF, JPEG, PNG, WebP.",
-      );
-    }
-    if (file.size > MAX_DOC_SIZE) {
-      throw new BadRequestException("File exceeds 10 MB limit.");
-    }
-
-    // Verify ownership
-    await this.professionalService.getApplication(user.sub, applicationId);
-
-    const ext = file.originalname.split(".").pop() ?? "bin";
+    validateApplicationFile(file);
+    const application = await this.professionalService.getApplication(
+      user.sub,
+      applicationId,
+    );
+    if (!["draft", "documents_requested"].includes(application.status))
+      throw new BadRequestException("Application is not editable.");
+    const ext =
+      {
+        "application/pdf": ".pdf",
+        "image/jpeg": ".jpg",
+        "image/png": ".png",
+        "image/webp": ".webp",
+      }[file.mimetype] ?? ".bin";
     const doc = await this.documentsService.create({
       bucket: "ioma-private",
       data: file.buffer,
@@ -135,22 +163,45 @@ export class ProfessionalController {
       extension: ext,
     });
 
-    await this.professionalService.addDocument(user.sub, applicationId, {
-      documentId: doc._id,
-      originalName: file.originalname,
-      mimeType: file.mimetype,
-    });
-
+    try {
+      await this.professionalService.addDocument(user.sub, applicationId, {
+        documentId: doc._id,
+        originalName: file.originalname.replace(/[\\/]/g, "_").slice(0, 255),
+        mimeType: file.mimetype,
+      });
+    } catch (error) {
+      await this.documentsService.remove(doc._id);
+      throw error;
+    }
     return { documentId: doc._id, originalName: file.originalname };
   }
 
   // --- Admin endpoints ---
+
+  @Get("admin/profiles")
+  @UseGuards(RolesGuard)
+  @Roles("administrator", "super_administrator")
+  listApprovedProfiles() {
+    return this.professionalService.listApprovedProfiles();
+  }
 
   @Get("admin/applications")
   @UseGuards(RolesGuard)
   @Roles("administrator", "super_administrator")
   listPendingApplications() {
     return this.professionalService.listPendingApplications();
+  }
+
+  @Get("admin/applications/:id/documents/:documentId")
+  @UseGuards(RolesGuard)
+  @Roles("administrator", "super_administrator")
+  async documentUrl(@Param("id") id: string, @Param("documentId") documentId: string) {
+    const app = await this.professionalService.getApplicationAdmin(id);
+    if (!app.documents.some((doc) => doc.documentId.toString() === documentId))
+      throw new BadRequestException("Document does not belong to this application.");
+    return {
+      url: await this.documentsService.getSignedUrl(new Types.ObjectId(documentId)),
+    };
   }
 
   @Get("admin/applications/:id")
@@ -166,9 +217,9 @@ export class ProfessionalController {
   approveApplication(
     @CurrentUser() user: JwtPayload,
     @Param("id") id: string,
-    @Body() dto: ReviewBody,
+    @Body() dto: unknown,
   ) {
-    return this.professionalService.approveApplication(user.sub, id, dto.reviewNotes);
+    return this.professionalService.approveApplication(user.sub, id, parseReview(dto));
   }
 
   @Patch("admin/applications/:id/reject")
@@ -177,12 +228,12 @@ export class ProfessionalController {
   rejectApplication(
     @CurrentUser() user: JwtPayload,
     @Param("id") id: string,
-    @Body() dto: ReviewBody,
+    @Body() dto: unknown,
   ) {
     return this.professionalService.rejectApplication(
       user.sub,
       id,
-      dto.reviewNotes ?? "Rejected",
+      parseReview(dto, true)!,
     );
   }
 
@@ -192,12 +243,12 @@ export class ProfessionalController {
   requestDocuments(
     @CurrentUser() user: JwtPayload,
     @Param("id") id: string,
-    @Body() dto: ReviewBody,
+    @Body() dto: unknown,
   ) {
     return this.professionalService.requestDocuments(
       user.sub,
       id,
-      dto.reviewNotes ?? "Additional documents required",
+      parseReview(dto, true)!,
     );
   }
 
@@ -207,8 +258,32 @@ export class ProfessionalController {
   suspendProfile(
     @CurrentUser() user: JwtPayload,
     @Param("id") id: string,
-    @Body() dto: SuspendBody,
+    @Body() dto: unknown,
   ) {
-    return this.professionalService.suspendProfile(user.sub, id, dto.reason);
+    const result = z
+      .object({ reason: z.string().trim().min(1).max(2000) })
+      .strict()
+      .safeParse(dto);
+    if (!result.success) throw new BadRequestException("Suspension reason required.");
+    return this.professionalService.suspendProfile(user.sub, id, result.data.reason);
   }
+}
+
+function publicApplication<
+  T extends {
+    reviewNotes?: unknown;
+    reviewedBy?: unknown;
+    statusHistory: { status: string; at: Date; note?: unknown }[];
+  },
+>(app: T) {
+  return {
+    ...app,
+    reviewNotes: null,
+    reviewedBy: null,
+    statusHistory: app.statusHistory.map(({ status, at }) => ({
+      status,
+      at,
+      note: null,
+    })),
+  };
 }

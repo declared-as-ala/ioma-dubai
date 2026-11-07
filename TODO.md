@@ -1,5 +1,51 @@
 # TODO.md — IOMA Paris Dubai
 
+## Complete IOMA Paris Magazine Migration & Multilingual Experience — 2026-11-06
+
+- [x] Crawled and discovered all 78 official articles across all 9 pagination pages of https://ioma-paris.com/blogs/ioma-mag.
+- [x] Extracted complete article metadata: slugs, French titles, author names, publication dates, categories, tags, high-resolution cover images, excerpts, and full HTML bodies.
+- [x] Preserved authoritative French (fr) source text for all 78 articles.
+- [x] Translated all 78 articles completely into luxury-tier English (en) and authentic Modern Standard Arabic (ar):
+  - Localized titles, excerpts, SEO titles, SEO descriptions, and category names.
+  - Translated complete article bodies while maintaining 100% of HTML tags.
+  - Rewrote legacy French /products/... links to UAE catalog /shop/... links.
+- [x] Created repeatable database seeder apps/api/src/scripts/seed-ioma-magazine.ts (pnpm run seed:ioma-magazine):
+  - Upserted all 78 articles into MongoDB contentpages collection with status published.
+  - Added reading time calculation, cover image URLs, categories, and author metadata.
+- [x] Enhanced Backend Content API (apps/api/src/modules/admin/content.controller.ts):
+  - Support for GET /api/content/magazine and GET /api/content/journal with pagination, category filtering, and keyword search.
+  - Support for GET /api/content/magazine/:slug returning full localized content.
+- [x] Built Luxury Public Magazine Experience (apps/web):
+  - Index page /[locale]/magazine: editorial hero, real-time search, category filter pills, featured article showcase, responsive 3-column card grid, and pagination.
+  - Detail page /[locale]/magazine/[slug]: sticky reading progress bar, breadcrumb navigation, author & date info, reading time badge, formatted prose typography, social share bar, and related articles grid.
+  - Multilingual SEO: Canonical URLs, hreflang alternates, Open Graph metadata, Twitter Cards, Schema.org Article & BreadcrumbList JSON-LD microdata.
+  - Backward compatibility: Redirects configured for /journal and /journal/[slug].
+  - Updated header dropdown and footer navigation links to point to /magazine.
+- [x] Enabled Admin Management (apps/admin):
+  - Registered magazine resource in ADMIN_RESOURCES with custom filter and column projections.
+  - Added 'Magazine' navigation item under Website in admin-shell.tsx.
+- [x] Verified full stack in Docker: API and Web containers rebuilt and healthy; live endpoints verified on ports 4000 and 3000.
+
+## IOMA Privé Luxury Experience Page & Lookbook Removal — 2026-11-06
+
+- [x] Researched official IOMA Privé page structure, factual information, Beautiful Longevity, Empreinte Cutanée, In.Lab live booster compounding, 7 official treatments, and Maison DESSANGE Paris address.
+- [x] Created `apps/web/src/content/ioma-prive.ts` containing verified descriptions, durations, official Paris prices in Euros (without artificial AED conversion), and FAQs.
+- [x] Built cinematic luxury `PriveExperience` component (`apps/web/src/components/prive/prive-experience.tsx`) with 7 core sections:
+  - Hero with dark luxury violet grade and headline _"Your skin is unique. Your ritual should be too."_
+  - Section 1: The Art of Personalisation & Beautiful Longevity philosophy.
+  - Section 2: Experience in Three Acts (Your Skin Signature, Your Formula by In.Lab, Your Personalised Ritual).
+  - Section 3: Treatment Collection with interactive card selector for all 7 verified rituals.
+  - Section 4: The In.Lab Experience detailing robotic live compounding and MEMS sensors.
+  - Section 5: Continue Your Ritual at Home linking to bespoke formulas (Ma Crème Jour, Ma Crème Nuit, Mon Soin Yeux).
+  - Section 6: Official Paris address at Maison DESSANGE Flagship Mondial (4, rue Marbeuf, Paris 8e) with clear geographic notice.
+  - Section 7: Frequently Asked Questions accordion and UAE partners linkback.
+- [x] Created page route `apps/web/src/app/[locale]/(public)/ioma-prive/page.tsx` with canonical links, Open Graph metadata, and Schema.org structured data (`HealthAndBeautyBusiness` & `FAQPage`).
+- [x] Added **IOMA Privé** link to the footer under _Discover_ alongside _Jean Michel Karam_ in `apps/web/src/components/layout/footer.tsx`.
+- [x] Added `iomaPrive` translation key across English, French, and Arabic (`en.json`, `fr.json`, `ar.json`).
+- [x] Added `/ioma-prive` to sitemap (`apps/web/src/app/sitemap.ts`).
+- [x] Removed Lookbook page and component (`apps/web/src/app/[locale]/(public)/lookbook/page.tsx`, `apps/web/src/components/gallery/lookbook.tsx`) with redirects configured in `next.config.ts`.
+- [x] Verified full TypeScript compilation: `pnpm --filter=@ioma/web typecheck` passed with 0 errors.
+
 Synced with `SPRINTS.md` and `PROGRESS.md`. Check items off only when actually done (code + tests + docs), not when merely started.
 
 ## Sprint 0 — Audit & Planning
@@ -237,3 +283,11 @@ Synced with `SPRINTS.md` and `PROGRESS.md`. Check items off only when actually d
 - [x] Customer account history and Before/After comparison view (`/diagnosis/history`)
 - [x] Full trilingual localization in English, French, and Arabic (RTL layout support)
 - [x] Backend unit tests and Playwright E2E test suite (`e2e/ai-skin-expert.spec.ts`)
+
+- [x] Service pages, legal drafts, cookie consent, footer redesign (2026-11-06) — browser/responsive check pending
+- [ ] Confirm with client: UAE delivery/returns/refund terms, payment provider + methods, loyalty programme for the UAE, UAE contact details, legal entity details, social accounts for Dubai; legal review of the Arabic copy
+- [ ] Footer/social/contact/legal-version management in the admin (reuse the content CMS)
+- [x] Catalogue sync core + import center + stats (2026-11-06)
+- [ ] Catalogue admin: collections, attributes, inventory adjustment history + bulk stock, translations side-by-side, B2B tab, optimistic concurrency on the product save
+- [ ] Review the 37 source variants missing locally and the 6 local variants missing from the source (docs/IOMA_PRODUCT_API_MAPPING.md §6)
+- [ ] Fix `apps/api/src/modules/admin/content.controller.ts` (duplicate imports break `tsc`) and `src/scripts/seed-ioma-magazine.ts` (`mongodb` import)

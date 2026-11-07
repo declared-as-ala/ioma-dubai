@@ -21,6 +21,28 @@ services:
       api:
         condition: service_healthy
 
+  admin:
+    build:
+      context: ../..
+      dockerfile: infrastructure/docker/admin.Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-}
+    container_name: ioma-prod-admin
+    restart: always
+    env_file:
+      - path: ../../.env
+        required: false
+      - path: ../../.env.prod
+        required: false
+    environment:
+      NODE_ENV: production
+      INTERNAL_API_URL: http://api:4000
+    ports:
+      - "${ADMIN_HOST_PORT:-3210}:3100"
+    depends_on:
+      api:
+        condition: service_healthy
+
   api:
     build:
       context: ../..
@@ -86,7 +108,7 @@ services:
       - minio-prod-data:/data
     command: server /data --console-address ":9001"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      test: ["CMD", "mc", "ready", "local"]
       interval: 10s
       timeout: 5s
       retries: 5

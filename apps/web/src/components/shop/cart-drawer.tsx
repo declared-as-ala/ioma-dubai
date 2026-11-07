@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import { ProductImage as Image } from "@/components/shop/product-image";
 import { useLocale, useTranslations } from "next-intl";
 import type { Locale } from "@ioma/config";
 import { Link } from "@/i18n/navigation";
@@ -50,7 +50,7 @@ export function CartDrawer() {
             <ul className="flex flex-col gap-6 py-4">
               {cart.items.map((item) => (
                 <li key={item.sku} className="flex gap-4">
-                  <div className="relative size-20 shrink-0 overflow-hidden rounded-md bg-white border border-border/40 flex items-center justify-center">
+                  <div className="relative size-20 shrink-0 overflow-hidden rounded-xl bg-sf-ivory flex items-center justify-center">
                     {item.product?.images?.[0] ? (
                       <Image
                         src={item.product.images[0]}
@@ -95,7 +95,7 @@ export function CartDrawer() {
             </div>
             <Button
               asChild
-              className="mt-2 w-full uppercase tracking-widest"
+              className="mt-2 h-12 w-full rounded-full uppercase tracking-widest"
               onClick={close}
             >
               <Link href="/checkout" prefetch={false} data-testid="cart-drawer-checkout">

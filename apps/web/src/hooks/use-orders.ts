@@ -17,16 +17,19 @@ export interface CheckoutInput {
   paymentMethod: "mock_success" | "mock_failure";
 }
 
-export function useCheckoutMutation() {
+export function useCheckoutMutation(professional = false) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (input: CheckoutInput) =>
-      apiFetch<Order>("/orders", {
+      apiFetch<Order>(professional ? "/orders/pro/checkout" : "/orders", {
         method: "POST",
         headers: guestHeaders(),
         body: JSON.stringify(input),
       }),
-    onSuccess: () => queryClient.setQueryData(["cart"], undefined),
+    onSuccess: () =>
+      queryClient.invalidateQueries({
+        queryKey: professional ? ["b2b", "cart"] : ["cart"],
+      }),
   });
 }
 
@@ -42,7 +45,7 @@ export function useOrderQuery(orderNumber: string, token?: string) {
 export function useOrdersQuery() {
   return useQuery({
     queryKey: ["orders", "own"],
-    queryFn: () => apiFetch<Order[]>("/orders"),
+    queryFn: () => apiFetch<Order[]>("/orders/my"),
   });
 }
 

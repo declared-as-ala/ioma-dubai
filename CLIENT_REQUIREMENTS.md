@@ -39,3 +39,30 @@ Tracks what only the client can supply, so the build is never blocked silently. 
 ## How This List Is Used
 
 Nothing above blocks building the _real_ interface and logic for its feature — every gap has a documented interim solution per `DECISIONS.md`'s provider-abstraction pattern or the CMS-placeholder rule in `CLAUDE.md`. This list blocks only the **final, client-facing go-live** for the specific features it touches, tracked again in `DEPLOYMENT.md`'s go-live checklist.
+
+## Technology page (added 2026-10-07)
+
+Built from `scratch/IOMA_Dubai_Our_Technology (2).pdf` (IEVA Group presentation, Feb 2024 + IOMA brand book). Content lives in `apps/web/src/content/technology.ts` (EN + AR).
+
+To supply / confirm with IEVA before launch:
+
+- HD photography for i-Diag, IOMA Sphere 2, IOMA In.Lab, the five-light face photos and the device timeline. The page currently uses the low-resolution images extracted from the brief (`apps/web/public/images/technology/`).
+- Time of an i-Diag diagnosis and its availability in the UAE (shown as "—" in the comparison table until confirmed).
+- The brand-book claim "most sophisticated skin-diagnosis device in the world" (omitted until confirmed).
+- The three videos ("90 seconds" overview, a diagnosis with IOMA Sphere, inside IOMA In.Lab). The videos section is omitted until real files and durations are supplied.
+- Approval of the Arabic translation of the Technology page copy (translated for this build; needs marketing/legal review), and confirmation that the "€40M R&D" figure may be shown in EUR on the UAE site.
+
+## B2B pro space v2 (added 2026-10-07)
+
+Built from `scratch/IOMA_Dubai_B2B_Professionnels_v2.pdf`. To decide / supply with IEVA (configurable or empty until then; the UI shows "to be confirmed", never invented values):
+
+- Minimum first-order amount; whether benefits are for life or need a new order every [12] months (Admin → B2B settings).
+- Trade prices and price tiers by client type, minimum orders, payment terms and delivery terms (shown as "Trade price to be confirmed" / "To be confirmed").
+- Who is eligible (boutiques, institutes, clinics, pharmacies), validation delay, and the exact UAE document list (Trade License, TRN, extra health licences).
+- Cabin products and treatment kits (names, sizes, prices); products used in each protocol.
+- Training videos (files, topics, length, language) — the eight titles from the brief are seeded without video files; cabin photos to shoot (the PDF photos are low-resolution placeholders, rights/HD to confirm).
+- Documents to publish: trade price list, order form, terms of sale, catalogue (open at validation), protocol guides and brand book (unlock with the first order).
+- Other benefits (e.g. samples, launch kit, loyalty), the IOMA Pro team contact and each customer's dedicated contact.
+- Arabic text of the B2B page and pro space was translated for this build and needs marketing/legal review.
+
+- Founder page: approved portrait of Jean Michel Karam (and rights to reuse the official banner) — to be placed at `apps/web/public/images/founder/jean-michel-karam.jpg`. Arabic translation of the page and of his quote needs marketing review; French original of the quote is shown beside it.

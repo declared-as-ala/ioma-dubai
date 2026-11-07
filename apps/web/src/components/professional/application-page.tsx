@@ -33,7 +33,7 @@ const businessTypes = [
 const emirates = ["AUH", "DXB", "SHJ", "AJM", "UAQ", "RAK", "FUJ"] as const;
 const applicationPath = "/professionals/apply";
 const linkClass =
-  "inline-flex min-h-11 items-center gap-2 underline underline-offset-4 hover:text-ioma-violet focus-visible:outline-2 focus-visible:outline-offset-4";
+  "inline-flex min-h-11 items-center gap-2 underline underline-offset-4 hover:text-sf-champagne focus-visible:outline-2 focus-visible:outline-offset-4";
 
 export default function ApplicationPage() {
   const t = useTranslations("Professionals.apply");
@@ -115,7 +115,7 @@ function ApplicationStatus({
   return (
     <section className="border p-6 md:p-8" data-testid="application-status">
       {pending && (
-        <CheckCircle aria-hidden="true" className="mb-4 size-8 text-ioma-violet" />
+        <CheckCircle aria-hidden="true" className="mb-4 size-8 text-sf-champagne" />
       )}
       <h2 className="font-display text-2xl">
         {pending ? t("success.title") : t(`statuses.${app.status}`)}
@@ -300,7 +300,7 @@ function ApplicationForm({
           id={name}
           {...form.register(name)}
           defaultValue={form.getValues(name) ?? ""}
-          className="mt-2 min-h-11 w-full rounded-none border bg-background px-3 text-sm focus-visible:outline-2 focus-visible:outline-ioma-violet"
+          className="mt-2 min-h-11 w-full rounded-none border bg-background px-3 text-sm focus-visible:outline-2 focus-visible:outline-sf-champagne"
           aria-invalid={!!form.formState.errors[name]}
           aria-describedby={form.formState.errors[name] ? `${name}-error` : undefined}
         >
@@ -323,7 +323,7 @@ function ApplicationForm({
       aria-busy={busy}
     >
       {initial?.status === "documents_requested" && (
-        <div role="status" className="border-s-2 border-ioma-violet p-4">
+        <div role="status" className="border-s-2 border-sf-champagne p-4">
           <h2>{t("statuses.documents_requested")}</h2>
           <p className="mt-2 whitespace-pre-wrap">{initial.applicantMessage}</p>
         </div>
@@ -407,7 +407,7 @@ function ApplicationForm({
           {t("terms")}
         </label>
         <Link
-          href="/terms-and-conditions"
+          href="/terms"
           target="_blank"
           rel="noopener noreferrer"
           className={linkClass}

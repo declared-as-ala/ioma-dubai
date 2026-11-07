@@ -30,6 +30,7 @@ function toQueryString(filters: ProductFilters): string {
 export function useProductsQuery(filters: ProductFilters) {
   return useQuery({
     queryKey: ["products", filters],
+    refetchInterval: 60000,
     queryFn: () => apiFetch<ProductListItem[]>(`/products${toQueryString(filters)}`),
   });
 }
@@ -37,6 +38,7 @@ export function useProductsQuery(filters: ProductFilters) {
 export function useProductQuery(slug: string) {
   return useQuery({
     queryKey: ["product", slug],
+    refetchInterval: 60000,
     queryFn: () => apiFetch<ProductDetail>(`/products/${slug}`),
     enabled: Boolean(slug),
   });

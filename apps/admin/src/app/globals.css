@@ -1,0 +1,271 @@
+@import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
+@import "../components/admin/polaris/polaris.css";
+
+/* The operational admin surface follows Carbon-style density and flat panels. */
+.admin-shell [data-slot="card"] { border-radius: 12px; box-shadow: var(--pl-shadow-card); }
+/* Desktop density follows the Polaris tokens (32px); touch devices keep the 44px target rule. */
+@media (pointer: coarse) { .admin-shell button, .admin-shell input:not([type="checkbox"]):not([type="radio"]), .admin-shell select, .admin-shell summary { min-height: 44px; } }
+.admin-shell input, .admin-shell select, .admin-shell textarea { min-width: 0; max-width: 100%; }
+.admin-shell table th { white-space: nowrap; }
+.admin-shell table { border-collapse: collapse; }
+.admin-shell svg { max-width: 100%; }
+
+/* shadcn's generated components use `dark:` classes throughout; we never
+   apply a `.dark` class anywhere (no dark mode in scope — see SPRINTS.md
+   Sprint 2 acceptance criteria), but Tailwind v4 requires the variant to be
+   registered or it errors on every `dark:` class it finds while scanning. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+ * IOMA design tokens — transcribed from IOMA_CHARTE_GRAPHIQUE_2026_FR.pdf.
+ * See DESIGN_SYSTEM.md for the full source table and rationale for every
+ * value below. Do not add a color here without a corresponding entry there.
+ *
+ * Tailwind v4 CSS-first theming: anything declared inside @theme under a
+ * recognized namespace (--color-*, --font-*, --radius-*, --breakpoint-*,
+ * --shadow-*) automatically generates matching utility classes (bg-primary,
+ * font-display, rounded-md, sm:, shadow-md, ...). Values that aren't a
+ * Tailwind utility namespace (motion timing, z-index, letter-spacing) live
+ * in a plain :root block below instead and are consumed via arbitrary
+ * value syntax, e.g. duration-[var(--motion-base)].
+ */
+@theme {
+  /* Charter brand colors */
+  --color-ioma-black: #000000;
+  --color-ioma-white: #ffffff;
+  --color-ioma-violet: #aa9feb;
+  --color-ioma-silver: #c7c7c7;
+
+  /* Neutral scale (charter-silent, derived — see DESIGN_SYSTEM.md) */
+  --color-ioma-grey-50: #fafafa;
+  --color-ioma-grey-100: #f5f5f4;
+  --color-ioma-grey-200: #e8e7e5;
+  --color-ioma-grey-400: #a8a6a2;
+  --color-ioma-grey-600: #6b6966;
+  --color-ioma-grey-900: #1a1a1a;
+
+  /* Product range colors — scoped via [data-range], never global accents */
+  --color-range-hydra: #00639a;
+  --color-range-energize: #e56953;
+  --color-range-renew: #782285;
+  --color-range-calm: #b52655;
+  --color-range-purete: #b89e16;
+  --color-range-matte: #00677f;
+  --color-range-illumine: #483a8f;
+
+  /* shadcn semantic slots, mapped to the palette above */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* Institutional type (Gotham substitute) + claim/editorial type (Futura
+     PT substitute) per DESIGN_SYSTEM.md. Swapped for ar below. */
+  --font-sans: var(--font-manrope), system-ui, sans-serif;
+  --font-display: var(--font-jost), var(--font-manrope), sans-serif;
+
+  /* Radii — deliberately minimal, never exceeds 4px anywhere in the system */
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 4px;
+  --radius-xl: 4px;
+
+  /* Shadows — minimal, cool-toned; used only for floating surfaces */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.06);
+
+  /* Breakpoints match the five required test resolutions exactly */
+  --breakpoint-sm: 390px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1440px;
+
+  /* Letter tracking per charter (titles/subtitles +50, claim +80) */
+  --tracking-heading: 0.05em;
+  --tracking-claim: 0.08em;
+
+  /* z-index scale */
+  --z-index-base: 0;
+  --z-index-sticky-header: 100;
+  --z-index-dropdown: 110;
+  --z-index-drawer: 200;
+  --z-index-modal: 300;
+  --z-index-toast: 400;
+  --z-index-tooltip: 500;
+}
+
+@layer base {
+  :root {
+    --background: var(--color-ioma-white);
+    --foreground: var(--color-ioma-black);
+    --card: var(--color-ioma-white);
+    --card-foreground: var(--color-ioma-black);
+    --popover: var(--color-ioma-white);
+    --popover-foreground: var(--color-ioma-black);
+    --primary: var(--color-ioma-black);
+    --primary-foreground: var(--color-ioma-white);
+    --secondary: var(--color-ioma-grey-100);
+    --secondary-foreground: var(--color-ioma-black);
+    --muted: var(--color-ioma-grey-100);
+    --muted-foreground: var(--color-ioma-grey-600);
+    --accent: #f4f2fd; /* faint violet tint — hover/emphasis, not a CTA color */
+    --accent-foreground: var(--color-ioma-black);
+    --destructive: #b3261e;
+    --destructive-foreground: var(--color-ioma-white);
+    --border: var(--color-ioma-grey-200);
+    --input: var(--color-ioma-grey-200);
+    --ring: var(--color-ioma-violet);
+
+    /* Motion Tokens (Sprint 4.6) */
+    --motion-instant: 120ms;
+    --motion-control: 180ms;
+    --motion-menu: 240ms;
+    --motion-overlay: 320ms;
+    --motion-page: 350ms;
+    --motion-editorial: 600ms;
+    --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+    --ease-entrance: cubic-bezier(0, 0, 0.2, 1);
+    --ease-exit: cubic-bezier(0.4, 0, 1, 1);
+    --ease-editorial: cubic-bezier(0.16, 1, 0.3, 1);
+
+    /* z-index scale */
+    --z-base: 0;
+    --z-sticky-header: 100;
+    --z-dropdown: 110;
+    --z-drawer: 120;
+    --z-modal: 130;
+    --z-toast: 140;
+    --z-tooltip: 150;
+  }
+
+  html[lang="ar"] {
+    --font-sans: var(--font-cairo), system-ui, sans-serif;
+    --font-display: var(--font-cairo), sans-serif;
+  }
+
+  /* No dark theme is in scope — @custom-variant dark above exists only so
+     Tailwind doesn't error on shadcn's generated dark: classes; nothing
+     ever applies a .dark class. */
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+
+  html {
+    @apply font-sans;
+    scroll-behavior: smooth;
+  }
+}
+
+@media (max-width: 1279px) {
+  :where(button, [role="button"], [role="radio"], [role="tab"]) {
+    min-width: 44px;
+    min-height: 44px;
+    touch-action: manipulation;
+  }
+
+  :where(input:not([type="hidden"]), select, [role="option"]) {
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 767px) {
+  body:has([data-mobile-bottom-nav]) {
+    padding-bottom: calc(3.5rem + env(safe-area-inset-bottom));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Leaflet Custom Marker & Popup Overrides */
+.leaflet-marker-icon.custom-ioma-pin-container {
+  background: transparent !important;
+  border: none !important;
+}
+
+.leaflet-popup-content-wrapper {
+  border-radius: 8px !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
+  padding: 4px !important;
+}
+
+.leaflet-popup-tip {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+}
+
+
+/* Authenticated customer and partner surfaces share the IOMA editorial rhythm. */
+.account-experience { animation: account-enter 200ms ease-out; }
+.account-experience h1 { letter-spacing: -.025em; }
+.account-experience button, .account-experience [role="combobox"] { min-height: 44px; }
+.account-experience [data-slot="card"] { border-radius: 0; box-shadow: none; }
+@keyframes account-enter { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+@keyframes loading-bar {
+  0% { transform: translateX(-100%); }
+  50% { transform: translateX(100%); }
+  100% { transform: translateX(200%); }
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(200%); }
+}
+
+/* ---------- Modern loaders ---------- */
+@keyframes ioma-slide {
+  0% { transform: translateX(-120%); }
+  100% { transform: translateX(320%); }
+}
+@keyframes ioma-skeleton {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+@keyframes ioma-fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes ioma-spin {
+  to { transform: rotate(360deg); }
+}
+.ioma-loader { animation: ioma-fade-in 240ms ease both; animation-delay: 120ms; }
+.ioma-bar { position: relative; overflow: hidden; height: 2px; width: 120px; border-radius: 2px; background: rgba(0, 0, 0, 0.1); }
+.ioma-bar::after { content: ""; position: absolute; inset-block: 0; inset-inline-start: 0; width: 36%; border-radius: 2px; background: currentColor; animation: ioma-slide 1.3s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
+.ioma-ring { width: 18px; height: 18px; border-radius: 50%; border: 2px solid rgba(0, 0, 0, 0.12); border-top-color: currentColor; animation: ioma-spin 0.8s linear infinite; }
+.ioma-skel { border-radius: 8px; background: linear-gradient(90deg, #ececec 25%, #f6f6f6 37%, #ececec 63%); background-size: 400% 100%; animation: ioma-skeleton 1.6s ease infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .ioma-loader, .ioma-bar::after, .ioma-ring, .ioma-skel { animation: none; }
+  .ioma-bar::after { width: 100%; opacity: 0.5; }
+}

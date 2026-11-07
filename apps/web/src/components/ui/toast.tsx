@@ -45,7 +45,7 @@ function ToastCard({ item }: { item: ToastItem }) {
   const icons = {
     success: <CheckCircle2 className="size-4 text-emerald-600 shrink-0" />,
     error: <AlertCircle className="size-4 text-destructive shrink-0" />,
-    info: <Info className="size-4 text-ioma-violet shrink-0" />,
+    info: <Info className="size-4 text-sf-champagne shrink-0" />,
   };
 
   const fadeTranslate = getMotionVariant(VARIANTS.fadeTranslateY, !!shouldReduceMotion);
@@ -68,7 +68,7 @@ function ToastCard({ item }: { item: ToastItem }) {
       <button
         type="button"
         onClick={() => removeToast(item.id)}
-        className="p-1 text-muted-foreground hover:text-foreground transition-colors rounded-sm focus-visible:outline-2 focus-visible:outline-ioma-violet"
+        className="p-1 text-muted-foreground hover:text-foreground transition-colors rounded-sm focus-visible:outline-2 focus-visible:outline-sf-champagne"
         aria-label="Close notification"
       >
         <X className="size-3.5" />

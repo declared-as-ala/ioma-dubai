@@ -8,6 +8,10 @@ export const contactMessageSchema = z.object({
   subject: z.string().min(1).max(150),
   message: z.string().min(10).max(2000),
   locale: z.enum(["en", "fr", "ar"]),
+  category: z.enum(["order", "return", "product", "account", "pro", "other"]).optional(),
+  orderReference: z.string().trim().max(40).optional(),
+  // Honeypot: real visitors never fill this hidden field; bots usually do.
+  website: z.string().max(200).optional(),
 });
 
 export type ContactMessageInput = z.infer<typeof contactMessageSchema>;

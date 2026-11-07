@@ -143,3 +143,23 @@ Every interactive component defines, at minimum: `default`, `hover`, `focus-visi
 ## What This System Explicitly Avoids
 
 Per the brief and the charter's restrained tone: glassmorphism, neon, gradients as decoration (gradients only appear as authentic photographic/product-lighting backdrops, matching the charter's key-visual examples — never as flat UI-chrome gradients), heavy drop shadows, dense card grids for editorial content, decorative stock icon sets beyond the charter's own pictogram family, and any second animation library layered on top of Motion for the same interaction.
+
+## Account experience
+
+Use editorial headings, light typography, thin rules, white space and restrained violet. Shared grouped navigation is sticky on desktop and collapses behind a labelled section button below 1024px. Keep touch controls at least 44px, use logical spacing and mirror directional arrows in Arabic. Two-column forms begin at md (768px), because this project's sm is 390px. Status timelines use text plus symbols, never percentages or color alone. Personal and professional modes link between /account and /portal without another login. Entrance transitions last 200ms and inherit reduced-motion rules. Product previews use catalogue images and real prices; empty/error/loading states must remain distinct.
+
+## Admin dashboard — September 2026
+
+Use flat neutral panels, blue actions, clear section borders, readable operational typography and restrained motion. KPI cards include period/snapshot context and link to relevant management records. Revenue uses an SVG line/area chart with previous-period comparison, tooltips and a tabular alternative; categorical metrics use labelled bars.
+
+Desktop navigation is sticky at 1280px and wider. Smaller widths use a modal navigation drawer; Needs Attention moves above the main charts. Tables scroll inside their own container. Charts measure their parent width. Forms use 44px controls and localized EN/FR/AR inputs, with logical spacing and RTL drawer placement. Verify 390/768/1024/1280/1440px in the running build.
+
+Arabic admin explicitly prioritizes Cairo before any Latin fallback font. Directional navigation arrows mirror in RTL; monetary details are formatted from integer fils into localized AED values, and operational timestamps use Asia/Dubai.
+
+## Admin editable detail pattern
+
+A compact identity header owns View/Edit/Save/Cancel actions. Nine keyboard-accessible tabs share parent draft state; changing tabs does not reset values. Read-only sections become labelled fields in edit mode. A sticky bottom save bar remains available while editing. Errors appear next to fields and as tab counts. Language controls include completeness and Arabic RTL. Use a large primary media preview, thumbnail strip and descriptive media metadata; keep database identifiers inside Technical Information.
+
+## Admin: catalogue import center (2026-11-06)
+
+Functional Polaris-style admin (separate from the storefront system). Import center = connection card, catalogue counts, start-import card, preview table with status badges (New = success, Update = warning, Conflict = critical, Unchanged = neutral), a right-hand sheet for per-field differences with "Keep Dubai / Use source" selects and an explicit approval checkbox, history table, ownership matrix. Rules: destructive or bulk actions (apply, rollback) always go through a confirmation sheet that restates what will and will not change; errors are announced with `role="alert"`; no decorative motion.

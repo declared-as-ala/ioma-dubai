@@ -1,6 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import type { Client } from "minio";
+import { Client } from "minio";
 import { randomUUID } from "crypto";
 import type { EnvConfig } from "../../config/env.validation";
 import { MINIO_CLIENT } from "./storage.constants";
@@ -12,6 +12,7 @@ export class StorageService {
   private readonly publicBucket: string;
   private readonly privateBucket: string;
   private readonly signedUrlTtlSeconds: number;
+  private readonly signingClient: Client;
 
   constructor(
     @Inject(MINIO_CLIENT) private readonly client: Client,
@@ -22,6 +23,18 @@ export class StorageService {
     this.signedUrlTtlSeconds = config.get("MINIO_SIGNED_URL_TTL_SECONDS", {
       infer: true,
     });
+    const endpoint = config.get("MINIO_SIGNED_URL_ENDPOINT", { infer: true });
+    const url = endpoint ? new URL(endpoint) : null;
+    this.signingClient = url
+      ? new Client({
+          endPoint: url.hostname,
+          port: Number(url.port || (url.protocol === "https:" ? 443 : 80)),
+          useSSL: url.protocol === "https:",
+          accessKey: config.get("MINIO_ACCESS_KEY", { infer: true }),
+          secretKey: config.get("MINIO_SECRET_KEY", { infer: true }),
+          region: "us-east-1",
+        })
+      : this.client;
   }
 
   private bucketName(bucket: StorageBucket): string {
@@ -69,7 +82,7 @@ export class StorageService {
   }
 
   async getSignedUrl(bucket: StorageBucket, objectKey: string): Promise<string> {
-    return this.client.presignedGetObject(
+    return this.signingClient.presignedGetObject(
       this.bucketName(bucket),
       objectKey,
       this.signedUrlTtlSeconds,

@@ -94,8 +94,10 @@ export class PartnersService {
       address: doc.address,
       coordinates: doc.coordinates,
       phone: doc.phone,
-      whatsapp: doc.whatsapp,
-      email: doc.email,
+      whatsapp: doc.whatsapp ?? null,
+      email: doc.email ?? null,
+      website: doc.website ?? null,
+      openingHours: doc.openingHours ?? null,
       diagnosisAvailable: doc.diagnosisAvailable,
       services: doc.serviceIds.map((s) => ({
         id: s._id.toString(),
@@ -104,7 +106,7 @@ export class PartnersService {
         durationMinutes: s.durationMinutes,
         category: s.category,
       })),
-      mediaIds: doc.mediaIds,
+      mediaIds: doc.mediaIds ?? [],
     };
   }
 
@@ -161,7 +163,15 @@ export class PartnersService {
       address: doc.address,
       coordinates: doc.coordinates,
       phone: doc.phone,
+      whatsapp: doc.whatsapp ?? null,
+      email: doc.email ?? null,
+      website: doc.website ?? null,
       diagnosisAvailable: doc.diagnosisAvailable,
+      image:
+        Array.isArray(doc.mediaIds) && doc.mediaIds.length
+          ? String(doc.mediaIds[0])
+          : null,
+      mediaIds: Array.isArray(doc.mediaIds) ? doc.mediaIds : [],
       services,
       distanceMeters: doc.distanceMeters ?? null,
     };

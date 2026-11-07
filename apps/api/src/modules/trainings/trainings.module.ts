@@ -1,3 +1,4 @@
+import { DocumentsModule } from "../documents/documents.module";
 import { Module } from "@nestjs/common";
 import { MongooseModule } from "@nestjs/mongoose";
 import { Training, TrainingSchema } from "./schemas/training.schema";
@@ -18,6 +19,7 @@ import { TrainingsController } from "./trainings.controller";
 
 @Module({
   imports: [
+    DocumentsModule,
     MongooseModule.forFeature([
       { name: Training.name, schema: TrainingSchema },
       { name: TrainingSession.name, schema: TrainingSessionSchema },

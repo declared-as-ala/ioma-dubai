@@ -116,7 +116,7 @@ export function RouteProgressBar() {
           aria-label="Loading route"
         >
           <motion.div
-            className="h-full bg-ioma-violet shadow-[0_0_8px_rgba(170,159,235,0.6)]"
+            className="h-full bg-sf-champagne shadow-[0_0_8px_rgba(170,159,235,0.6)]"
             style={{ width: `${progress}%` }}
             transition={{ ease: [0, 0, 0.2, 1], duration: 0.2 }}
           />

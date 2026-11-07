@@ -70,8 +70,8 @@ export class AvailabilityService {
     });
 
     // Check existing bookings for this date
-    const dateStart = new Date(`${dateStr}T00:00:00.000Z`);
-    const dateEnd = new Date(`${dateStr}T23:59:59.999Z`);
+    const dateStart = new Date(`${dateStr}T00:00:00.000+04:00`);
+    const dateEnd = new Date(`${dateStr}T23:59:59.999+04:00`);
 
     const existingBookings = await this.appointmentModel
       .find({
@@ -85,8 +85,8 @@ export class AvailabilityService {
 
     // Mark slots as available or not based on existing bookings
     return nonBreakSlots.map((slot) => {
-      const slotStart = new Date(`${dateStr}T${slot.startsAt}:00.000Z`);
-      const slotEnd = new Date(`${dateStr}T${slot.endsAt}:00.000Z`);
+      const slotStart = new Date(`${dateStr}T${slot.startsAt}:00.000+04:00`);
+      const slotEnd = new Date(`${dateStr}T${slot.endsAt}:00.000+04:00`);
 
       const bookedCount = existingBookings.filter((b) => {
         const bStart = new Date(b.startsAt);

@@ -1,16 +1,6 @@
 @import "tailwindcss";
 @import "leaflet/dist/leaflet.css";
 
-/* The operational admin surface follows Carbon-style density and flat panels. */
-.admin-shell { font-family: var(--font-manrope), var(--font-cairo), sans-serif; }
-[dir="rtl"] .admin-shell { font-family: var(--font-cairo), sans-serif; }
-.admin-shell [data-slot="card"], .admin-shell [data-slot="button"] { border-radius: 0; box-shadow: none; }
-.admin-shell button, .admin-shell input, .admin-shell select, .admin-shell summary { min-height: 44px; }
-.admin-shell input, .admin-shell select, .admin-shell textarea { min-width: 0; max-width: 100%; }
-.admin-shell table th { white-space: nowrap; }
-.admin-shell table { border-collapse: collapse; }
-.admin-shell svg { max-width: 100%; }
-
 /* shadcn's generated components use `dark:` classes throughout; we never
    apply a `.dark` class anywhere (no dark mode in scope — see SPRINTS.md
    Sprint 2 acceptance criteria), but Tailwind v4 requires the variant to be
@@ -44,6 +34,15 @@
   --color-ioma-grey-400: #a8a6a2;
   --color-ioma-grey-600: #6b6966;
   --color-ioma-grey-900: #1a1a1a;
+
+  /* Storefront palette — pearl, ivory, platinum, silver, champagne, charcoal (public site only) */
+  --color-sf-pearl: #ffffff;
+  --color-sf-ivory: #f6f6f6;
+  --color-sf-platinum: #e4e5e8;
+  --color-sf-silver: #b9bdc5;
+  --color-sf-champagne: #bfa273;
+  --color-sf-charcoal: #1a1a1d;
+  --color-sf-mauve: #6e5e93;
 
   /* Product range colors — scoped via [data-range], never global accents */
   --color-range-hydra: #00639a;
@@ -113,25 +112,25 @@
 
 @layer base {
   :root {
-    --background: var(--color-ioma-white);
+    --background: var(--color-sf-pearl);
     --foreground: var(--color-ioma-black);
-    --card: var(--color-ioma-white);
+    --card: var(--color-sf-pearl);
     --card-foreground: var(--color-ioma-black);
-    --popover: var(--color-ioma-white);
+    --popover: var(--color-sf-pearl);
     --popover-foreground: var(--color-ioma-black);
-    --primary: var(--color-ioma-black);
+    --primary: var(--color-sf-charcoal);
     --primary-foreground: var(--color-ioma-white);
-    --secondary: var(--color-ioma-grey-100);
+    --secondary: var(--color-sf-ivory);
     --secondary-foreground: var(--color-ioma-black);
-    --muted: var(--color-ioma-grey-100);
+    --muted: var(--color-sf-ivory);
     --muted-foreground: var(--color-ioma-grey-600);
-    --accent: #f4f2fd; /* faint violet tint — hover/emphasis, not a CTA color */
+    --accent: #f6f6f6; /* ivory tint — hover/emphasis, not a CTA color */
     --accent-foreground: var(--color-ioma-black);
     --destructive: #b3261e;
     --destructive-foreground: var(--color-ioma-white);
-    --border: var(--color-ioma-grey-200);
-    --input: var(--color-ioma-grey-200);
-    --ring: var(--color-ioma-violet);
+    --border: #e8e8e8;
+    --input: #e8e8e8;
+    --ring: var(--color-sf-champagne);
 
     /* Motion Tokens (Sprint 4.6) */
     --motion-instant: 120ms;
@@ -144,6 +143,8 @@
     --ease-entrance: cubic-bezier(0, 0, 0.2, 1);
     --ease-exit: cubic-bezier(0.4, 0, 1, 1);
     --ease-editorial: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
+    --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
 
     /* z-index scale */
     --z-base: 0;
@@ -175,6 +176,18 @@
   html {
     @apply font-sans;
     scroll-behavior: smooth;
+    /* Fixed storefront header: anchors and focus never land underneath it. */
+    scroll-padding-top: 9.5rem;
+  }
+
+  ::selection {
+    background: var(--color-sf-champagne);
+    color: var(--color-sf-charcoal);
+  }
+
+  :where(a, button, [role="button"], input, select, textarea, summary):focus-visible {
+    outline: 2px solid var(--color-sf-champagne);
+    outline-offset: 3px;
   }
 }
 
@@ -243,3 +256,264 @@
   0% { transform: translateX(-100%); }
   100% { transform: translateX(200%); }
 }
+
+/* ---------- Modern loaders ---------- */
+@keyframes ioma-slide {
+  0% { transform: translateX(-120%); }
+  100% { transform: translateX(320%); }
+}
+@keyframes ioma-skeleton {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+@keyframes ioma-fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes ioma-spin {
+  to { transform: rotate(360deg); }
+}
+.ioma-loader { animation: ioma-fade-in 240ms ease both; animation-delay: 120ms; }
+.ioma-bar { position: relative; overflow: hidden; height: 2px; width: 120px; border-radius: 2px; background: rgba(0, 0, 0, 0.1); }
+.ioma-bar::after { content: ""; position: absolute; inset-block: 0; inset-inline-start: 0; width: 36%; border-radius: 2px; background: currentColor; animation: ioma-slide 1.3s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
+.ioma-ring { width: 18px; height: 18px; border-radius: 50%; border: 2px solid rgba(0, 0, 0, 0.12); border-top-color: currentColor; animation: ioma-spin 0.8s linear infinite; }
+.ioma-skel { border-radius: 8px; background: linear-gradient(90deg, #ececec 25%, #f6f6f6 37%, #ececec 63%); background-size: 400% 100%; animation: ioma-skeleton 1.6s ease infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .ioma-loader, .ioma-bar::after, .ioma-ring, .ioma-skel { animation: none; }
+  .ioma-bar::after { width: 100%; opacity: 0.5; }
+}
+
+/* ---------- Partner locator map: refined controls and popups (natural map colours) ---------- */
+.ioma-map .leaflet-container { font-family: inherit; background: #f4f4f4; }
+.ioma-map .leaflet-popup-content-wrapper { border-radius: 12px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.14); }
+.ioma-map .leaflet-popup-tip { box-shadow: none; }
+.ioma-map .leaflet-control-zoom { border: 0; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12); border-radius: 999px; overflow: hidden; }
+.ioma-map .leaflet-control-zoom a { width: 36px; height: 36px; line-height: 36px; color: #000; }
+.ioma-map .leaflet-control-attribution { font-size: 10px; background: rgba(255, 255, 255, 0.8); }
+
+/* ---------- Technology page: scan line over the hero photo ---------- */
+@keyframes ioma-scan { from { top: 10%; } to { top: 88%; } }
+.ioma-scanline { top: 10%; animation: ioma-scan 4.5s ease-in-out infinite alternate; }
+@media (prefers-reduced-motion: reduce) { .ioma-scanline { animation: none; top: 50%; opacity: 0.6; } }
+
+/* ---------- Route content reveal (fail-safe: ends visible even without JavaScript) ---------- */
+@keyframes ioma-page-enter { from { opacity: 0; } to { opacity: 1; } }
+.ioma-page-enter { animation: ioma-page-enter 260ms var(--ease-out-strong) backwards; }
+@media (prefers-reduced-motion: reduce) { .ioma-page-enter { animation: none; } }
+
+/* ---------- Technology page: deep violet-ink surfaces with a soft glow and dot texture ---------- */
+.tech-aurora {
+  background-image:
+    radial-gradient(60% 55% at 88% 12%, rgba(170, 159, 235, 0.26), transparent 62%),
+    radial-gradient(45% 50% at 4% 96%, rgba(124, 92, 224, 0.18), transparent 62%),
+    radial-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1.2px);
+  background-size: auto, auto, 26px 26px;
+}
+.tech-aurora--center {
+  background-image:
+    radial-gradient(50% 70% at 50% 110%, rgba(170, 159, 235, 0.3), transparent 65%),
+    radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1.2px);
+  background-size: auto, 26px 26px;
+}
+.tech-sphere-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(55% 40% at 80% 0%, rgba(170, 159, 235, 0.16), transparent 65%);
+}
+.tech-sphere-bg > * { position: relative; }
+
+/* ---------- Home hero reel: masked line rise (ends visible even without JavaScript) ---------- */
+@keyframes hero-rise { from { opacity: 0; transform: translateY(1.1em); } to { opacity: 1; transform: none; } }
+.hero-rise { animation: hero-rise 800ms cubic-bezier(0.16, 1, 0.3, 1) both; }
+.hero-line { display: block; overflow: hidden; padding-bottom: 0.12em; margin-bottom: -0.12em; }
+@media (prefers-reduced-motion: reduce) { .hero-rise { animation: none; } }
+
+/* Homepage lockup uses the official logo and separate Dubai emblem. */
+.cinematic-header > div:first-child > div { min-height: 44px; }
+.cinematic-header > div:first-child a, .cinematic-header > div:first-child button { min-height: 44px; align-items: center; }
+.cinematic-header .cinematic-logo-row { height: 80px; }
+.cinematic-brand { display: flex; align-items: center; gap: 20px; }
+.cinematic-burj { width: auto; height: 48px; object-fit: contain; }
+.cinematic-wordmark { width: 96px; height: auto; object-fit: contain; }
+.cinematic-logo-row > div > button, .cinematic-logo-row > div > a { min-width: 44px; min-height: 44px; }
+.cinematic-header .cinematic-book { color: white; background: transparent; height: 44px; font-size: 11px; padding-inline: 12px; }
+.cinematic-header .cinematic-book:hover { background: #ffffff14; }
+@media (max-width: 767px) {
+  .cinematic-header > div:first-child > div { font-size: 8px; letter-spacing: .06em; }
+  .cinematic-header .cinematic-logo-row { padding-inline: 8px; }
+  .cinematic-header .cinematic-logo-row > div { gap: 0; }
+}
+@media (min-width: 1280px) {
+  .cinematic-header .cinematic-logo-row { height: 104px; }
+  .cinematic-brand { gap: 56px; }
+  .cinematic-burj { height: 74px; }
+  .cinematic-wordmark { width: 148px; }
+}
+
+/* =====================================================================================
+   Cinematic technology page (/technology)
+   Static layout by default (works without JavaScript, on touch screens and with reduced motion).
+   The pinned, scroll-driven layout only exists on md+ screens that allow motion AND once the page
+   script has flagged `html.tx-js`; a failsafe removes the flag if the script never starts.
+   ===================================================================================== */
+.tx {
+  --tx-pearl: #ffffff;
+  --tx-ivory: #f6f6f6;
+  --tx-platinum: #e4e5e8;
+  --tx-silver: #b9bdc5;
+  --tx-champagne: #bfa273;
+  --tx-ink: #1a1a1d;
+  --tx-charcoal: #15151a;
+  --tx-header: 120px; /* height of the fixed storefront header (see Header spacer) */
+  color: var(--tx-ink);
+}
+@media (min-width: 1280px) { .tx { --tx-header: 148px; } }
+
+/* Initial hidden states: only before GSAP has taken over (then its inline styles rule). */
+@media (prefers-reduced-motion: no-preference) {
+  html.tx-js:not(.tx-ready) .tx [data-tx="word"] { visibility: hidden; }
+  html.tx-js:not(.tx-ready) .tx [data-tx="fade"] { opacity: 0; }
+  html.tx-js:not(.tx-ready) .tx [data-tx="reveal"] { clip-path: inset(100% 0 0 0); }
+}
+
+.tx-cue-line { animation: tx-cue 2.2s cubic-bezier(0.77, 0, 0.175, 1) infinite; }
+@keyframes tx-cue { 0% { transform: translateY(-100%); } 60%, 100% { transform: translateY(220%); } }
+@media (prefers-reduced-motion: reduce) { .tx-cue-line { animation: none; } }
+
+/* Chapter 02 — observe / measure / personalize */
+.tx-stack { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; }
+.tx-stack > figure { position: relative; aspect-ratio: 1; margin: 0; }
+.tx-overlay { display: none; }
+@media (min-width: 768px) { .tx-stack { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+  html.tx-js .tx-observe .tx-pinwrap { height: calc(100svh - var(--tx-header)); min-height: 560px; max-height: 940px; }
+  html.tx-js .tx-observe .tx-stack { display: block; position: relative; aspect-ratio: 5 / 4; max-height: calc(100svh - var(--tx-header) - 8rem); margin-inline: auto; }
+  html.tx-js .tx-observe .tx-stack > figure { position: absolute; inset: 0; aspect-ratio: auto; }
+  html.tx-js .tx-observe .tx-overlay { display: block; }
+  html.tx-js .tx-observe .tx-stages { position: relative; min-height: 15rem; }
+  html.tx-js .tx-observe .tx-stages > li { position: absolute; inset-inline: 0; top: 0; }
+  html.tx-js:not(.tx-ready) .tx-observe .tx-stages > li:not(:first-child),
+  html.tx-js:not(.tx-ready) .tx-observe .tx-stack > figure:not(:first-child) { opacity: 0; }
+}
+
+/* Chapter 03 — the device */
+.tx-veil { display: none; }
+@media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+  html.tx-js .tx-device .tx-pinwrap { position: relative; height: calc(100svh - var(--tx-header)); min-height: 600px; max-height: 960px; overflow: hidden; }
+  html.tx-js .tx-device .tx-layer { position: absolute; inset: 0; }
+  html.tx-js .tx-device .tx-devicebox { position: absolute; inset: 0; margin: 0; display: grid; place-items: center; pointer-events: none; }
+  html.tx-js .tx-device .tx-device-img { height: min(66svh, calc(100svh - var(--tx-header) - 9rem)); width: auto; max-width: none; }
+  html.tx-js .tx-device .tx-veil { display: block; position: absolute; inset: 0; z-index: 2; background: var(--tx-pearl); pointer-events: none; }
+  html.tx-js .tx-device .tx-callout { position: absolute; z-index: 3; max-width: 17rem; }
+  html.tx-js .tx-device .tx-callout-1 { inset-inline-start: 5%; top: 60%; }
+  html.tx-js .tx-device .tx-callout-2 { inset-inline-end: 5%; top: 24%; }
+  html.tx-js .tx-device .tx-callout-3 { inset-inline-end: 8%; top: 58%; }
+  html.tx-js .tx-device .tx-headblock { position: absolute; z-index: 3; inset-inline-start: 5%; top: 7%; max-width: 24rem; }
+  html.tx-js .tx-device .tx-statsrow { position: absolute; z-index: 3; inset-inline: 5%; bottom: 5%; }
+  html.tx-js:not(.tx-ready) .tx-device .tx-callout,
+  html.tx-js:not(.tx-ready) .tx-device .tx-statsrow { opacity: 0; }
+}
+
+/* Chapter 04 — dosing vessel */
+.tx-drop { transform-box: fill-box; transform-origin: 50% 50%; }
+
+/* ---------- Homepage story: stacked by default, one pinned stage when motion is allowed (desktop) ---------- */
+.home-story__copies { display: grid; gap: 3.5rem; }
+.home-story__imgs { display: grid; gap: 1.5rem; }
+.home-story--pinned { height: 100svh; }
+.home-story--pinned .home-story__stage { height: 100%; padding-top: 7rem; padding-bottom: 2.5rem; }
+.home-story--pinned .home-story__copies,
+.home-story--pinned .home-story__imgs { display: block; position: relative; }
+.home-story--pinned .home-story__copies { min-height: 20rem; }
+.home-story--pinned .home-story__scene { position: absolute; inset-inline: 0; top: 0; }
+.home-story--pinned .home-story__img { position: absolute; inset: 0; aspect-ratio: auto; }
+.home-story--pinned .home-story__imgs { height: min(68svh, 44rem); }
+
+/* Hero caption entrance: pure CSS so it plays on load without waiting for hydration. */
+@keyframes hero-intro { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: none; } }
+.hero-intro { animation: hero-intro 1.2s var(--ease-out-strong) 0.35s backwards; }
+@media (prefers-reduced-motion: reduce) { .hero-intro { animation: none; } }
+
+/* Checkout step panel: each step glides in (opacity + small rise); keyed by the step container remounting. */
+@keyframes ioma-step-in { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+.ioma-step-panel > * { animation: ioma-step-in 420ms var(--ease-out-strong) backwards; }
+@media (prefers-reduced-motion: reduce) { .ioma-step-panel > * { animation: none; } }
+
+/* ---------- Radix overlays: explicit enter/exit motion ----------
+   The shadcn `data-open:animate-in` classes never matched Radix (`data-state`) and tw-animate-css is not loaded,
+   so sheets and dialogs used to pop in. Panels use the drawer curve; the veil fades; exits mirror entrances. */
+@keyframes ioma-veil-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes ioma-veil-out { from { opacity: 1; } to { opacity: 0; } }
+@keyframes ioma-sheet-r-in { from { transform: translateX(100%); } to { transform: none; } }
+@keyframes ioma-sheet-r-out { from { transform: none; } to { transform: translateX(100%); } }
+@keyframes ioma-sheet-l-in { from { transform: translateX(-100%); } to { transform: none; } }
+@keyframes ioma-sheet-l-out { from { transform: none; } to { transform: translateX(-100%); } }
+@keyframes ioma-sheet-t-in { from { transform: translateY(-100%); } to { transform: none; } }
+@keyframes ioma-sheet-t-out { from { transform: none; } to { transform: translateY(-100%); } }
+@keyframes ioma-sheet-b-in { from { transform: translateY(100%); } to { transform: none; } }
+@keyframes ioma-sheet-b-out { from { transform: none; } to { transform: translateY(100%); } }
+@keyframes ioma-dialog-in { from { opacity: 0; transform: scale(0.97); } to { opacity: 1; transform: scale(1); } }
+@keyframes ioma-dialog-out { from { opacity: 1; transform: scale(1); } to { opacity: 0; transform: scale(0.97); } }
+
+[data-slot="sheet-overlay"][data-state="open"],
+[data-slot="dialog-overlay"][data-state="open"] { animation: ioma-veil-in 320ms var(--ease-out-strong) both; }
+[data-slot="sheet-overlay"][data-state="closed"],
+[data-slot="dialog-overlay"][data-state="closed"] { animation: ioma-veil-out 240ms ease-out both; }
+
+[data-slot="sheet-content"][data-state="open"] { animation-duration: 420ms; animation-timing-function: var(--ease-drawer); animation-fill-mode: both; }
+[data-slot="sheet-content"][data-state="closed"] { animation-duration: 280ms; animation-timing-function: cubic-bezier(0.4, 0, 1, 1); animation-fill-mode: both; }
+[data-slot="sheet-content"][data-side="right"][data-state="open"] { animation-name: ioma-sheet-r-in; }
+[data-slot="sheet-content"][data-side="right"][data-state="closed"] { animation-name: ioma-sheet-r-out; }
+[data-slot="sheet-content"][data-side="left"][data-state="open"] { animation-name: ioma-sheet-l-in; }
+[data-slot="sheet-content"][data-side="left"][data-state="closed"] { animation-name: ioma-sheet-l-out; }
+[data-slot="sheet-content"][data-side="top"][data-state="open"] { animation-name: ioma-sheet-t-in; }
+[data-slot="sheet-content"][data-side="top"][data-state="closed"] { animation-name: ioma-sheet-t-out; }
+[data-slot="sheet-content"][data-side="bottom"][data-state="open"] { animation-name: ioma-sheet-b-in; }
+[data-slot="sheet-content"][data-side="bottom"][data-state="closed"] { animation-name: ioma-sheet-b-out; }
+
+/* The dialog centres itself with the `translate` property, so these keyframes only animate scale + opacity. */
+[data-slot="dialog-content"][data-state="open"] { animation: ioma-dialog-in 300ms var(--ease-out-strong) both; }
+[data-slot="dialog-content"][data-state="closed"] { animation: ioma-dialog-out 200ms ease-out both; }
+
+@media (prefers-reduced-motion: reduce) {
+  [data-slot="sheet-content"][data-state],
+  [data-slot="dialog-content"][data-state] { animation-name: ioma-veil-in !important; animation-duration: 150ms !important; }
+  [data-slot="sheet-content"][data-state="closed"],
+  [data-slot="dialog-content"][data-state="closed"] { animation-name: ioma-veil-out !important; }
+}
+
+/* Small anchored popovers (filter / sort menus): quick fade + settle from the trigger corner. */
+@keyframes ioma-pop-in { from { opacity: 0; transform: scale(0.96) translateY(-4px); } to { opacity: 1; transform: none; } }
+.ioma-pop { transform-origin: top; animation: ioma-pop-in 170ms var(--ease-out-strong) both; }
+@media (prefers-reduced-motion: reduce) { .ioma-pop { animation: none; } }
+
+/* Founder page: scroll cue — a short bar travels down its rail. */
+@keyframes founder-scroll { 0% { transform: translateY(-100%); } 70%, 100% { transform: translateY(300%); } }
+
+@keyframes founder-video-in { to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .animate-\[founder-video-in_1\.6s_ease-out_0\.4s_forwards\] { animation: none; opacity: 1; } }
+
+/* Founder hero film: a slow, continuous push-in so the picture never sits still. */
+@keyframes founder-pushin { from { transform: scale(1.02); } to { transform: scale(1.12); } }
+.founder-pushin { animation: founder-pushin 26s ease-in-out infinite alternate; will-change: transform; }
+@media (prefers-reduced-motion: reduce) { .founder-pushin { animation: none; } }
+
+/* IOMA Privé ticker: one long row translates by half its width, seamlessly looping (transform only). */
+@keyframes prive-marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+.prive-marquee__track { animation: prive-marquee 40s linear infinite; }
+.prive-marquee:hover .prive-marquee__track { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) { .prive-marquee__track { animation: none; } }
+
+/* Footer links: an underline that grows from the start edge on hover/focus (transform only). */
+.ioma-flink::after { content: ""; position: absolute; inset-inline: 0; bottom: 0.35rem; height: 1px; background: currentColor; transform: scaleX(0); transform-origin: left; transition: transform 300ms var(--ease-out-strong); }
+[dir="rtl"] .ioma-flink::after { transform-origin: right; }
+@media (hover: hover) and (pointer: fine) { .ioma-flink:hover::after { transform: scaleX(1); } }
+.ioma-flink:focus-visible::after { transform: scaleX(1); }
+@media (prefers-reduced-motion: reduce) { .ioma-flink::after { transition: none; } }
+
+/* Cookie banner: rises into place once. */
+@keyframes consent-in { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+.consent-banner { animation: consent-in 420ms var(--ease-out-strong) 600ms backwards; }
+@media (prefers-reduced-motion: reduce) { .consent-banner { animation: none; } }

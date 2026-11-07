@@ -3,7 +3,14 @@ import { HydratedDocument, Types } from "mongoose";
 
 export type DocumentRecordDocument = HydratedDocument<DocumentRecord>;
 export type DocumentOwnerType =
-  "professional_application" | "training" | "protocol" | "order" | "ai_analysis" | "cms";
+  | "professional_application"
+  | "professional_lead"
+  | "b2b_content"
+  | "training"
+  | "protocol"
+  | "order"
+  | "ai_analysis"
+  | "cms";
 
 // See DATA_MODEL.md "Document". Named `DocumentRecord` (not `Document`) to
 // avoid colliding with the DOM/Node global `Document` type across the API
@@ -27,6 +34,8 @@ export class DocumentRecord {
     required: true,
     enum: [
       "professional_application",
+      "professional_lead",
+      "b2b_content",
       "training",
       "protocol",
       "order",

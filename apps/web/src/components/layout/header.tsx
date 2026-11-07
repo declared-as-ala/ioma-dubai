@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { Search, ChevronDown, Sparkles } from "lucide-react";
+import { Search, ChevronDown } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { Link } from "@/i18n/navigation";
-import { IomaLogo } from "@/components/brand/ioma-logo";
 import { LocaleSwitcher } from "@/components/layout/locale-switcher";
 import { CartTriggerButton } from "@/components/shop/cart-trigger-button";
 import { AccountLink } from "@/components/layout/account-link";
@@ -16,16 +16,18 @@ import { useSearchStore } from "@/stores/search-store";
 import { MegaMenu } from "@/components/layout/mega-menu";
 import { SoinsSurMesureDropdown } from "@/components/layout/soins-sur-mesure-dropdown";
 import { InsideIomaDropdown } from "@/components/layout/inside-ioma-dropdown";
-
-type ActiveMenu = "none" | "visage" | "bespoke" | "inside";
+import { usePublicNavigation } from "@/hooks/use-navigation-query";
 
 export function Header() {
   const t = useTranslations("Nav");
   const pathname = usePathname();
   const openSearch = useSearchStore((state) => state.openSearch);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [activeMenu, setActiveMenu] = useState<ActiveMenu>("none");
+  const [activeMenu, setActiveMenu] = useState<string>("none");
   const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const { data: navData } = usePublicNavigation();
+  const navItems = navData?.items || [];
 
   useEffect(() => {
     const handleScroll = () => {
@@ -46,12 +48,12 @@ export function Header() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  const handleMouseEnter = (menu: ActiveMenu) => {
+  const handleMouseEnter = (menuSlug: string) => {
     if (closeTimeoutRef.current) {
       clearTimeout(closeTimeoutRef.current);
       closeTimeoutRef.current = null;
     }
-    setActiveMenu(menu);
+    setActiveMenu(menuSlug);
   };
 
   const handleMouseLeave = () => {
@@ -60,8 +62,8 @@ export function Header() {
     }, 150);
   };
 
-  const handleMenuClick = (menu: ActiveMenu) => {
-    setActiveMenu((prev) => (prev === menu ? "none" : menu));
+  const handleMenuClick = (menuSlug: string) => {
+    setActiveMenu((prev) => (prev === menuSlug ? "none" : menuSlug));
   };
 
   const isHomepage =
@@ -74,25 +76,21 @@ export function Header() {
     pathname === "/fr/" ||
     pathname === "/ar/";
 
-  const isDarkHeader = isHomepage && !isScrolled && activeMenu === "none";
+  // On the homepage the bar is transparent over the hero (light text) and turns solid once the page scrolls
+  // or a menu opens, so the logo and links always stay readable and above the hero video.
+  const overHero = isHomepage && !isScrolled && activeMenu === "none";
+  const isDarkHeader = overHero;
 
-  const isBespokeActive =
-    activeMenu === "bespoke" || pathname.includes("soins-sur-mesure");
-  const isVisageActive = activeMenu === "visage" || pathname.startsWith("/shop");
-  const isInsideActive =
-    activeMenu === "inside" ||
-    pathname.startsWith("/maison") ||
-    pathname.startsWith("/technology") ||
-    pathname.startsWith("/journal");
+  const activeItem = navItems.find((i) => i.slug === activeMenu || i.id === activeMenu);
 
   return (
     <>
       <header
-        className={`fixed top-0 inset-x-0 z-30 transition-all duration-300 ${
+        className={`fixed top-0 inset-x-0 z-30 transition-[background-color,color,border-color,box-shadow] duration-300 ${
           isDarkHeader
-            ? "border-b border-ioma-white/10 bg-ioma-black/40 backdrop-blur-md text-ioma-white"
-            : `border-b border-border bg-background text-foreground ${
-                isScrolled ? "shadow-md backdrop-blur-md bg-background/95" : ""
+            ? "border-b border-transparent bg-gradient-to-b from-black/60 via-black/25 to-transparent text-ioma-white"
+            : `border-b border-border bg-background/95 text-foreground backdrop-blur-md ${
+                isScrolled ? "shadow-md" : ""
               }`
         }`}
         onMouseLeave={handleMouseLeave}
@@ -101,7 +99,7 @@ export function Header() {
         <div
           className={`border-b transition-colors duration-300 ${
             isDarkHeader
-              ? "border-ioma-white/10 bg-ioma-black/50 text-ioma-white/70"
+              ? "border-ioma-white/10 bg-transparent text-ioma-white/80"
               : "border-border bg-muted/20 text-muted-foreground"
           }`}
         >
@@ -110,26 +108,6 @@ export function Header() {
               <span>
                 {t("region")} — {t("currency")}
               </span>
-              <span
-                className={
-                  isDarkHeader
-                    ? "hidden sm:inline text-ioma-white/20"
-                    : "hidden sm:inline text-border"
-                }
-              >
-                |
-              </span>
-              <Link
-                href="/diagnosis"
-                className={`hidden sm:inline-flex items-center gap-1 font-medium transition-colors ${
-                  isDarkHeader
-                    ? "text-ioma-white hover:text-ioma-violet"
-                    : "text-foreground hover:text-primary"
-                }`}
-              >
-                <Sparkles className="size-3 text-ioma-violet" />
-                <span>AI Skin Expert 2.0</span>
-              </Link>
             </div>
             <div className="flex items-center gap-3">
               <Link
@@ -186,7 +164,30 @@ export function Header() {
             aria-label={t("home")}
             className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center"
           >
-            <IomaLogo variant={isDarkHeader ? "white" : "black"} />
+            <span className="flex items-center gap-6 xl:gap-10" dir="ltr">
+              <Image
+                src={
+                  overHero ? "/images/burj-emblem-white.png" : "/images/burj-emblem.png"
+                }
+                alt=""
+                width={516}
+                height={1184}
+                priority
+                className="h-[52px] w-auto xl:h-[62px]"
+              />
+              <Image
+                src={
+                  overHero
+                    ? "/images/brand/logo-white.svg"
+                    : "/images/brand/logo-black.svg"
+                }
+                alt="IOMA Paris"
+                width={2020}
+                height={856}
+                priority
+                className="h-auto w-[102px] xl:w-[138px]"
+              />
+            </span>
           </Link>
 
           <div className="flex items-center gap-2">
@@ -206,171 +207,106 @@ export function Header() {
             </Button>
             <AccountLink />
             <CartTriggerButton />
+
             <Button
               asChild
               size="sm"
-              className="ms-2 hidden uppercase tracking-widest xl:inline-flex bg-primary hover:bg-primary/90 text-primary-foreground font-semibold"
+              className={`ms-2 hidden uppercase tracking-widest xl:inline-flex font-semibold bg-primary hover:bg-primary/90 text-primary-foreground`}
             >
-              <Link href="/booking" prefetch={false}>
-                {t("bookAppointment")}
+              <Link href="/partners" prefetch={false}>
+                {t("findPartner")}
               </Link>
             </Button>
           </div>
         </div>
 
-        {/* Primary nav matching ioma-paris.com structure */}
+        {/* Primary nav dynamically generated from Admin Configuration */}
         <nav
           aria-label={t("primaryNavigation")}
-          className="mx-auto hidden max-w-[1440px] items-center justify-center gap-8 overflow-visible px-4 py-2.5 md:px-6 xl:flex"
+          className={`mx-auto hidden max-w-[1440px] items-center justify-center gap-8 overflow-visible px-4 py-2.5 md:px-6 xl:flex`}
         >
-          {/* 1. UV & PROTECTION */}
-          <Link
-            href="/shop?category=protection-solaire"
-            className={`text-xs uppercase tracking-widest font-medium transition-colors ${
-              isDarkHeader
-                ? pathname.includes("category=protection-solaire")
-                  ? "text-ioma-white font-semibold"
-                  : "text-ioma-white/75 hover:text-ioma-white"
-                : pathname.includes("category=protection-solaire")
-                  ? "text-foreground font-semibold"
-                  : "text-foreground/80 hover:text-foreground"
-            }`}
-          >
-            {t("uvProtection")}
-          </Link>
+          {navItems.map((item) => {
+            const isMenuType =
+              item.type === "MEGA_MENU" || item.type === "SIMPLE_DROPDOWN";
+            const isActive = activeMenu === item.slug || activeMenu === item.id;
 
-          {/* 2. SOINS SUR MESURE (Dropdown) */}
-          <div className="relative" onMouseEnter={() => handleMouseEnter("bespoke")}>
-            <button
-              type="button"
-              onClick={() => handleMenuClick("bespoke")}
-              aria-expanded={activeMenu === "bespoke"}
-              aria-haspopup="true"
-              className={`flex items-center gap-1 text-xs uppercase tracking-widest font-medium transition-colors ${
-                isDarkHeader
-                  ? isBespokeActive
-                    ? "text-ioma-white font-semibold"
-                    : "text-ioma-white/75 hover:text-ioma-white"
-                  : isBespokeActive
-                    ? "text-foreground font-semibold"
-                    : "text-foreground/80 hover:text-foreground"
-              }`}
-            >
-              <span>{t("bespoke")}</span>
-              <ChevronDown
-                className={`size-3 transition-transform duration-200 ${activeMenu === "bespoke" ? "rotate-180" : ""}`}
-              />
-            </button>
-          </div>
+            if (!isMenuType) {
+              return (
+                <Link
+                  key={item.id}
+                  href={item.url || "/shop"}
+                  className={`text-xs uppercase tracking-widest font-medium transition-colors ${
+                    isDarkHeader
+                      ? pathname === item.url || (item.url && pathname.includes(item.url))
+                        ? "text-ioma-white font-semibold"
+                        : "text-ioma-white/75 hover:text-ioma-white"
+                      : pathname === item.url || (item.url && pathname.includes(item.url))
+                        ? "text-foreground font-semibold"
+                        : "text-foreground/80 hover:text-foreground"
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              );
+            }
 
-          {/* 3. VISAGE (Mega Menu) */}
-          <div className="relative" onMouseEnter={() => handleMouseEnter("visage")}>
-            <button
-              type="button"
-              onClick={() => handleMenuClick("visage")}
-              aria-expanded={activeMenu === "visage"}
-              aria-haspopup="true"
-              className={`flex items-center gap-1 text-xs uppercase tracking-widest font-medium transition-colors ${
-                isDarkHeader
-                  ? isVisageActive
-                    ? "text-ioma-white font-semibold"
-                    : "text-ioma-white/75 hover:text-ioma-white"
-                  : isVisageActive
-                    ? "text-foreground font-semibold"
-                    : "text-foreground/80 hover:text-foreground"
-              }`}
-            >
-              <span>{t("visage")}</span>
-              <ChevronDown
-                className={`size-3 transition-transform duration-200 ${activeMenu === "visage" ? "rotate-180" : ""}`}
-              />
-            </button>
-          </div>
-
-          {/* 4. CORPS */}
-          <Link
-            href="/shop?category=corps"
-            className={`text-xs uppercase tracking-widest font-medium transition-colors ${
-              isDarkHeader
-                ? pathname.includes("category=corps")
-                  ? "text-ioma-white font-semibold"
-                  : "text-ioma-white/75 hover:text-ioma-white"
-                : pathname.includes("category=corps")
-                  ? "text-foreground font-semibold"
-                  : "text-foreground/80 hover:text-foreground"
-            }`}
-          >
-            {t("corps")}
-          </Link>
-
-          {/* 5. CHEVEUX */}
-          <Link
-            href="/shop?category=cheveux"
-            className={`text-xs uppercase tracking-widest font-medium transition-colors ${
-              isDarkHeader
-                ? pathname.includes("category=cheveux")
-                  ? "text-ioma-white font-semibold"
-                  : "text-ioma-white/75 hover:text-ioma-white"
-                : pathname.includes("category=cheveux")
-                  ? "text-foreground font-semibold"
-                  : "text-foreground/80 hover:text-foreground"
-            }`}
-          >
-            {t("cheveux")}
-          </Link>
-
-          {/* 6. KITS & ROUTINES */}
-          <Link
-            href="/shop?category=routines"
-            className={`text-xs uppercase tracking-widest font-medium transition-colors ${
-              isDarkHeader
-                ? pathname.includes("category=routines")
-                  ? "text-ioma-white font-semibold"
-                  : "text-ioma-white/75 hover:text-ioma-white"
-                : pathname.includes("category=routines")
-                  ? "text-foreground font-semibold"
-                  : "text-foreground/80 hover:text-foreground"
-            }`}
-          >
-            {t("routinesKits")}
-          </Link>
-
-          {/* 7. INSIDE IOMA (Dropdown) */}
-          <div className="relative" onMouseEnter={() => handleMouseEnter("inside")}>
-            <button
-              type="button"
-              onClick={() => handleMenuClick("inside")}
-              aria-expanded={activeMenu === "inside"}
-              aria-haspopup="true"
-              className={`flex items-center gap-1 text-xs uppercase tracking-widest font-medium transition-colors ${
-                isDarkHeader
-                  ? isInsideActive
-                    ? "text-ioma-white font-semibold"
-                    : "text-ioma-white/75 hover:text-ioma-white"
-                  : isInsideActive
-                    ? "text-foreground font-semibold"
-                    : "text-foreground/80 hover:text-foreground"
-              }`}
-            >
-              <span>{t("insideIoma")}</span>
-              <ChevronDown
-                className={`size-3 transition-transform duration-200 ${activeMenu === "inside" ? "rotate-180" : ""}`}
-              />
-            </button>
-          </div>
+            return (
+              <div
+                key={item.id}
+                className="relative"
+                onMouseEnter={() => handleMouseEnter(item.slug)}
+              >
+                <button
+                  type="button"
+                  onClick={() => handleMenuClick(item.slug)}
+                  aria-expanded={isActive}
+                  aria-haspopup="true"
+                  className={`flex items-center gap-1 text-xs uppercase tracking-widest font-medium transition-colors ${
+                    isDarkHeader
+                      ? isActive
+                        ? "text-ioma-white font-semibold"
+                        : "text-ioma-white/75 hover:text-ioma-white"
+                      : isActive
+                        ? "text-foreground font-semibold"
+                        : "text-foreground/80 hover:text-foreground"
+                  }`}
+                >
+                  <span>{item.label}</span>
+                  <ChevronDown
+                    className={`size-3 transition-transform duration-200 ${
+                      isActive ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+              </div>
+            );
+          })}
         </nav>
 
         {/* Dropdowns & Mega Menus */}
         <MegaMenu
-          isOpen={activeMenu === "visage"}
+          isOpen={activeItem?.type === "MEGA_MENU" || activeMenu === "visage"}
           onClose={() => setActiveMenu("none")}
+          item={activeItem?.type === "MEGA_MENU" ? activeItem : null}
         />
+
         <SoinsSurMesureDropdown
-          isOpen={activeMenu === "bespoke"}
+          isOpen={
+            (activeItem?.type === "SIMPLE_DROPDOWN" &&
+              (activeItem.slug.includes("sur-mesure") ||
+                activeItem.slug.includes("bespoke"))) ||
+            activeMenu === "bespoke"
+          }
           onClose={() => setActiveMenu("none")}
+          item={activeItem?.type === "SIMPLE_DROPDOWN" ? activeItem : null}
         />
+
         <InsideIomaDropdown
-          isOpen={activeMenu === "inside"}
+          isOpen={
+            (activeItem?.type === "SIMPLE_DROPDOWN" &&
+              activeItem.slug.includes("inside")) ||
+            activeMenu === "inside"
+          }
           onClose={() => setActiveMenu("none")}
         />
 

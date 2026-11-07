@@ -24,6 +24,10 @@ Base URL: `/api/v1`. Full interactive contract served at `/api/docs` (Swagger UI
 
 ### Professional Applications (`/professional-applications`)
 
+**Implementation update (2026-09-06):** the existing deployed controller uses `/api/professional`, not the planned paths below. Applicant routes: `GET /applications`, `POST /applications/draft`, `GET /applications/:id`, `POST /applications/:id/upload`, `POST /applications/:id/submit`. Submission validates the shared application schema, requires `termsAccepted: true` and a previously uploaded private document, and records `submittedAt`/`termsAcceptedAt`. Existing non-rejected applications are reused; only drafts and documents-requested applications can be submitted. Resubmission after a document request requires a new uploaded document. Duplicate submission races return a controlled 400/409.
+
+Admin routes under the same prefix: `GET /admin/applications`, `GET /admin/applications/:id`, `GET /admin/applications/:id/documents/:documentId` (short-lived signed URL), `PATCH /admin/applications/:id/approve|reject|request-documents`, `GET /admin/profiles` (approved profiles), and `PATCH /admin/profiles/:id/suspend`. Rejection/document requests require `reviewNotes`; suspension requires `reason`. Admin routes require administrator or super-administrator roles. The retained metadata attachment route verifies private-document ownership and rejects duplicate attachments.
+
 `POST /` (submit) · `GET /me` · `PATCH /:id` (draft edit, own) · `POST /:id/documents` (signed upload) · Admin: `GET /` (filterable by status) · `PATCH /:id/status` (approve/reject/request-documents/suspend)
 
 ### Catalog (`/products`, `/product-ranges`, `/categories`, `/skin-concerns`, `/ingredients`, `/product-variants`)
@@ -85,3 +89,34 @@ Public `GET` by slug/locale; Admin CRUD + `POST /content/pages/:id/publish`, rev
 ## OpenAPI & Typed Client
 
 NestJS's `@nestjs/swagger` decorators generate `/api/docs-json`. `packages/types` consumes that JSON at build time (via `openapi-typescript` or an equivalent codegen step wired into Sprint 4+ once the first non-auth modules stabilize) to produce the frontend's typed request/response types — the frontend never imports backend Mongoose types directly, per `CLAUDE.md`.
+
+## Account experience additions — 2026-09-06
+
+- GET /api/orders/my returns only the authenticated user's b2c orders. GET /api/orders/pro/list returns only their b2b orders and requires professional approval.
+- GET /api/cart/pro and DELETE /api/cart/pro/items/:sku operate on the separate owned b2b cart and require approval. POST /api/orders/pro/checkout checks approval and checks out that cart. Ordinary cart/checkout endpoints always use b2c.
+- GET /api/professional/profile returns the current identity's optional professional profile.
+- GET /api/professional/applications/:id/documents/:documentId checks applicant ownership, attachment membership and document ownership, returning a temporary private URL.
+- PATCH /api/professional/applications/:id/contact validates and updates only contactPerson, email and phone for the owning applicant. It cannot change legal identity, status, roles or company approval.
+- Applicant application reads return applicantMessage, strip reviewNotes/reviewedBy, and omit internal notes from statusHistory. The admin review interface identifies which messages are shared with applicants.
+- Training and protocol endpoints enforce RequireProfessional at controller level. GET /api/trainings/my-bookings/:id/certificate additionally verifies attendee ownership, attended status and a real certificate attachment before signing.
+- Personal profile, address, wishlist, diagnosis/AI history and appointment endpoints retain ownership checks; frontend identity is never authorization.
+
+## Admin API (2026-09-06)
+
+All `/api/admin/*` routes require JWT and server-resolved permissions. `/access` returns the permitted resource metadata, roles and permission strings. `/dashboard/overview?from=YYYY-MM-DD&to=YYYY-MM-DD` returns scoped aggregates and Dubai period/comparison metadata. `/resources/:key` supports GET pagination/search/filter and POST creation where allowed; `/resources/:key/:id` supports detail GET and validated PATCH. `/references/:key` returns minimal selection data; `/search?q=` returns permission-filtered global results.
+
+Dedicated actions: POST `/inventory/:id/adjust`, PATCH `/orders/:id`, PATCH `/appointments/:id`, PATCH `/training-bookings/:id`, POST `/ai-analyses/:id/action`, multipart POST `/documents/upload`, GET `/documents/:id/url`, POST `/users/roles`, GET `/roles`, GET `/settings`. The fixed allowlist rejects arbitrary collections and unknown write fields. Role assignment requires super-administrator permissions.
+
+Public structured CMS reads: GET `/api/content/:kind/:slug` returns a published entry or null; GET `/api/content/journal` lists published journal entries. No private document keys or configuration secrets are returned. See ADMIN_IMPLEMENTATION.md for reporting and storage semantics.
+
+## Product media endpoints (2026-09-06)
+
+- POST /api/admin/products/:id/media — JWT commerce.manage; multipart file, JPEG/PNG/WebP, 10 MiB. Returns media DTO after validated MinIO storage.
+- PUT /api/admin/products/:id/media — JWT commerce.manage; {revision, media:[{assetId,alt:{en,fr,ar}}]}. Ordered gallery; 409 on stale revision, 400 on unknown/unrelated or duplicate asset. First member is primary.
+- POST /api/admin/products/:id/duplicate — JWT commerce.manage; creates a draft sharing immutable media, without stock/SKUs.
+- GET /api/media/products/:assetId/:variant — public, variant main/card/thumbnail; WebP bytes with immutable cache headers. No private-document access or arbitrary object-key parameter.
+- Product catalogue DTOs add media and primaryImage with URL, thumbnail/card URLs, dimensions, localized alt, order and isPrimary. images remains compatible. Admin list returns human-readable range/category records.
+
+## Bulk deletion
+
+POST /api/admin/products/bulk-delete and POST /api/admin/orders/bulk-delete accept {ids: string[]} (1–100 valid Mongo IDs), require commerce.manage, validate all IDs before mutation, and return {deletedCount}. Product deletion archives/hides; order deletion hides only in management. Both retain history and write audit events.

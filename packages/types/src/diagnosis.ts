@@ -8,6 +8,7 @@ import type {
 import type { LocalizedText } from "./api";
 
 export interface RoutineVariant {
+  inStock?: boolean;
   sku: string;
   size: string;
   priceMinor: number;
