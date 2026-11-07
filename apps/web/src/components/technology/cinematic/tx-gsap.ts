@@ -22,7 +22,13 @@ export const DUR = { word: 1.1, reveal: 1.4, fade: 0.9 } as const;
 
 /** Height of the fixed storefront header: pinned scenes start right below it (mirrors `--tx-header`). */
 export const headerOffset = () =>
-  typeof window !== "undefined" && window.innerWidth >= 1280 ? 148 : 120;
+  typeof window === "undefined"
+    ? 120
+    : window.innerWidth >= 1280
+      ? 148
+      : window.innerWidth >= 768
+        ? 120
+        : 102;
 
 export type MotionMode = { desktop: boolean; mobile: boolean };
 

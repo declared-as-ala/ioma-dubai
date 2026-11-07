@@ -189,7 +189,7 @@ export function FounderStory({ loc }: { loc: Loc }) {
 
         <div
           data-fh="copy"
-          className="pointer-events-none mx-auto flex min-h-[100svh] max-w-[1440px] flex-col justify-end px-4 pb-20 pt-44 md:px-8 md:pb-24 xl:pt-52"
+          className="pointer-events-none mx-auto flex min-h-[calc(100svh-102px)] max-w-[1440px] flex-col justify-end px-4 pb-24 pt-24 md:min-h-[calc(100svh-120px)] md:px-8 md:pb-24 xl:min-h-[calc(100svh-148px)]"
         >
           <Kicker light>{F.hero.kicker[loc]}</Kicker>
           <h1
@@ -230,7 +230,7 @@ export function FounderStory({ loc }: { loc: Loc }) {
           <ImageReveal
             drift={false}
             from="bottom"
-            className="h-[46svh] min-h-[22rem] md:aspect-[1820/650] md:h-auto md:min-h-0"
+            className="h-[46svh] min-h-[20rem] xl:aspect-[1820/650] xl:h-auto xl:min-h-0"
           >
             <Image
               src={FOUNDER_IMAGES.banner}
@@ -240,9 +240,9 @@ export function FounderStory({ loc }: { loc: Loc }) {
               className="object-cover object-[78%_center] rtl:-scale-x-100 rtl:object-[22%_center]"
             />
           </ImageReveal>
-          <div className="pointer-events-none inset-0 flex items-center md:absolute">
-            <div className="pointer-events-auto mx-auto w-full max-w-[1440px] px-4 py-12 md:px-8 md:py-0">
-              <div className="max-w-xl space-y-6 md:max-w-[42%]">
+          <div className="pointer-events-none inset-0 flex items-center xl:absolute">
+            <div className="pointer-events-auto mx-auto w-full max-w-[1440px] px-4 py-12 md:px-8 xl:py-0">
+              <div className="max-w-xl space-y-6 xl:max-w-[42%]">
                 <Kicker>{F.banner.kicker[loc]}</Kicker>
                 <MaskText
                   as="h2"
@@ -267,7 +267,7 @@ export function FounderStory({ loc }: { loc: Loc }) {
       <section
         id="engineer"
         aria-label={F.a.title[loc]}
-        className="mx-auto max-w-[1440px] scroll-mt-40 px-4 py-28 md:px-8 lg:py-44"
+        className="mx-auto max-w-[1440px] scroll-mt-40 px-4 py-20 md:px-8 md:py-28 lg:py-44"
       >
         <div className="grid items-center gap-14 lg:grid-cols-12 lg:gap-24">
           <ImageReveal
@@ -307,7 +307,7 @@ export function FounderStory({ loc }: { loc: Loc }) {
       {/* B — TIMELINE */}
       <section
         aria-label={F.b.title[loc]}
-        className="bg-sf-ivory px-4 py-28 md:px-8 lg:py-40"
+        className="bg-sf-ivory px-4 py-20 md:px-8 md:py-28 lg:py-40"
       >
         <div className="mx-auto max-w-[1440px] text-center">
           <div className="flex justify-center">
@@ -341,7 +341,7 @@ export function FounderStory({ loc }: { loc: Loc }) {
           aria-hidden
           className="absolute inset-0 -z-10 bg-gradient-to-b from-black/70 via-black/40 to-black/80"
         />
-        <div className="mx-auto grid min-h-[90svh] max-w-[1440px] items-center gap-14 px-4 py-28 md:px-8 lg:grid-cols-12 lg:gap-24">
+        <div className="mx-auto grid min-h-[90svh] max-w-[1440px] items-center gap-12 px-4 py-20 md:px-8 md:py-28 lg:grid-cols-12 lg:gap-24">
           <div className="space-y-8 lg:col-span-7">
             <Kicker light>{F.c.kicker[loc]}</Kicker>
             <MaskText
@@ -379,9 +379,9 @@ export function FounderStory({ loc }: { loc: Loc }) {
       {/* D — TECHNOLOGY MEETS SKIN */}
       <section
         aria-label={F.d.title[loc]}
-        className="mx-auto max-w-[1440px] px-4 py-28 md:px-8 lg:py-44"
+        className="mx-auto max-w-[1440px] px-4 py-20 md:px-8 md:py-28 lg:py-44"
       >
-        <div className="grid gap-14 lg:grid-cols-12 lg:items-end lg:gap-20">
+        <div className="grid gap-12 lg:grid-cols-12 lg:items-end lg:gap-20">
           <div className="space-y-8 lg:col-span-5">
             <Kicker>{F.d.kicker[loc]}</Kicker>
             <MaskText
@@ -436,7 +436,7 @@ export function FounderStory({ loc }: { loc: Loc }) {
       {/* QUOTE */}
       <section
         aria-label={F.name}
-        className="bg-sf-ivory px-4 py-28 text-center md:px-8 lg:py-40"
+        className="bg-sf-ivory px-4 py-20 text-center md:px-8 md:py-28 lg:py-40"
       >
         <figure className="mx-auto max-w-4xl">
           <Reveal>
@@ -467,7 +467,7 @@ export function FounderStory({ loc }: { loc: Loc }) {
       {/* E — BEYOND IOMA */}
       <section
         aria-label={F.e.title[loc]}
-        className="mx-auto max-w-[1440px] px-4 py-28 md:px-8 lg:py-40"
+        className="mx-auto max-w-[1440px] px-4 py-20 md:px-8 md:py-28 lg:py-40"
       >
         <div className="grid gap-12 lg:grid-cols-12 lg:items-end">
           <div className="space-y-6 lg:col-span-7">
@@ -501,7 +501,7 @@ export function FounderStory({ loc }: { loc: Loc }) {
                 href={x.href}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group flex min-h-20 items-center justify-between gap-6 rounded-[1.5rem] border border-border px-7 py-5 transition-[background-color,border-color,transform] duration-300 ease-[var(--ease-out-strong)] hover:border-sf-charcoal hover:bg-sf-ivory active:scale-[0.99]"
+                className="group flex min-h-20 items-center justify-between gap-4 rounded-[1.5rem] border border-border px-5 py-5 sm:gap-6 sm:px-7 transition-[background-color,border-color,transform] duration-300 ease-[var(--ease-out-strong)] hover:border-sf-charcoal hover:bg-sf-ivory active:scale-[0.99]"
               >
                 <span>
                   <span className="block font-display text-lg font-medium">

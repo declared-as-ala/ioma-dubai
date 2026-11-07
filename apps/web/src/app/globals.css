@@ -366,9 +366,10 @@
   --tx-champagne: #bfa273;
   --tx-ink: #1a1a1d;
   --tx-charcoal: #15151a;
-  --tx-header: 120px; /* height of the fixed storefront header (see Header spacer) */
+  --tx-header: 102px; /* height of the fixed storefront header (see Header spacer) */
   color: var(--tx-ink);
 }
+@media (min-width: 768px) { .tx { --tx-header: 120px; } }
 @media (min-width: 1280px) { .tx { --tx-header: 148px; } }
 
 /* Initial hidden states: only before GSAP has taken over (then its inline styles rule). */
