@@ -60,7 +60,7 @@ export default async function FounderPage() {
   };
 
   return (
-    <main>
+    <main className="overflow-x-clip">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(person) }}
