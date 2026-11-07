@@ -8,8 +8,8 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale, slug } = await params;
   const origin =
-    process.env.API_URL ??
     process.env.INTERNAL_API_URL ??
+    process.env.API_URL ??
     process.env.NEXT_PUBLIC_API_URL ??
     "http://localhost:4000";
   try {
