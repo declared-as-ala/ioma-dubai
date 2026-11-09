@@ -8,7 +8,8 @@ import { cn } from "@/lib/utils";
 import { LOCK, type L } from "@/content/pro-space";
 import type { Localized, ProAccess } from "@/hooks/use-pro-access";
 
-export type Loc = "en" | "ar";
+export type { Loc } from "@/lib/l10n";
+import type { Loc } from "@/lib/l10n";
 
 /** Picks the visible language of a content string. */
 export function useTx() {
@@ -16,8 +17,13 @@ export function useTx() {
   return {
     loc,
     tx: (v: L) => v[loc],
-    /** Admin-managed content ({ en, ar }) falls back to English when Arabic is empty. */
-    lx: (v?: Localized) => (loc === "ar" ? v?.ar || v?.en : v?.en || v?.ar) ?? "",
+    /** Admin-managed content ({ en, fr, ar }) falls back to English when the locale is empty. */
+    lx: (v?: Localized) =>
+      (loc === "ar"
+        ? v?.ar || v?.en
+        : loc === "fr"
+          ? v?.fr || v?.en || v?.ar
+          : v?.en || v?.ar) ?? "",
   };
 }
 

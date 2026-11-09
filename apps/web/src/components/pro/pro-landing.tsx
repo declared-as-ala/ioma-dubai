@@ -31,6 +31,7 @@ import { Link } from "@/i18n/navigation";
 import { ApiError } from "@/lib/api";
 import { useRegisterLead } from "@/hooks/use-pro-access";
 import { cn } from "@/lib/utils";
+import { tr } from "@/lib/l10n";
 import { LANDING } from "@/content/pro-space";
 import galleries from "@/content/galleries.json";
 import { Eyebrow, primaryBtn, useTx } from "./pro-ui";
@@ -81,21 +82,46 @@ const EMIRATES_LIST = [
 ];
 
 const BUSINESS_TYPES = [
-  { value: "spa", en: "Luxury Hotel Spa / Day Spa", ar: "سبا فندقي فاخر / سبا نهاري" },
-  { value: "clinic", en: "Aesthetic Medical Clinic", ar: "عيادة طبية تجميلية" },
+  {
+    value: "spa",
+    en: "Luxury Hotel Spa / Day Spa",
+    fr: "Spa d'hôtel de luxe / Day spa",
+    ar: "سبا فندقي فاخر / سبا نهاري",
+  },
+  {
+    value: "clinic",
+    en: "Aesthetic Medical Clinic",
+    fr: "Clinique médicale esthétique",
+    ar: "عيادة طبية تجميلية",
+  },
   {
     value: "beauty_institute",
     en: "Beauty Institute / Salon",
+    fr: "Institut de beauté / Salon haut de gamme",
     ar: "معهد تجميل / صالون راقٍ",
   },
-  { value: "hotel", en: "Luxury Hotel / Resort", ar: "فندق / منتجع فاخر" },
-  { value: "retail", en: "High-end Retail / Concept Store", ar: "متجر تجزئة راقٍ" },
-  { value: "distributor", en: "Authorized Distributor", ar: "موزع إقليمي معتمد" },
+  {
+    value: "hotel",
+    en: "Luxury Hotel / Resort",
+    fr: "Hôtel / Resort de luxe",
+    ar: "فندق / منتجع فاخر",
+  },
+  {
+    value: "retail",
+    en: "High-end Retail / Concept Store",
+    fr: "Boutique haut de gamme / Concept store",
+    ar: "متجر تجزئة راقٍ",
+  },
+  {
+    value: "distributor",
+    en: "Authorized Distributor",
+    fr: "Distributeur agréé",
+    ar: "موزع إقليمي معتمد",
+  },
 ];
 
 function RegistrationForm() {
   const { tx, loc } = useTx();
-  const ar = loc === "ar";
   const F = LANDING.form;
   const register = useRegisterLead();
   const [errors, setErrors] = useState<Errors>({});
@@ -169,39 +195,51 @@ function RegistrationForm() {
         {/* 4-Step Partnership Progression */}
         <div className="mt-8 space-y-3 pt-6 border-t border-border">
           <p className="text-xs font-semibold uppercase tracking-wider text-foreground">
-            {ar ? "مراحل معالجة الطلب" : "Application Workflow"}
+            {tr(loc, {
+              en: "Application Workflow",
+              fr: "Étapes du traitement de la demande",
+              ar: "مراحل معالجة الطلب",
+            })}
           </p>
           <ol className="space-y-2 text-xs">
             <li className="flex items-center gap-2 text-emerald-700 font-medium">
               <CheckCircle2 className="size-4 shrink-0" />
               <span>
-                {ar
-                  ? "١. تم استلام الطلب بنجاح (قيد المعالجة)"
-                  : "1. Application Submitted (Under Review)"}
+                {tr(loc, {
+                  en: "1. Application Submitted (Under Review)",
+                  fr: "1. Demande envoyée (en cours d'examen)",
+                  ar: "١. تم استلام الطلب بنجاح (قيد المعالجة)",
+                })}
               </span>
             </li>
             <li className="flex items-center gap-2 text-muted-foreground">
               <Clock className="size-4 shrink-0 text-sf-mauve" />
               <span>
-                {ar
-                  ? "٢. التحقق ومطابقة الرخصة التجارية (خلال ٢٤–٤٨ ساعة)"
-                  : "2. Document & Trade Licence Verification (24–48h)"}
+                {tr(loc, {
+                  en: "2. Document & Trade Licence Verification (24–48h)",
+                  fr: "2. Vérification des documents et de la licence commerciale (24–48 h)",
+                  ar: "٢. التحقق ومطابقة الرخصة التجارية (خلال ٢٤–٤٨ ساعة)",
+                })}
               </span>
             </li>
             <li className="flex items-center gap-2 text-muted-foreground">
               <ShieldCheck className="size-4 shrink-0 text-muted-foreground" />
               <span>
-                {ar
-                  ? "٣. اعتماد الحساب وإصدار بيانات الدخول الرسمية"
-                  : "3. Account Approval & Official Credentials"}
+                {tr(loc, {
+                  en: "3. Account Approval & Official Credentials",
+                  fr: "3. Validation du compte et identifiants officiels",
+                  ar: "٣. اعتماد الحساب وإصدار بيانات الدخول الرسمية",
+                })}
               </span>
             </li>
             <li className="flex items-center gap-2 text-muted-foreground">
               <ShoppingBag className="size-4 shrink-0 text-muted-foreground" />
               <span>
-                {ar
-                  ? "٤. الوصول إلى البوابة المهنية وأسعار الجملة"
-                  : "4. Full Access to B2B Wholesale Portal"}
+                {tr(loc, {
+                  en: "4. Full Access to B2B Wholesale Portal",
+                  fr: "4. Accès complet au portail B2B de vente en gros",
+                  ar: "٤. الوصول إلى البوابة المهنية وأسعار الجملة",
+                })}
               </span>
             </li>
           </ol>
@@ -249,7 +287,13 @@ function RegistrationForm() {
     >
       <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-sf-mauve">
         <Sparkles className="size-3.5" />
-        <span>{ar ? "طلب اعتماد شراكة B2B" : "Partnership Application"}</span>
+        <span>
+          {tr(loc, {
+            en: "Partnership Application",
+            fr: "Demande de partenariat",
+            ar: "طلب اعتماد شراكة B2B",
+          })}
+        </span>
       </div>
       <h2 className="mt-2 font-display text-2xl text-foreground">{tx(F.title)}</h2>
       <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
@@ -261,15 +305,21 @@ function RegistrationForm() {
         {textInput("companyName", tx(F.company), "companyName", {
           autoComplete: "organization",
           maxLength: 120,
-          placeholder: ar
-            ? "اسم السبا أو العيادة أو المعهد"
-            : "Spa, clinic or establishment name",
+          placeholder: tr(loc, {
+            en: "Spa, clinic or establishment name",
+            fr: "Nom du spa, de la clinique ou de l'établissement",
+            ar: "اسم السبا أو العيادة أو المعهد",
+          }),
         })}
 
         {/* Business Type & Emirate */}
         <div className="grid gap-3 sm:grid-cols-2">
           <label className="block text-xs font-medium text-foreground">
-            {ar ? "نوع المنشأة *" : "Establishment Type *"}
+            {tr(loc, {
+              en: "Establishment Type *",
+              fr: "Type d'établissement *",
+              ar: "نوع المنشأة *",
+            })}
             <select
               name="businessType"
               defaultValue=""
@@ -277,11 +327,15 @@ function RegistrationForm() {
               aria-invalid={!!errors.businessType}
             >
               <option value="" disabled>
-                {ar ? "اختر النوع..." : "Select type..."}
+                {tr(loc, {
+                  en: "Select type...",
+                  fr: "Choisir le type…",
+                  ar: "اختر النوع...",
+                })}
               </option>
               {BUSINESS_TYPES.map((bt) => (
                 <option key={bt.value} value={bt.value}>
-                  {ar ? bt.ar : bt.en}
+                  {bt[loc]}
                 </option>
               ))}
             </select>
@@ -293,7 +347,7 @@ function RegistrationForm() {
           </label>
 
           <label className="block text-xs font-medium text-foreground">
-            {ar ? "الإمارة *" : "Emirate *"}
+            {tr(loc, { en: "Emirate *", fr: "Émirat *", ar: "الإمارة *" })}
             <select
               name="emirate"
               defaultValue="Dubai"
@@ -346,32 +400,68 @@ function RegistrationForm() {
 
         {/* Address / City */}
         <div className="grid gap-3 sm:grid-cols-2">
-          {textInput("city", ar ? "المدينة / المنطقة" : "City / Area", undefined, {
-            placeholder: ar ? "مثال: جميرا، وسط المدينة" : "E.g. Jumeirah, Downtown",
-            maxLength: 80,
-          })}
-          {textInput("address", ar ? "العنوان التجاري" : "Business Address", undefined, {
-            placeholder: ar ? "الشارع، المبنى" : "Street, building, unit",
-            maxLength: 180,
-          })}
+          {textInput(
+            "city",
+            tr(loc, {
+              en: "City / Area",
+              fr: "Ville / Quartier",
+              ar: "المدينة / المنطقة",
+            }),
+            undefined,
+            {
+              placeholder: tr(loc, {
+                en: "E.g. Jumeirah, Downtown",
+                fr: "Ex. : Jumeirah, Downtown",
+                ar: "مثال: جميرا، وسط المدينة",
+              }),
+              maxLength: 80,
+            },
+          )}
+          {textInput(
+            "address",
+            tr(loc, {
+              en: "Business Address",
+              fr: "Adresse professionnelle",
+              ar: "العنوان التجاري",
+            }),
+            undefined,
+            {
+              placeholder: tr(loc, {
+                en: "Street, building, unit",
+                fr: "Rue, bâtiment, unité",
+                ar: "الشارع، المبنى",
+              }),
+              maxLength: 180,
+            },
+          )}
         </div>
 
         {/* Trade Licence & Website */}
         <div className="grid gap-3 sm:grid-cols-2">
           {textInput(
             "tradeLicenceNumber",
-            ar ? "رقم الرخصة التجارية" : "Trade Licence Number",
+            tr(loc, {
+              en: "Trade Licence Number",
+              fr: "Numéro de licence commerciale",
+              ar: "رقم الرخصة التجارية",
+            }),
             undefined,
             {
-              placeholder: ar
-                ? "رقم الرخصة بدبي / الإمارات"
-                : "DED / Free Zone licence no.",
+              placeholder: tr(loc, {
+                en: "DED / Free Zone licence no.",
+                fr: "N° de licence DED / zone franche",
+                ar: "رقم الرخصة بدبي / الإمارات",
+              }),
               maxLength: 80,
             },
           )}
           {textInput(
             "webOrSocial",
-            ar ? "الموقع أو حساب إنستغرام" : "Website or Instagram",
+            tr(loc, {
+              en: "Website or Instagram",
+              fr: "Site web ou Instagram",
+              ar: "الموقع أو حساب إنستغرام",
+            }),
             undefined,
             {
               placeholder: "https://... or @account",
@@ -383,18 +473,20 @@ function RegistrationForm() {
 
         {/* Partnership Message */}
         <label className="block text-xs font-medium text-foreground">
-          {ar
-            ? "رسالة أو تفاصيل إضافية (اختياري)"
-            : "Partnership message or requirements (optional)"}
+          {tr(loc, {
+            en: "Partnership message or requirements (optional)",
+            fr: "Message ou besoins du partenariat (facultatif)",
+            ar: "رسالة أو تفاصيل إضافية (اختياري)",
+          })}
           <textarea
             name="message"
             rows={2}
             maxLength={1000}
-            placeholder={
-              ar
-                ? "أخبرنا عن غرف العلاج وعدد الأسرّة والخدمات المقدمة..."
-                : "Tell us about your cabin setup, treatment rooms and interests..."
-            }
+            placeholder={tr(loc, {
+              en: "Tell us about your cabin setup, treatment rooms and interests...",
+              fr: "Parlez-nous de votre cabine, de vos salles de soins et de vos attentes…",
+              ar: "أخبرنا عن غرف العلاج وعدد الأسرّة والخدمات المقدمة...",
+            })}
             className="mt-1 w-full rounded-lg border border-sf-mauve/25 bg-white p-3 text-xs outline-none transition-colors focus-visible:border-sf-mauve focus-visible:ring-2 focus-visible:ring-sf-mauve/20"
           />
         </label>
@@ -428,9 +520,11 @@ function RegistrationForm() {
       >
         {register.isPending
           ? tx(F.sending)
-          : ar
-            ? "إرسال طلب الانضمام"
-            : "Submit Partnership Application"}
+          : tr(loc, {
+              en: "Submit Partnership Application",
+              fr: "Envoyer la demande de partenariat",
+              ar: "إرسال طلب الانضمام",
+            })}
       </button>
 
       <p className="mt-4 text-[11px] leading-relaxed text-muted-foreground">
@@ -475,60 +569,99 @@ function SectionEyebrow({
 
 export default function ProLanding() {
   const { tx, loc } = useTx();
-  const ar = loc === "ar";
   const L = LANDING;
 
   const proof = [
     {
       icon: Cpu,
-      v: ar ? "MEMS" : "MEMS",
-      l: ar ? "حساسات دقيقة للقياس الموضوعي" : "Objective skin measurement",
+      v: tr(loc, { en: "MEMS", fr: "MEMS", ar: "MEMS" }),
+      l: tr(loc, {
+        en: "Objective skin measurement",
+        fr: "Mesure objective de la peau",
+        ar: "حساسات دقيقة للقياس الموضوعي",
+      }),
     },
     {
       icon: FlaskConical,
       v: "40,000+",
-      l: ar ? "تركيبة ممكنة مع In.Lab" : "possible In.Lab formulas",
+      l: tr(loc, {
+        en: "possible In.Lab formulas",
+        fr: "formules In.Lab possibles",
+        ar: "تركيبة ممكنة مع In.Lab",
+      }),
     },
     {
       icon: BadgePercent,
       v: "B2B",
-      l: ar ? "أسعار جملة مخصصة بالدرهم" : "dedicated wholesale pricing in AED",
+      l: tr(loc, {
+        en: "dedicated wholesale pricing in AED",
+        fr: "tarifs de gros dédiés en AED",
+        ar: "أسعار جملة مخصصة بالدرهم",
+      }),
     },
     {
       icon: GraduationCap,
-      v: ar ? "تدريب" : "Training",
-      l: ar ? "فيديوهات وبروتوكولات خطوة بخطوة" : "videos and step-by-step protocols",
+      v: tr(loc, { en: "Training", fr: "Formation", ar: "تدريب" }),
+      l: tr(loc, {
+        en: "videos and step-by-step protocols",
+        fr: "vidéos et protocoles pas à pas",
+        ar: "فيديوهات وبروتوكولات خطوة بخطوة",
+      }),
     },
   ];
 
   const pillars = [
     {
       icon: Cpu,
-      t: ar ? "أجهزة i-Diag و In.Lab" : "i-Diag & In.Lab Devices",
-      b: ar
-        ? "أجهزة تشخيص وتركيب مصغرة توضع في عيادتكم أو السبا الخاص بكم لتوفير تجربة استثنائية."
-        : "Turnkey diagnostic and drop-by-drop compounding hardware for prestigious treatment rooms.",
+      t: tr(loc, {
+        en: "i-Diag & In.Lab Devices",
+        fr: "Appareils i-Diag et In.Lab",
+        ar: "أجهزة i-Diag و In.Lab",
+      }),
+      b: tr(loc, {
+        en: "Turnkey diagnostic and drop-by-drop compounding hardware for prestigious treatment rooms.",
+        fr: "Matériel clé en main de diagnostic et de préparation goutte à goutte pour des cabines de soins d'exception.",
+        ar: "أجهزة تشخيص وتركيب مصغرة توضع في عيادتكم أو السبا الخاص بكم لتوفير تجربة استثنائية.",
+      }),
     },
     {
       icon: FlaskConical,
-      t: ar ? "منتجات الكابينة الحصرية" : "Exclusive Cabin Formats",
-      b: ar
-        ? "أحجام مهنية مخصصة للمعالجين مع بروتوكولات تدليك وتقشير متقدمة."
-        : "Professional-sized cleansers, peelings, serums and massage concentrates formulated exclusively for therapists.",
+      t: tr(loc, {
+        en: "Exclusive Cabin Formats",
+        fr: "Formats cabine exclusifs",
+        ar: "منتجات الكابينة الحصرية",
+      }),
+      b: tr(loc, {
+        en: "Professional-sized cleansers, peelings, serums and massage concentrates formulated exclusively for therapists.",
+        fr: "Nettoyants, peelings, sérums et concentrés de massage en formats professionnels, formulés exclusivement pour les praticiens.",
+        ar: "أحجام مهنية مخصصة للمعالجين مع بروتوكولات تدليك وتقشير متقدمة.",
+      }),
     },
     {
       icon: BadgePercent,
-      t: ar ? "أسعار الجملة وهوامش ربح مجزية" : "B2B Wholesale Margins",
-      b: ar
-        ? "قائمة أسعار مخصصة للشركاء المعتمدين مع شروط طلب مرنة ودعم لإعادة البيع بالتجزئة."
-        : "Dedicated wholesale tier with transparent AED pricing, low MOQs, and retail resale support.",
+      t: tr(loc, {
+        en: "B2B Wholesale Margins",
+        fr: "Tarifs de gros et marges B2B",
+        ar: "أسعار الجملة وهوامش ربح مجزية",
+      }),
+      b: tr(loc, {
+        en: "Dedicated wholesale tier with transparent AED pricing, low MOQs, and retail resale support.",
+        fr: "Grille de gros dédiée avec tarifs transparents en AED, minimums de commande réduits et accompagnement à la revente.",
+        ar: "قائمة أسعار مخصصة للشركاء المعتمدين مع شروط طلب مرنة ودعم لإعادة البيع بالتجزئة.",
+      }),
     },
     {
       icon: GraduationCap,
-      t: ar ? "أكاديمية تدريب معتمدة" : "Masterclass Certification",
-      b: ar
-        ? "فيديوهات تدريبية وكتيبات بروتوكولية خطوة بخطوة تضمن احترافية طاقم السبا لديكم."
-        : "Comprehensive video training modules and protocol step guides empowering your aesthetic team.",
+      t: tr(loc, {
+        en: "Masterclass Certification",
+        fr: "Certification Masterclass",
+        ar: "أكاديمية تدريب معتمدة",
+      }),
+      b: tr(loc, {
+        en: "Comprehensive video training modules and protocol step guides empowering your aesthetic team.",
+        fr: "Modules de formation vidéo complets et guides de protocoles pas à pas pour accompagner votre équipe esthétique.",
+        ar: "فيديوهات تدريبية وكتيبات بروتوكولية خطوة بخطوة تضمن احترافية طاقم السبا لديكم.",
+      }),
     },
   ];
 
@@ -546,11 +679,11 @@ export default function ProLanding() {
             <MaskText
               as="h1"
               immediate
-              text={
-                ar
-                  ? "تميّز العناية الشخصية الفرنسية في مساحتكم المهنية."
-                  : "French bespoke skincare, for luxury spas & clinics."
-              }
+              text={tr(loc, {
+                en: "French bespoke skincare, for luxury spas & clinics.",
+                fr: "Le soin sur mesure à la française, pour les spas et cliniques de luxe.",
+                ar: "تميّز العناية الشخصية الفرنسية في مساحتكم المهنية.",
+              })}
               className="mt-6 text-balance font-display text-[clamp(2.3rem,5.2vw,4.6rem)] font-medium leading-[1.04] tracking-[-0.03em] text-foreground rtl:leading-[1.3] rtl:tracking-normal"
             />
 
@@ -559,9 +692,11 @@ export default function ProLanding() {
                 data-cine-item
                 className="text-base font-light leading-relaxed text-muted-foreground sm:text-lg"
               >
-                {ar
-                  ? "انضموا إلى شبكة شركاء آيوما باريس في الإمارات: أحجام كابينة حصرية، أجهزة تشخيص MEMS المتقدمة، تدريب معتمد، وأسعار جملة مخصصة للمحترفين."
-                  : "Join the official IOMA Paris partner network across the UAE: exclusive treatment-room formats, high-precision MEMS diagnostic technology, masterclass protocols and dedicated wholesale pricing."}
+                {tr(loc, {
+                  en: "Join the official IOMA Paris partner network across the UAE: exclusive treatment-room formats, high-precision MEMS diagnostic technology, masterclass protocols and dedicated wholesale pricing.",
+                  fr: "Rejoignez le réseau officiel de partenaires IOMA Paris aux Émirats : formats cabine exclusifs, technologie de diagnostic MEMS de haute précision, protocoles masterclass et tarifs de gros dédiés.",
+                  ar: "انضموا إلى شبكة شركاء آيوما باريس في الإمارات: أحجام كابينة حصرية، أجهزة تشخيص MEMS المتقدمة، تدريب معتمد، وأسعار جملة مخصصة للمحترفين.",
+                })}
               </p>
 
               <ul data-cine-item className="space-y-3">
@@ -589,7 +724,13 @@ export default function ProLanding() {
                     "bg-foreground text-background hover:bg-sf-mauve",
                   )}
                 >
-                  <span>{ar ? "قدّم طلب الاعتماد" : "Apply to become a partner"}</span>
+                  <span>
+                    {tr(loc, {
+                      en: "Apply to become a partner",
+                      fr: "Devenir partenaire",
+                      ar: "قدّم طلب الاعتماد",
+                    })}
+                  </span>
                   <ArrowDown className="size-4" aria-hidden />
                 </a>
                 <Link
@@ -599,7 +740,13 @@ export default function ProLanding() {
                     "border border-foreground/25 bg-white text-foreground hover:border-sf-mauve hover:bg-sf-mauve/10",
                   )}
                 >
-                  <span>{ar ? "تسجيل دخول الشركاء" : "Partner sign in"}</span>
+                  <span>
+                    {tr(loc, {
+                      en: "Partner sign in",
+                      fr: "Connexion partenaires",
+                      ar: "تسجيل دخول الشركاء",
+                    })}
+                  </span>
                   <ArrowUpRight className="size-4 rtl:-scale-x-100" aria-hidden />
                 </Link>
               </div>
@@ -640,11 +787,11 @@ export default function ProLanding() {
             <ImageReveal className="relative aspect-[4/5] rounded-[2rem] bg-sf-ivory">
               <Image
                 src="/images/pro/advisor.jpg"
-                alt={
-                  ar
-                    ? "مستشارة آيوما تقدّم منتجًا"
-                    : "An IOMA advisor presenting a product"
-                }
+                alt={tr(loc, {
+                  en: "An IOMA advisor presenting a product",
+                  fr: "Une conseillère IOMA présentant un produit",
+                  ar: "مستشارة آيوما تقدّم منتجًا",
+                })}
                 fill
                 sizes="(min-width: 1024px) 40vw, 100vw"
                 className="object-cover object-[50%_25%]"
@@ -653,21 +800,27 @@ export default function ProLanding() {
           </div>
           <div className="lg:col-span-7">
             <SectionEyebrow>
-              {ar ? "الريادة العلمية لآيوما" : "Scientific heritage"}
+              {tr(loc, {
+                en: "Scientific heritage",
+                fr: "Héritage scientifique",
+                ar: "الريادة العلمية لآيوما",
+              })}
             </SectionEyebrow>
             <MaskText
               as="h2"
               className={cn("mt-5", h2Cls)}
-              text={
-                ar
-                  ? "أكثر من ٤٠٬٠٠٠ تركيبة ودقة ميكروإلكترونية مثبتة"
-                  : "Proven precision: 40,000+ formulations & MEMS technology"
-              }
+              text={tr(loc, {
+                en: "Proven precision: 40,000+ formulations & MEMS technology",
+                fr: "Une précision éprouvée : plus de 40 000 formulations et la technologie MEMS",
+                ar: "أكثر من ٤٠٬٠٠٠ تركيبة ودقة ميكروإلكترونية مثبتة",
+              })}
             />
             <p className="mt-5 max-w-2xl text-base leading-relaxed text-muted-foreground">
-              {ar
-                ? "تعتمد آيوما باريس على مستشعرات دقيقة مستمدة من صناعة الإلكترونيات المتقدمة لقياس رطوبة البشرة وتجددها واحمرارها بدقة موضوعية، قبل اقتراح التركيبات المخصصة أو تحضيرها."
-                : "Founded in Paris, IOMA harnesses micro-electromechanical sensors (MEMS) to read skin hydration, cellular renewal and redness with objective precision before recommending or compounding bespoke formulas."}
+              {tr(loc, {
+                en: "Founded in Paris, IOMA harnesses micro-electromechanical sensors (MEMS) to read skin hydration, cellular renewal and redness with objective precision before recommending or compounding bespoke formulas.",
+                fr: "Née à Paris, IOMA s'appuie sur des capteurs micro-électromécaniques (MEMS) pour lire l'hydratation, le renouvellement cellulaire et les rougeurs de la peau avec une précision objective, avant de recommander ou de préparer des formules sur mesure.",
+                ar: "تعتمد آيوما باريس على مستشعرات دقيقة مستمدة من صناعة الإلكترونيات المتقدمة لقياس رطوبة البشرة وتجددها واحمرارها بدقة موضوعية، قبل اقتراح التركيبات المخصصة أو تحضيرها.",
+              })}
             </p>
             <StaggerGrid revision="pillars" className="mt-10 grid gap-4 sm:grid-cols-2">
               {pillars.map(({ icon: Icon, t, b }) => (
@@ -695,33 +848,39 @@ export default function ProLanding() {
           <div className="grid gap-6 md:grid-cols-2 md:items-end">
             <div>
               <SectionEyebrow>
-                {ar ? "التقنية في كابينتكم" : "Technology in your cabin"}
+                {tr(loc, {
+                  en: "Technology in your cabin",
+                  fr: "La technologie dans votre cabine",
+                  ar: "التقنية في كابينتكم",
+                })}
               </SectionEyebrow>
               <MaskText
                 as="h2"
                 className={cn("mt-5", h2Cls)}
-                text={
-                  ar
-                    ? "أجهزة تقرأ البشرة وتصنع التركيبة"
-                    : "Devices that read the skin and create the formula"
-                }
+                text={tr(loc, {
+                  en: "Devices that read the skin and create the formula",
+                  fr: "Des appareils qui lisent la peau et créent la formule",
+                  ar: "أجهزة تقرأ البشرة وتصنع التركيبة",
+                })}
               />
             </div>
             <p className="text-base leading-relaxed text-muted-foreground">
-              {ar
-                ? "يقدّم الشريك المعتمد لعملائه تشخيصًا حيًّا ثم عناية مصممة لبشرتهم، في تجربة واحدة داخل الكابينة."
-                : "An approved partner offers clients a live diagnosis followed by care made for their skin, in a single cabin experience."}
+              {tr(loc, {
+                en: "An approved partner offers clients a live diagnosis followed by care made for their skin, in a single cabin experience.",
+                fr: "Un partenaire agréé offre à ses clientes un diagnostic en direct suivi d'un soin pensé pour leur peau, au sein d'une seule et même expérience en cabine.",
+                ar: "يقدّم الشريك المعتمد لعملائه تشخيصًا حيًّا ثم عناية مصممة لبشرتهم، في تجربة واحدة داخل الكابينة.",
+              })}
             </p>
           </div>
           <StaggerGrid revision="devices" className="mt-12 grid gap-4 md:grid-cols-5">
             <div className="group relative aspect-[16/10] overflow-hidden rounded-[1.5rem] bg-white md:col-span-3">
               <Image
                 src="/images/pro/gallery-1.jpg"
-                alt={
-                  ar
-                    ? "جهاز IOMA Sphere أثناء استشارة"
-                    : "An IOMA Sphere during a consultation"
-                }
+                alt={tr(loc, {
+                  en: "An IOMA Sphere during a consultation",
+                  fr: "Une IOMA Sphere lors d'une consultation",
+                  ar: "جهاز IOMA Sphere أثناء استشارة",
+                })}
                 fill
                 sizes="(min-width: 768px) 60vw, 100vw"
                 className="object-cover transition-transform duration-[900ms] ease-[var(--ease-out-strong)] motion-reduce:transition-none [@media(hover:hover)]:group-hover:scale-[1.04]"
@@ -730,7 +889,11 @@ export default function ProLanding() {
             <div className="group relative aspect-[4/5] overflow-hidden rounded-[1.5rem] bg-white md:col-span-2 md:aspect-auto">
               <Image
                 src="/images/pro/gallery-3.jpg"
-                alt={ar ? "شاشة التشخيص التفاعلية" : "The interactive diagnosis screen"}
+                alt={tr(loc, {
+                  en: "The interactive diagnosis screen",
+                  fr: "L'écran de diagnostic interactif",
+                  ar: "شاشة التشخيص التفاعلية",
+                })}
                 fill
                 sizes="(min-width: 768px) 40vw, 100vw"
                 className="object-cover transition-transform duration-[900ms] ease-[var(--ease-out-strong)] motion-reduce:transition-none [@media(hover:hover)]:group-hover:scale-[1.04]"
@@ -748,16 +911,18 @@ export default function ProLanding() {
             <MaskText
               as="h2"
               className={cn("mt-5", h2Cls)}
-              text={
-                ar
-                  ? "مسار الانضمام والاعتماد الرسمي"
-                  : "Four steps to official partnership"
-              }
+              text={tr(loc, {
+                en: "Four steps to official partnership",
+                fr: "Quatre étapes vers le partenariat officiel",
+                ar: "مسار الانضمام والاعتماد الرسمي",
+              })}
             />
             <p className="mt-4 text-sm text-muted-foreground sm:text-base">
-              {ar
-                ? "عملية بسيطة وواضحة من الطلب إلى تفعيل البوابة المهنية."
-                : "A clear workflow from first application to your official trade credentials."}
+              {tr(loc, {
+                en: "A clear workflow from first application to your official trade credentials.",
+                fr: "Un parcours clair, de la première demande à vos identifiants professionnels officiels.",
+                ar: "عملية بسيطة وواضحة من الطلب إلى تفعيل البوابة المهنية.",
+              })}
             </p>
           </div>
           <StaggerGrid
@@ -835,21 +1000,27 @@ export default function ProLanding() {
         <div className="mx-auto max-w-[1440px] px-4 md:px-8">
           <div className="mx-auto max-w-xl text-center">
             <SectionEyebrow center>
-              {ar ? "منتجات الكابينة الاحترافية" : "Official cabin catalogue"}
+              {tr(loc, {
+                en: "Official cabin catalogue",
+                fr: "Catalogue cabine officiel",
+                ar: "منتجات الكابينة الاحترافية",
+              })}
             </SectionEyebrow>
             <MaskText
               as="h2"
               className={cn("mt-5", h2Cls)}
-              text={
-                ar
-                  ? "أحجام مهنية لجلسات السبا والعيادات"
-                  : "Treatment-room formats & cabin sizes"
-              }
+              text={tr(loc, {
+                en: "Treatment-room formats & cabin sizes",
+                fr: "Formats cabine et tailles professionnelles",
+                ar: "أحجام مهنية لجلسات السبا والعيادات",
+              })}
             />
             <p className="mt-4 text-sm text-muted-foreground sm:text-base">
-              {ar
-                ? "تنسيقات كبيرة مصنّعة في فرنسا ومخصصة للاستخدام الاحترافي فقط."
-                : "Large-format products made in France, for licensed therapists and clinicians only."}
+              {tr(loc, {
+                en: "Large-format products made in France, for licensed therapists and clinicians only.",
+                fr: "Produits grand format fabriqués en France, réservés aux praticiens et cliniciens agréés.",
+                ar: "تنسيقات كبيرة مصنّعة في فرنسا ومخصصة للاستخدام الاحترافي فقط.",
+              })}
             </p>
           </div>
           <StaggerGrid
@@ -904,23 +1075,33 @@ export default function ProLanding() {
       <section className="bg-white px-4 py-20 md:px-8 md:py-28">
         <div className="mx-auto max-w-4xl rounded-[2rem] border border-sf-mauve/15 bg-sf-ivory px-6 py-14 text-center md:px-16 md:py-20">
           <SectionEyebrow center>
-            {ar ? "انضموا إلينا" : "Join the network"}
+            {tr(loc, {
+              en: "Join the network",
+              fr: "Rejoindre le réseau",
+              ar: "انضموا إلينا",
+            })}
           </SectionEyebrow>
           <MaskText
             as="h2"
             className={cn("mt-5", h2Cls)}
-            text={
-              ar
-                ? "هل أنتم مستعدون لتقديم آيوما باريس لعملائكم؟"
-                : "Ready to offer IOMA Paris to your clients?"
-            }
+            text={tr(loc, {
+              en: "Ready to offer IOMA Paris to your clients?",
+              fr: "Prêt(e) à proposer IOMA Paris à vos clients ?",
+              ar: "هل أنتم مستعدون لتقديم آيوما باريس لعملائكم؟",
+            })}
           />
           <div className="mt-9 flex flex-wrap justify-center gap-3">
             <a
               href="#apply-form"
               className={cn(pillBtn, "bg-foreground text-background hover:bg-sf-mauve")}
             >
-              <span>{ar ? "قدّم طلبك الآن" : "Apply now"}</span>
+              <span>
+                {tr(loc, {
+                  en: "Apply now",
+                  fr: "Candidater maintenant",
+                  ar: "قدّم طلبك الآن",
+                })}
+              </span>
               <ArrowDown className="size-4" aria-hidden />
             </a>
             <Link
@@ -931,7 +1112,13 @@ export default function ProLanding() {
               )}
             >
               <MapPin className="size-4" aria-hidden />
-              <span>{ar ? "اكتشف شركاءنا" : "See our partners"}</span>
+              <span>
+                {tr(loc, {
+                  en: "See our partners",
+                  fr: "Voir nos partenaires",
+                  ar: "اكتشف شركاءنا",
+                })}
+              </span>
             </Link>
           </div>
         </div>

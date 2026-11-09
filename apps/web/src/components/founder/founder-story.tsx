@@ -446,14 +446,16 @@ export function FounderStory({ loc }: { loc: Loc }) {
             >
               “{F.quote.text[loc]}”
             </blockquote>
-            <p
-              data-cine-item
-              lang="fr"
-              dir="ltr"
-              className="mt-6 font-serif text-lg italic text-muted-foreground"
-            >
-              {F.quote.original}
-            </p>
+            {loc !== "fr" && (
+              <p
+                data-cine-item
+                lang="fr"
+                dir="ltr"
+                className="mt-6 font-serif text-lg italic text-muted-foreground"
+              >
+                {F.quote.original}
+              </p>
+            )}
             <figcaption
               data-cine-item
               className="mt-6 text-xs uppercase tracking-[0.2em] text-foreground/55 rtl:tracking-normal"

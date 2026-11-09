@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { useLocale } from "next-intl";
+import { toLoc } from "@/lib/l10n";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { contactMessageSchema, type ContactMessageInput } from "@ioma/validation";
@@ -15,8 +16,8 @@ const F = CONTACT.form;
 
 /** Contact form: validated on the client and again on the server, honeypot + server rate limit against spam. */
 export function ServiceContactForm() {
-  const locale = useLocale() as "en" | "ar";
-  const loc = locale === "ar" ? "ar" : "en";
+  const locale = toLoc(useLocale());
+  const loc = locale;
   const mutation = useContactMutation();
   const successRef = useRef<HTMLHeadingElement>(null);
 

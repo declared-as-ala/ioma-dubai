@@ -1,14 +1,16 @@
 /**
- * Service and legal pages: copy for IOMA Paris Dubai (EN + AR; French is no longer a served locale).
+ * Service and legal pages: copy for IOMA Paris Dubai (EN + FR + AR).
  * Sources: the official IOMA Paris pages for the loyalty programme, contact, delivery/returns, secure payment,
  * the IEVA Group site, and the structure of the four legal pages. The official terms are FRENCH commercial terms:
  * their figures (fees, delays, discount caps, legal entity, jurisdiction) are deliberately NOT carried over to
  * the UAE site. Wherever UAE information is not confirmed, the copy says so and nothing is invented.
  * Arabic text was written for this build and needs marketing/legal review before it is relied on.
  */
-export type Loc = "en" | "ar";
+import { SERVICES_FR } from "./services-fr";
+
+export type Loc = "en" | "fr" | "ar";
 export type L = Record<Loc, string>;
-const l = (en: string, ar: string): L => ({ en, ar });
+const l = (en: string, ar: string): L => ({ en, fr: SERVICES_FR[en] ?? en, ar });
 
 export const COMMON = {
   pending: l("Pending approval", "بانتظار الاعتماد"),

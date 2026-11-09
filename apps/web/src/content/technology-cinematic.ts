@@ -1,10 +1,9 @@
 // Copy for the cinematic /technology page (six chapters). Every claim, figure and device description is
 // taken from content/technology.ts (client brief: IEVA Group presentation + IOMA brand book). Nothing is
 // invented here: items the brief flagged "to confirm with IEVA" stay unpublished.
-import { HERO, IN_LAB, SPHERE, STORY, TIMELINE, SOURCES, type L } from "./technology";
+import { HERO, IN_LAB, SPHERE, STORY, TIMELINE, SOURCES, l, type L } from "./technology";
 
 export type { L };
-const l = (en: string, ar: string): L => ({ en, ar });
 
 export const CHAPTERS = [
   { id: "ch-1", label: l("Introduction", "مقدمة") },

@@ -30,7 +30,12 @@ export function ChapterObserve({ loc }: { loc: Loc }) {
     })),
     {
       src: OBSERVE.profile.image,
-      label: loc === "ar" ? "ملفك الجمالي" : "Your beauty profile",
+      label:
+        loc === "ar"
+          ? "ملفك الجمالي"
+          : loc === "fr"
+            ? "Votre profil beauté"
+            : "Your beauty profile",
       body: "",
       kind: "profile" as const,
     },

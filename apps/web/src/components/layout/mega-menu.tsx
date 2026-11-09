@@ -14,8 +14,33 @@ interface MegaMenuProps {
   item?: ResolvedNavigationItem | null;
 }
 
-type Loc = "en" | "ar";
-const l = (en: string, ar: string) => ({ en, ar });
+import { toLoc, type Loc } from "@/lib/l10n";
+
+const FR: Record<string, string> = {
+  Dehydration: "Déshydratation",
+  "Anti-ageing & wrinkles": "Anti-âge & rides",
+  "Radiance & dull skin": "Éclat & teint terne",
+  Firmness: "Fermeté",
+  "Redness & sensitivity": "Rougeurs & sensibilité",
+  "Dark spots & even tone": "Taches & teint uniforme",
+  "Imperfections & pores": "Imperfections & pores",
+  "Eye contour": "Contour des yeux",
+  "Sun protection & pollution": "Protection solaire & pollution",
+  "Cleansers & makeup removers": "Nettoyants & démaquillants",
+  "Day & night creams": "Crèmes de jour & de nuit",
+  "High-precision serums": "Sérums haute précision",
+  "Masks & scrubs": "Masques & gommages",
+  "Eye care": "Soins des yeux",
+  "UV protection": "Protection UV",
+  "Hydration & nutrition": "Hydratation & nutrition",
+  "First wrinkles & radiance": "Premières rides & éclat",
+  "Anti-ageing & firmness": "Anti-âge & fermeté",
+  "Redness & soothing": "Rougeurs & apaisement",
+  "Clarity & imperfections": "Clarté & imperfections",
+  "Matte finish & pores": "Fini mat & pores",
+  "Dark spots & radiance": "Taches & éclat",
+};
+const l = (en: string, ar: string) => ({ en, ar, fr: FR[en] ?? en });
 
 // Built-in menu used when the admin has not configured sections.
 const DEFAULT_CONCERNS = [
@@ -191,7 +216,7 @@ function MenuLink({
 
 export function MegaMenu({ isOpen, onClose, item }: MegaMenuProps) {
   const t = useTranslations("Nav");
-  const loc = (useLocale() === "ar" ? "ar" : "en") as Loc;
+  const loc = toLoc(useLocale());
 
   if (!isOpen) return null;
 
@@ -324,7 +349,12 @@ export function MegaMenu({ isOpen, onClose, item }: MegaMenuProps) {
           className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent"
         />
         <span className="absolute start-4 top-4 rounded-full bg-white/95 px-3 py-1 text-[0.62rem] font-semibold uppercase tracking-[0.16em] text-foreground">
-          {pick(f.badge, loc) || (loc === "ar" ? "منتج أيقوني" : "Iconic care")}
+          {pick(f.badge, loc) ||
+            (loc === "ar"
+              ? "منتج أيقوني"
+              : loc === "fr"
+                ? "Soin iconique"
+                : "Iconic care")}
         </span>
         <span className="absolute inset-x-0 bottom-0 p-5 text-white">
           <span className="block text-[0.62rem] uppercase tracking-[0.2em] text-white/70">

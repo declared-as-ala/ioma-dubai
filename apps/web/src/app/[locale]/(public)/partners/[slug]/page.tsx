@@ -2,6 +2,7 @@
 
 import { use } from "react";
 import Image from "next/image";
+import { toLoc, tr } from "@/lib/l10n";
 import { useLocale, useTranslations } from "next-intl";
 import {
   ArrowLeft,
@@ -36,8 +37,9 @@ export default function PartnerDetailPage({
   const { slug } = use(params);
   const t = useTranslations("PartnerDetail");
   const tp = useTranslations("Partners");
-  const locale = useLocale() as "en" | "fr" | "ar";
-  const ar = locale === "ar";
+  const locale = toLoc(useLocale());
+  const L = (en: string, fr: string, arText: string) =>
+    tr(locale, { en, fr, ar: arText });
   const { data: partner, isLoading } = usePartnerQuery(slug);
 
   if (isLoading) {
@@ -59,9 +61,11 @@ export default function PartnerDetailPage({
       <main className="mx-auto max-w-[1440px] px-4 md:px-6 py-32 text-center">
         <h1 className="font-display text-3xl sm:text-4xl">{t("notFound")}</h1>
         <p className="mt-3 text-sm text-muted-foreground">
-          {ar
-            ? "تعذر العثور على هذا الشريك أو أنه غير متاح حاليًا."
-            : "The partner you requested could not be found or is currently inactive."}
+          {L(
+            "The partner you requested could not be found or is currently inactive.",
+            "Le partenaire demandé est introuvable ou actuellement inactif.",
+            "تعذر العثور على هذا الشريك أو أنه غير متاح حاليًا.",
+          )}
         </p>
         <Button
           asChild
@@ -111,7 +115,11 @@ export default function PartnerDetailPage({
       ? partner.openingHours
       : (partner.openingHours as any)?.[locale] ||
         (partner.openingHours as any)?.en ||
-        (ar ? "يوميًا: ١٠:٠٠ ص – ١٠:٠٠ م" : "Daily: 10:00 AM – 10:00 PM");
+        L(
+          "Daily: 10:00 AM – 10:00 PM",
+          "Tous les jours : 10h00 – 22h00",
+          "يوميًا: ١٠:٠٠ ص – ١٠:٠٠ م",
+        );
 
   return (
     <main className="bg-background pb-24">
@@ -257,9 +265,11 @@ export default function PartnerDetailPage({
                     {t("diagnosisDescription")}
                   </p>
                   <p className="mt-3 text-xs text-sf-champagne font-semibold uppercase tracking-wider">
-                    {ar
-                      ? "فحص بدقة أجهزة MEMS ومختبر In.Lab متاح لدى هذا الشريك"
-                      : "High-precision MEMS sensors & In.Lab custom compounding available on-site"}
+                    {L(
+                      "High-precision MEMS sensors & In.Lab custom compounding available on-site",
+                      "Capteurs MEMS haute précision et préparation sur mesure In.Lab disponibles sur place",
+                      "فحص بدقة أجهزة MEMS ومختبر In.Lab متاح لدى هذا الشريك",
+                    )}
                   </p>
                 </div>
               </div>
@@ -272,9 +282,11 @@ export default function PartnerDetailPage({
                   {t("services")}
                 </h2>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  {ar
-                    ? "البروتوكولات والعلاجات الحصرية المعتمدة من آيوما باريس المتوفرة لدى هذا الشريك."
-                    : "Exclusive IOMA Paris certified protocols and treatments available at this partner."}
+                  {L(
+                    "Exclusive IOMA Paris certified protocols and treatments available at this partner.",
+                    "Protocoles et soins exclusifs certifiés IOMA Paris, disponibles chez ce partenaire.",
+                    "البروتوكولات والعلاجات الحصرية المعتمدة من آيوما باريس المتوفرة لدى هذا الشريك.",
+                  )}
                 </p>
               </div>
 
@@ -308,7 +320,11 @@ export default function PartnerDetailPage({
 
                       <div className="text-end shrink-0">
                         <span className="text-xs font-semibold uppercase tracking-wider text-sf-champagne">
-                          {ar ? "متوفر في هذا المعهد" : "In-Cabin Ritual"}
+                          {L(
+                            "In-Cabin Ritual",
+                            "Rituel en cabine",
+                            "متوفر في هذا المعهد",
+                          )}
                         </span>
                       </div>
                     </article>
@@ -322,7 +338,11 @@ export default function PartnerDetailPage({
           <div className="lg:col-span-5 lg:sticky lg:top-36">
             <div className="rounded-2xl border border-border/80 bg-card p-6 sm:p-8 shadow-sm space-y-6">
               <h3 className="font-display text-xl font-medium text-foreground pb-4 border-b border-border">
-                {ar ? "معلومات التواصل والزيارة" : "Establishment & Contact"}
+                {L(
+                  "Establishment & Contact",
+                  "Établissement & contact",
+                  "معلومات التواصل والزيارة",
+                )}
               </h3>
 
               <div className="space-y-4 text-sm">
@@ -342,7 +362,7 @@ export default function PartnerDetailPage({
                   <Clock className="size-4 text-muted-foreground shrink-0 mt-0.5" />
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                      {ar ? "أوقات العمل" : "Opening Hours"}
+                      {L("Opening Hours", "Horaires d'ouverture", "أوقات العمل")}
                     </p>
                     <p className="text-sm font-medium text-foreground mt-0.5">
                       {openingHoursText}
@@ -413,7 +433,7 @@ export default function PartnerDetailPage({
                     <Globe className="size-4 text-muted-foreground shrink-0 mt-0.5" />
                     <div>
                       <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                        {ar ? "الموقع الرسمي" : "Official Website"}
+                        {L("Official Website", "Site officiel", "الموقع الرسمي")}
                       </p>
                       <a
                         href={partner.website}

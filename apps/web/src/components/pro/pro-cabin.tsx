@@ -7,6 +7,7 @@ import { useProAccess } from "@/hooks/use-pro-access";
 import { formatMinor } from "@/lib/money";
 import { cn } from "@/lib/utils";
 import { CABIN, SHOP } from "@/content/pro-space";
+import { tr } from "@/lib/l10n";
 import galleries from "@/content/galleries.json";
 import { GalleryGrid, type GalleryImage } from "@/components/gallery/gallery-grid";
 import {
@@ -122,11 +123,15 @@ export default function ProCabin() {
       </section>
 
       <section>
-        <Eyebrow>{loc === "ar" ? "أحجام الكابينة" : "Cabin formats"}</Eyebrow>
+        <Eyebrow>
+          {tr(loc, { en: "Cabin formats", fr: "Formats cabine", ar: "أحجام الكابينة" })}
+        </Eyebrow>
         <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-          {loc === "ar"
-            ? "منتجات الكابينة الرسمية من آيوما باريس، للعلاجات في المعهد."
-            : "The official IOMA Paris cabin products, for treatments in the institute."}
+          {tr(loc, {
+            en: "The official IOMA Paris cabin products, for treatments in the institute.",
+            fr: "Les produits cabine officiels IOMA Paris, pour les soins en institut.",
+            ar: "منتجات الكابينة الرسمية من آيوما باريس، للعلاجات في المعهد.",
+          })}
         </p>
         <div className="mt-4">
           <GalleryGrid
@@ -134,21 +139,26 @@ export default function ProCabin() {
             columns="columns-2 sm:columns-3 lg:columns-4 xl:columns-5"
             tone="bg-[#f4f2fd]"
             fit="contain"
-            labels={
-              loc === "ar"
-                ? {
-                    close: "إغلاق",
-                    prev: "الصورة السابقة",
-                    next: "الصورة التالية",
-                    open: "فتح الصورة",
-                  }
-                : {
-                    close: "Close",
-                    prev: "Previous image",
-                    next: "Next image",
-                    open: "Open image",
-                  }
-            }
+            labels={tr(loc, {
+              en: {
+                close: "Close",
+                prev: "Previous image",
+                next: "Next image",
+                open: "Open image",
+              },
+              fr: {
+                close: "Fermer",
+                prev: "Image précédente",
+                next: "Image suivante",
+                open: "Ouvrir l'image",
+              },
+              ar: {
+                close: "إغلاق",
+                prev: "الصورة السابقة",
+                next: "الصورة التالية",
+                open: "فتح الصورة",
+              },
+            })}
           />
         </div>
       </section>

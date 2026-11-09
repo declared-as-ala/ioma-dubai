@@ -3,6 +3,7 @@
 import { useLocale, useTranslations } from "next-intl";
 import { motion } from "motion/react";
 import { Link } from "@/i18n/navigation";
+import { tr } from "@/lib/l10n";
 import { Building2, Cpu, BookOpen, MapPin, Briefcase, ArrowRight } from "lucide-react";
 
 interface InsideIomaDropdownProps {
@@ -12,7 +13,7 @@ interface InsideIomaDropdownProps {
 
 export function InsideIomaDropdown({ isOpen, onClose }: InsideIomaDropdownProps) {
   const t = useTranslations("Nav");
-  const ar = useLocale() === "ar";
+  const locale = useLocale();
 
   if (!isOpen) return null;
 
@@ -20,41 +21,51 @@ export function InsideIomaDropdown({ isOpen, onClose }: InsideIomaDropdownProps)
     {
       href: "/about",
       title: t("maison"),
-      desc: ar
-        ? "قصة مستحضرات التجميل الراقية المصممة خصيصًا وفلسفتنا الباريسية."
-        : "The story of bespoke high cosmetics and our Parisian philosophy.",
+      desc: tr(locale, {
+        en: "The story of bespoke high cosmetics and our Parisian philosophy.",
+        fr: "L'histoire de la haute cosmétique sur mesure et notre philosophie parisienne.",
+        ar: "قصة مستحضرات التجميل الراقية المصممة خصيصًا وفلسفتنا الباريسية.",
+      }),
       icon: Building2,
     },
     {
       href: "/technology",
       title: t("technology"),
-      desc: ar
-        ? "حساسات MEMS وبراءات اختراع إلكترونية دقيقة ودقة تشخيصية مثبتة."
-        : "MEMS sensors, micro-electronic patents and proven diagnostic precision.",
+      desc: tr(locale, {
+        en: "MEMS sensors, micro-electronic patents and proven diagnostic precision.",
+        fr: "Capteurs MEMS, brevets micro-électroniques et précision diagnostique éprouvée.",
+        ar: "حساسات MEMS وبراءات اختراع إلكترونية دقيقة ودقة تشخيصية مثبتة.",
+      }),
       icon: Cpu,
     },
     {
       href: "/magazine",
       title: t("journal"),
-      desc: ar
-        ? "نصائح الخبراء، وعلم البشرة المتقدم، وطقوس تناسب مناخ الإمارات."
-        : "Expert advice, advanced skin science, and bespoke beauty rituals.",
+      desc: tr(locale, {
+        en: "Expert advice, advanced skin science, and bespoke beauty rituals.",
+        fr: "Conseils d'experts, science avancée de la peau et rituels de beauté sur mesure.",
+        ar: "نصائح الخبراء، وعلم البشرة المتقدم، وطقوس تناسب مناخ الإمارات.",
+      }),
       icon: BookOpen,
     },
     {
       href: "/partners",
       title: t("partners"),
-      desc: ar
-        ? "اكتشف المعاهد والسبا الشريكة المعتمدة لآيوما باريس في الإمارات."
-        : "Discover the IOMA Paris approved partner institutes and spas in the UAE.",
+      desc: tr(locale, {
+        en: "Discover the IOMA Paris approved partner institutes and spas in the UAE.",
+        fr: "Découvrez les instituts et spas partenaires agréés IOMA Paris aux Émirats.",
+        ar: "اكتشف المعاهد والسبا الشريكة المعتمدة لآيوما باريس في الإمارات.",
+      }),
       icon: MapPin,
     },
     {
       href: "/professionals",
       title: t("professionals"),
-      desc: ar
-        ? "بروتوكولات الكابينة وتدريب متميز وطلبات مهنية B2B."
-        : "Cabin protocols, premium training and professional B2B orders.",
+      desc: tr(locale, {
+        en: "Cabin protocols, premium training and professional B2B orders.",
+        fr: "Protocoles en cabine, formation premium et commandes professionnelles B2B.",
+        ar: "بروتوكولات الكابينة وتدريب متميز وطلبات مهنية B2B.",
+      }),
       icon: Briefcase,
     },
   ];

@@ -114,6 +114,7 @@ export default function ProOverview() {
                 ? tx(customer ? OVERVIEW.welcomeBack(name) : OVERVIEW.welcome(name))
                 : tx({
                     en: customer ? "Welcome back." : "Welcome.",
+                    fr: customer ? "Bon retour parmi nous." : "Bienvenue.",
                     ar: customer ? "مرحباً بعودتك." : "مرحباً.",
                   })}
             </h1>
@@ -303,7 +304,11 @@ export default function ProOverview() {
             <div className="px-6 py-12 text-center">
               <p className="text-sm text-muted-foreground">{tx(OVERVIEW.noOrders)}</p>
               <Link href="/portal/shop" className={cn(primaryBtn, "mt-5")}>
-                {tx({ en: "Start your first order", ar: "ابدأ طلبك الأول" })}
+                {tx({
+                  en: "Start your first order",
+                  fr: "Passez votre première commande",
+                  ar: "ابدأ طلبك الأول",
+                })}
               </Link>
             </div>
           )}

@@ -2,6 +2,7 @@
 
 import { MaskText } from "@/components/motion/cine";
 import { useMemo, useState } from "react";
+import { toLoc, tr } from "@/lib/l10n";
 import { useLocale, useTranslations } from "next-intl";
 import {
   ArrowUpRight,
@@ -39,8 +40,9 @@ const TYPE_FILTERS = [
 
 export default function PartnersPage() {
   const t = useTranslations("Partners");
-  const locale = useLocale() as "en" | "ar" | "fr";
-  const ar = locale === "ar";
+  const locale = toLoc(useLocale());
+  const L = (en: string, fr: string, arText: string) =>
+    tr(locale, { en, fr, ar: arText });
   const [selectedEmirate, setSelectedEmirate] = useState("");
   const [selectedType, setSelectedType] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
@@ -143,13 +145,19 @@ export default function PartnersPage() {
             <MaskText
               as="h1"
               immediate
-              text={ar ? "اكتشفوا معاهدنا وشركاءنا" : "Discover Our Partners"}
+              text={L(
+                "Discover Our Partners",
+                "Découvrez nos instituts partenaires",
+                "اكتشفوا معاهدنا وشركاءنا",
+              )}
               className="mt-5 max-w-4xl font-display text-[clamp(2.6rem,7vw,6rem)] font-medium uppercase leading-[0.96] tracking-[-0.03em] text-foreground rtl:normal-case rtl:leading-[1.2] rtl:tracking-normal"
             />
             <p className="mt-5 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg font-light">
-              {ar
-                ? "تفضلوا بزيارة شركائنا المعتمدين في جميع أنحاء الإمارات لاختبار دقة تشخيص آيوما وبروتوكولات العناية الفاخرة."
-                : "Locate our official approved luxury spas, clinics and beauty institutes across the UAE to discover in-person diagnostic precision and bespoke cabin rituals."}
+              {L(
+                "Locate our official approved luxury spas, clinics and beauty institutes across the UAE to discover in-person diagnostic precision and bespoke cabin rituals.",
+                "Trouvez nos spas de luxe, cliniques et instituts de beauté agréés dans tous les Émirats pour découvrir en personne la précision du diagnostic et des rituels en cabine sur mesure.",
+                "تفضلوا بزيارة شركائنا المعتمدين في جميع أنحاء الإمارات لاختبار دقة تشخيص آيوما وبروتوكولات العناية الفاخرة.",
+              )}
             </p>
           </div>
 
@@ -181,11 +189,11 @@ export default function PartnersPage() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={
-                ar
-                  ? "ابحث باسم الشريك أو المدينة أو العنوان..."
-                  : "Search partner name, city or emirate..."
-              }
+              placeholder={L(
+                "Search partner name, city or emirate...",
+                "Rechercher un partenaire, une ville ou un émirat...",
+                "ابحث باسم الشريك أو المدينة أو العنوان...",
+              )}
               className="h-12 w-full rounded-full border border-border bg-background ps-11 pe-10 text-xs font-medium uppercase tracking-wider outline-none transition-colors hover:border-foreground/40 focus:border-sf-champagne focus:ring-2 focus:ring-sf-champagne/20"
             />
             {searchQuery && (
@@ -261,7 +269,7 @@ export default function PartnersPage() {
                     : "text-muted-foreground hover:text-foreground",
                 )}
               >
-                {ar ? "الكل" : "Both"}
+                {L("Both", "Tous", "الكل")}
               </button>
               <button
                 type="button"
@@ -273,7 +281,7 @@ export default function PartnersPage() {
                     : "text-muted-foreground hover:text-foreground",
                 )}
               >
-                {ar ? "قائمة" : "List"}
+                {L("List", "Liste", "قائمة")}
               </button>
               <button
                 type="button"
@@ -285,7 +293,7 @@ export default function PartnersPage() {
                     : "text-muted-foreground hover:text-foreground",
                 )}
               >
-                {ar ? "خريطة" : "Map"}
+                {L("Map", "Carte", "خريطة")}
               </button>
             </div>
 

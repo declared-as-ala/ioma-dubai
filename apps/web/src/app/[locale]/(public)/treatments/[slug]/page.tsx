@@ -45,7 +45,11 @@ export default async function TreatmentDetailPage({
       </div>
       <Button asChild size="lg" className="mt-10 uppercase tracking-widest">
         <Link href="/partners" prefetch={false}>
-          {locale === "ar" ? "البحث عن معهد شريك" : "Find an Institute"}
+          {locale === "ar"
+            ? "البحث عن معهد شريك"
+            : locale === "fr"
+              ? "Trouver un institut"
+              : "Find an Institute"}
         </Link>
       </Button>
     </main>

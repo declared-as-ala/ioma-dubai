@@ -1,5 +1,6 @@
 "use client";
 
+import { toLoc, tr } from "@/lib/l10n";
 import { useLocale, useTranslations } from "next-intl";
 import { ArrowUpRight, MapPin, Navigation, Phone } from "lucide-react";
 import type { PartnerListItem } from "@ioma/types";
@@ -28,7 +29,7 @@ const initials = (name: string) =>
 
 export function PartnerCard({ partner, isSelected, onSelect }: PartnerCardProps) {
   const t = useTranslations("Partners");
-  const locale = useLocale() as "en" | "ar";
+  const locale = toLoc(useLocale());
   const emirate = EMIRATES.find((e) => e.code === partner.emirate);
   const emirateName = emirate
     ? (emirate.name[locale] ?? emirate.name.en)
@@ -164,7 +165,11 @@ export function PartnerCard({ partner, isSelected, onSelect }: PartnerCardProps)
             onClick={(e) => e.stopPropagation()}
             className="inline-flex min-h-11 items-center rounded-full bg-foreground px-5 text-xs font-semibold uppercase tracking-wider text-background transition-colors hover:bg-foreground/85"
           >
-            {locale === "ar" ? "عرض الشريك" : "View Partner"}
+            {tr(locale, {
+              en: "View Partner",
+              fr: "Voir le partenaire",
+              ar: "عرض الشريك",
+            })}
           </Link>
         </div>
       </div>

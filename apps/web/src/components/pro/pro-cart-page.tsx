@@ -14,41 +14,66 @@ import { cn } from "@/lib/utils";
 import type { L } from "@/content/pro-space";
 import { EmptyNote, PageTitle, ProCard, outlineBtn, primaryBtn, useTx } from "./pro-ui";
 
-const l = (en: string, ar: string): L => ({ en, ar });
+const l = (en: string, ar: string, fr: string): L => ({ en, ar, fr });
 
 const C = {
-  title: l("Your order", "طلبك"),
+  title: l("Your order", "طلبك", "Votre commande"),
   intro: l(
     "Check quantities, then continue to delivery details.",
     "راجع الكميات ثم تابع إلى بيانات التوصيل.",
+    "Vérifiez les quantités, puis passez aux informations de livraison.",
   ),
-  steps: [l("Cart", "السلة"), l("Delivery", "التوصيل"), l("Confirmation", "التأكيد")],
-  items: (n: number): L => l(`${n} item${n === 1 ? "" : "s"}`, `${n} منتج`),
-  qty: l("Quantity", "الكمية"),
-  remove: l("Remove", "حذف"),
-  clear: l("Empty cart", "إفراغ السلة"),
-  summary: l("Order summary", "ملخص الطلب"),
-  subtotal: l("Subtotal", "المجموع الفرعي"),
+  steps: [
+    l("Cart", "السلة", "Panier"),
+    l("Delivery", "التوصيل", "Livraison"),
+    l("Confirmation", "التأكيد", "Confirmation"),
+  ],
+  items: (n: number): L =>
+    l(`${n} item${n === 1 ? "" : "s"}`, `${n} منتج`, `${n} article${n > 1 ? "s" : ""}`),
+  qty: l("Quantity", "الكمية", "Quantité"),
+  remove: l("Remove", "حذف", "Supprimer"),
+  clear: l("Empty cart", "إفراغ السلة", "Vider le panier"),
+  summary: l("Order summary", "ملخص الطلب", "Récapitulatif de la commande"),
+  subtotal: l("Subtotal", "المجموع الفرعي", "Sous-total"),
   vatNote: l(
     "VAT and delivery are calculated at the next step.",
     "تُحتسب الضريبة والتوصيل في الخطوة التالية.",
+    "La TVA et la livraison sont calculées à l'étape suivante.",
   ),
-  checkout: l("Continue to delivery", "المتابعة إلى التوصيل"),
-  more: l("Keep shopping", "متابعة التسوق"),
-  empty: l("Your cart is empty.", "سلتك فارغة."),
-  browse: l("Browse the pro shop", "تصفح المتجر المهني"),
-  error: l("Something went wrong. Please try again.", "حدث خطأ. حاول مرة أخرى."),
-  loading: l("Loading your cart…", "جارٍ تحميل السلة…"),
-  progressTitle: l("Progress to your pro benefits", "التقدم نحو مزاياك المهنية"),
+  checkout: l(
+    "Continue to delivery",
+    "المتابعة إلى التوصيل",
+    "Continuer vers la livraison",
+  ),
+  more: l("Keep shopping", "متابعة التسوق", "Poursuivre vos achats"),
+  empty: l("Your cart is empty.", "سلتك فارغة.", "Votre panier est vide."),
+  browse: l("Browse the pro shop", "تصفح المتجر المهني", "Parcourir la boutique pro"),
+  error: l(
+    "Something went wrong. Please try again.",
+    "حدث خطأ. حاول مرة أخرى.",
+    "Une erreur est survenue. Veuillez réessayer.",
+  ),
+  loading: l("Loading your cart…", "جارٍ تحميل السلة…", "Chargement de votre panier…"),
+  progressTitle: l(
+    "Progress to your pro benefits",
+    "التقدم نحو مزاياك المهنية",
+    "Progression vers vos avantages pro",
+  ),
   progressLeft: (amount: string): L =>
-    l(`${amount} left to unlock your benefits.`, `متبقٍ ${amount} لفتح مزاياك.`),
+    l(
+      `${amount} left to unlock your benefits.`,
+      `متبقٍ ${amount} لفتح مزاياك.`,
+      `Encore ${amount} pour débloquer vos avantages.`,
+    ),
   progressDone: l(
     "Your first order reaches the unlock threshold.",
     "طلبك الأول يبلغ حد فتح المزايا.",
+    "Votre première commande atteint le seuil de déblocage.",
   ),
   unlockNote: l(
     "Benefits open once the order is confirmed.",
     "تُفتح المزايا عند تأكيد الطلب.",
+    "Les avantages s'ouvrent dès que la commande est confirmée.",
   ),
 };
 

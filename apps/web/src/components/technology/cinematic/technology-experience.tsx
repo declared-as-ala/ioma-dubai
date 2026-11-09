@@ -49,7 +49,13 @@ export function TechnologyExperience({ loc }: { loc: Loc }) {
   return (
     <div ref={root} className="tx">
       <nav
-        aria-label={loc === "ar" ? "فصول الصفحة" : "Page chapters"}
+        aria-label={
+          loc === "ar"
+            ? "فصول الصفحة"
+            : loc === "fr"
+              ? "Chapitres de la page"
+              : "Page chapters"
+        }
         className="pointer-events-none fixed inset-y-0 end-4 z-20 hidden items-center lg:flex xl:end-6"
       >
         <ol className="pointer-events-auto flex flex-col gap-1">

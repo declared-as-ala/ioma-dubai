@@ -5,8 +5,10 @@
 // Photos are the low-resolution brief images — replace with HD files from IEVA
 // (tracked in CLIENT_REQUIREMENTS.md).
 
-export type L = { en: string; ar: string };
-const l = (en: string, ar: string): L => ({ en, ar });
+import { FR } from "./technology-fr";
+
+export type L = { en: string; fr: string; ar: string };
+export const l = (en: string, ar: string): L => ({ en, fr: FR[en] ?? en, ar });
 
 export const SOURCES = {
   ieva: l("Source: IEVA Group, February 2024.", "المصدر: مجموعة IEVA، فبراير 2024."),

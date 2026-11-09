@@ -1,4 +1,5 @@
 import { useLocale } from "next-intl";
+import { toLoc, tr } from "@/lib/l10n";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
@@ -16,24 +17,38 @@ import { HaircareBand } from "@/components/home/haircare-band";
 import { Briefcase, Hotel, MapPin, Sparkles, Stethoscope } from "lucide-react";
 
 export default function HomePage() {
-  const locale = useLocale() as "en" | "ar";
+  const locale = toLoc(useLocale());
   const ar = locale === "ar";
+  const L = (en: string, fr: string, arText: string) =>
+    tr(locale, { en, fr, ar: arText });
 
-  const bestSellersKicker =
-    locale === "ar" ? "مختارات استثنائية" : "Exceptional Selection";
-  const bestSellersTitle = locale === "ar" ? "أفضل المبيعات" : "Our Best Sellers";
-  const bestSellersDesc =
-    locale === "ar"
-      ? "تركيبات آيوما باريس المميزة والمشهورة بفعاليتها المثبتة وتجربتها الحسية الفريدة."
-      : "Iconic IOMA Paris formulations acclaimed for their proven clinical efficacy and unique sensory experience.";
+  const bestSellersKicker = L(
+    "Exceptional Selection",
+    "Sélection d'exception",
+    "مختارات استثنائية",
+  );
+  const bestSellersTitle = L("Our Best Sellers", "Nos best-sellers", "أفضل المبيعات");
+  const bestSellersDesc = L(
+    "Iconic IOMA Paris formulations acclaimed for their proven clinical efficacy and unique sensory experience.",
+    "Les formules iconiques d'IOMA Paris, plébiscitées pour leur efficacité clinique prouvée et leur expérience sensorielle unique.",
+    "تركيبات آيوما باريس المميزة والمشهورة بفعاليتها المثبتة وتجربتها الحسية الفريدة.",
+  );
 
-  const routinesKicker = locale === "ar" ? "بروتوكولات متكاملة" : "Complete Protocols";
-  const routinesTitle =
-    locale === "ar" ? "روتينات ومجموعات العناية" : "Our Skincare Routines & Kits";
-  const routinesDesc =
-    locale === "ar"
-      ? "طقوس متكاملة مصممة بتناغم لتعزيز نتائج كل تركيبة يومًا بعد يوم."
-      : "Turnkey rituals designed in synergy to amplify the clinical results of each formula day after day.";
+  const routinesKicker = L(
+    "Complete Protocols",
+    "Protocoles complets",
+    "بروتوكولات متكاملة",
+  );
+  const routinesTitle = L(
+    "Our Skincare Routines & Kits",
+    "Nos routines & coffrets de soins",
+    "روتينات ومجموعات العناية",
+  );
+  const routinesDesc = L(
+    "Turnkey rituals designed in synergy to amplify the clinical results of each formula day after day.",
+    "Des rituels clés en main pensés en synergie pour amplifier, jour après jour, les résultats cliniques de chaque formule.",
+    "طقوس متكاملة مصممة بتناغم لتعزيز نتائج كل تركيبة يومًا بعد يوم.",
+  );
 
   return (
     <main className="relative bg-background">
@@ -41,7 +56,7 @@ export default function HomePage() {
       <CinematicHero />
 
       {/* SCROLL STORY: measure, formulate, ritual */}
-      <HomeStory ar={ar} />
+      <HomeStory locale={locale} />
 
       {/* BRAND: editorial split with image curtain */}
       <section
@@ -62,20 +77,22 @@ export default function HomePage() {
             <MaskText
               as="h2"
               className="font-display text-[clamp(2.2rem,5vw,4.6rem)] font-medium leading-[1.04] tracking-[-0.025em] text-foreground rtl:leading-[1.3] rtl:tracking-normal"
-              text={
-                ar
-                  ? "ولدت في باريس. صُمّمت لمناخ الخليج."
-                  : "Born in Paris. Perfected for the Gulf climate."
-              }
+              text={L(
+                "Born in Paris. Perfected for the Gulf climate.",
+                "Née à Paris. Perfectionnée pour le climat du Golfe.",
+                "ولدت في باريس. صُمّمت لمناخ الخليج.",
+              )}
             />
             <Reveal className="space-y-10">
               <p
                 data-cine-item
                 className="max-w-2xl text-base font-light leading-relaxed text-muted-foreground sm:text-lg"
               >
-                {ar
-                  ? "تأسست آيوما باريس بناءً على قناعة راسخة: لا توجد بشرتان متطابقتان. نقيس أدق خصائص البشرة أولاً، لنحوّل الدقة العلمية إلى طقوس عناية يومية تحمي وترمم حاجز البشرة في مواجهة حرارة الخليج وأشعة الشمس وجفاف التكييف."
-                  : "Founded in Paris out of one single conviction: no two skins are alike. IOMA measures before it formulates, turning high-tech diagnostic precision into custom-tailored daily formulas engineered to protect and replenish the skin barrier against the Gulf's intense heat, sun, and indoor dryness."}
+                {L(
+                  "Founded in Paris out of one single conviction: no two skins are alike. IOMA measures before it formulates, turning high-tech diagnostic precision into custom-tailored daily formulas engineered to protect and replenish the skin barrier against the Gulf's intense heat, sun, and indoor dryness.",
+                  "Fondée à Paris sur une conviction unique : il n'existe pas deux peaux identiques. IOMA mesure avant de formuler, et transforme une précision de diagnostic de haute technologie en formules quotidiennes sur mesure, conçues pour protéger et restaurer la barrière cutanée face à la chaleur intense du Golfe, au soleil et à la sécheresse de la climatisation.",
+                  "تأسست آيوما باريس بناءً على قناعة راسخة: لا توجد بشرتان متطابقتان. نقيس أدق خصائص البشرة أولاً، لنحوّل الدقة العلمية إلى طقوس عناية يومية تحمي وترمم حاجز البشرة في مواجهة حرارة الخليج وأشعة الشمس وجفاف التكييف.",
+                )}
               </p>
               <dl
                 data-cine-item
@@ -84,15 +101,27 @@ export default function HomePage() {
                 {[
                   [
                     "1M+",
-                    ar ? "تشخيص في أطلس آيوما للبشرة" : "Skin profiles in the IOMA Atlas",
+                    L(
+                      "Skin profiles in the IOMA Atlas",
+                      "Profils de peau dans l'Atlas IOMA",
+                      "تشخيص في أطلس آيوما للبشرة",
+                    ),
                   ],
                   [
                     "40 000+",
-                    ar ? "تركيبة ممكنة مع جهاز In.Lab" : "Bespoke formulas via In.Lab",
+                    L(
+                      "Bespoke formulas via In.Lab",
+                      "Formules sur mesure via In.Lab",
+                      "تركيبة ممكنة مع جهاز In.Lab",
+                    ),
                   ],
                   [
                     "100%",
-                    ar ? "مُبتكر ومُصنّع في فرنسا" : "Formulated & made in France",
+                    L(
+                      "Formulated & made in France",
+                      "Formulé & fabriqué en France",
+                      "مُبتكر ومُصنّع في فرنسا",
+                    ),
                   ],
                 ].map(([v, l]) => (
                   <div key={v}>
@@ -115,7 +144,7 @@ export default function HomePage() {
                   className="px-0 font-semibold uppercase tracking-widest text-foreground"
                 >
                   <Link href="/about" className="inline-flex items-center gap-2">
-                    <span>{ar ? "اكتشف الدار" : "About IOMA"}</span>
+                    <span>{L("About IOMA", "À propos d'IOMA", "اكتشف الدار")}</span>
                     <CtaArrow />
                   </Link>
                 </Button>
@@ -125,7 +154,9 @@ export default function HomePage() {
                   className="px-0 font-semibold uppercase tracking-widest text-foreground"
                 >
                   <Link href="/technology" className="inline-flex items-center gap-2">
-                    <span>{ar ? "تقنيتنا وابتكاراتنا" : "Our Technology"}</span>
+                    <span>
+                      {L("Our Technology", "Notre technologie", "تقنيتنا وابتكاراتنا")}
+                    </span>
                     <CtaArrow />
                   </Link>
                 </Button>
@@ -205,7 +236,11 @@ export default function HomePage() {
                 <div className="inline-flex items-center gap-3 text-[0.7rem] uppercase tracking-[0.26em] text-sf-mauve font-semibold rtl:tracking-normal">
                   <span aria-hidden className="h-px w-8 bg-sf-mauve" />
                   <span>
-                    {ar ? "معاهد وشركاء آيوما — الإمارات" : "Partner Institutes — UAE"}
+                    {L(
+                      "Partner Institutes — UAE",
+                      "Instituts partenaires — EAU",
+                      "معاهد وشركاء آيوما — الإمارات",
+                    )}
                   </span>
                 </div>
                 <h2 className="font-display text-[clamp(2rem,4.6vw,3.8rem)] font-light leading-[1.08] tracking-tight text-foreground rtl:leading-[1.3]">
@@ -214,6 +249,13 @@ export default function HomePage() {
                       عِش تجربة آيوما الحضورية <br />
                       <span className="font-serif italic text-sf-mauve">
                         في أفخم منتجعات الإمارات.
+                      </span>
+                    </>
+                  ) : locale === "fr" ? (
+                    <>
+                      Vivez IOMA en personne <br />
+                      <span className="font-serif italic text-sf-mauve">
+                        À Dubaï &amp; dans les Émirats.
                       </span>
                     </>
                   ) : (
@@ -226,9 +268,11 @@ export default function HomePage() {
                   )}
                 </h2>
                 <p className="max-w-xl text-sm sm:text-base leading-relaxed font-light text-muted-foreground">
-                  {ar
-                    ? "تتواجد آيوما باريس في أرقى الفنادق والمنتجعات الصحية والعيادات التجميلية في دبي وأبوظبي. اكتشف أقرب معهد شريك واختبر دقة التشخيص وبروتوكولات العناية الحصرية."
-                    : "Discover IOMA Paris at prestigious luxury hotels, aesthetic clinics, and partner institutes across Dubai and Abu Dhabi. Locate your nearest partner institute to experience in-person diagnostic precision and bespoke cabin rituals."}
+                  {L(
+                    "Discover IOMA Paris at prestigious luxury hotels, aesthetic clinics, and partner institutes across Dubai and Abu Dhabi. Locate your nearest partner institute to experience in-person diagnostic precision and bespoke cabin rituals.",
+                    "Retrouvez IOMA Paris dans des hôtels de luxe prestigieux, des cliniques esthétiques et des instituts partenaires à Dubaï et Abou Dabi. Trouvez l'institut partenaire le plus proche pour vivre la précision du diagnostic et des rituels en cabine sur mesure.",
+                    "تتواجد آيوما باريس في أرقى الفنادق والمنتجعات الصحية والعيادات التجميلية في دبي وأبوظبي. اكتشف أقرب معهد شريك واختبر دقة التشخيص وبروتوكولات العناية الحصرية.",
+                  )}
                 </p>
                 <div className="flex flex-wrap items-center gap-4 pt-2">
                   <Button
@@ -238,7 +282,13 @@ export default function HomePage() {
                   >
                     <Link href="/partners" className="inline-flex items-center gap-2">
                       <MapPin className="size-4" />
-                      <span>{ar ? "اكتشف شركاءنا" : "Discover Our Partners"}</span>
+                      <span>
+                        {L(
+                          "Discover Our Partners",
+                          "Découvrir nos partenaires",
+                          "اكتشف شركاءنا",
+                        )}
+                      </span>
                     </Link>
                   </Button>
                   <Button
@@ -252,7 +302,9 @@ export default function HomePage() {
                       className="inline-flex items-center gap-2"
                     >
                       <Briefcase className="size-4" />
-                      <span>{ar ? "كن شريكاً معتمداً" : "Become a Partner"}</span>
+                      <span>
+                        {L("Become a Partner", "Devenir partenaire", "كن شريكاً معتمداً")}
+                      </span>
                     </Link>
                   </Button>
                 </div>
@@ -262,15 +314,27 @@ export default function HomePage() {
                 {[
                   {
                     icon: Hotel,
-                    label: ar ? "فنادق ومنتجعات فاخرة" : "Luxury hotels & resorts",
+                    label: L(
+                      "Luxury hotels & resorts",
+                      "Hôtels & resorts de luxe",
+                      "فنادق ومنتجعات فاخرة",
+                    ),
                   },
                   {
                     icon: Stethoscope,
-                    label: ar ? "عيادات تجميلية" : "Aesthetic clinics",
+                    label: L(
+                      "Aesthetic clinics",
+                      "Cliniques esthétiques",
+                      "عيادات تجميلية",
+                    ),
                   },
                   {
                     icon: Sparkles,
-                    label: ar ? "معاهد شريكة معتمدة" : "Approved partner institutes",
+                    label: L(
+                      "Approved partner institutes",
+                      "Instituts partenaires agréés",
+                      "معاهد شريكة معتمدة",
+                    ),
                   },
                 ].map(({ icon: Icon, label }) => (
                   <li
@@ -287,7 +351,7 @@ export default function HomePage() {
                 ))}
                 <li className="flex items-center gap-2 px-2 pt-1 text-[0.7rem] uppercase tracking-[0.22em] text-muted-foreground rtl:tracking-normal">
                   <MapPin className="size-3.5 text-sf-mauve" aria-hidden />
-                  {ar ? "دبي · أبوظبي" : "Dubai · Abu Dhabi"}
+                  {L("Dubai · Abu Dhabi", "Dubaï · Abou Dabi", "دبي · أبوظبي")}
                 </li>
               </ul>
             </div>

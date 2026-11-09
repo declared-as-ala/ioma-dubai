@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getLocale } from "next-intl/server";
+import { toLoc } from "@/lib/l10n";
 import { FounderStory } from "@/components/founder/founder-story";
 import {
   FOUNDER,
@@ -13,7 +14,7 @@ const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 const PATH = "/jean-michel-karam";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const loc = ((await getLocale()) === "ar" ? "ar" : "en") as Loc;
+  const loc = toLoc(await getLocale());
   const image = FOUNDER_IMAGES.banner;
   return {
     title: FOUNDER.metaTitle[loc],
@@ -22,6 +23,7 @@ export async function generateMetadata(): Promise<Metadata> {
       canonical: `${baseUrl}/${loc}${PATH}`,
       languages: {
         en: `${baseUrl}/en${PATH}`,
+        fr: `${baseUrl}/fr${PATH}`,
         ar: `${baseUrl}/ar${PATH}`,
         "x-default": `${baseUrl}/en${PATH}`,
       },
@@ -32,14 +34,14 @@ export async function generateMetadata(): Promise<Metadata> {
       description: FOUNDER.metaDescription[loc],
       url: `${baseUrl}/${loc}${PATH}`,
       siteName: "IOMA Paris Dubai",
-      locale: loc === "ar" ? "ar_AE" : "en_AE",
+      locale: loc === "ar" ? "ar_AE" : loc === "fr" ? "fr_FR" : "en_AE",
       images: [{ url: `${baseUrl}${image}`, alt: FOUNDER.banner.alt[loc] }],
     },
   };
 }
 
 export default async function FounderPage() {
-  const loc = ((await getLocale()) === "ar" ? "ar" : "en") as Loc;
+  const loc = toLoc(await getLocale());
 
   // Verified facts only (official IOMA Paris page): no dates beyond 2010, no awards or figures.
   const person = {

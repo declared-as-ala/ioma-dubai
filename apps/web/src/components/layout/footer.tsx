@@ -17,9 +17,38 @@ import {
 import { CINE, gsap, useMotion } from "@/components/motion/cine";
 import { openConsentSettings } from "@/lib/consent";
 
-type Loc = "en" | "ar";
+import { toLoc, type Loc } from "@/lib/l10n";
+
 type L = Record<Loc, string>;
-const l = (en: string, ar: string): L => ({ en, ar });
+
+// French strings keyed by their English source text.
+const FR: Record<string, string> = {
+  "About IOMA": "À propos d'IOMA",
+  "Our partners": "Nos partenaires",
+  Technology: "Technologie",
+  Services: "Services",
+  "Loyalty programme": "Programme de fidélité",
+  Contact: "Contact",
+  "Shipping, returns & refunds": "Livraison, retours & remboursements",
+  "Secure payment": "Paiement sécurisé",
+  Careers: "Carrières",
+  Professionals: "Professionnels",
+  "Become a partner": "Devenir partenaire",
+  "Professional space": "Espace professionnel",
+  "Professional products": "Produits professionnels",
+  Legal: "Mentions légales",
+  "Terms & conditions": "Conditions générales",
+  "Legal notice": "Mentions légales",
+  "Privacy policy": "Politique de confidentialité",
+  "Cookie settings": "Paramètres des cookies",
+  "Combining advanced technology and bespoke formulations, IOMA Paris care answers the unique needs of your skin.":
+    "Alliant technologie de pointe et formulations sur mesure, les soins IOMA Paris répondent aux besoins uniques de votre peau.",
+  "Follow IOMA Paris": "Suivez IOMA Paris",
+  "opens in a new tab": "s'ouvre dans un nouvel onglet",
+  FAQ: "FAQ",
+  Accessibility: "Accessibilité",
+};
+const l = (en: string, ar: string): L => ({ en, ar, fr: FR[en] ?? en });
 
 type Item = { href: string; label: L } | { action: "cookies"; label: L };
 
@@ -115,7 +144,7 @@ function FooterLink({ item, loc }: { item: Item; loc: Loc }) {
 
 export function Footer() {
   const t = useTranslations("Footer");
-  const loc = (useLocale() === "ar" ? "ar" : "en") as Loc;
+  const loc = toLoc(useLocale());
   const ref = useRef<HTMLElement>(null);
 
   // Scroll-triggered reveal: columns rise in a short stagger, links follow, the logo settles in. Reduced motion: none.

@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { toLoc } from "@/lib/l10n";
 import { useLocale } from "next-intl";
 import { ArrowRight } from "lucide-react";
 import { Link } from "@/i18n/navigation";
@@ -15,6 +16,21 @@ const COPY = {
     modelAlt: "Smiling woman applying a blue care mask with a brush",
     badge: "Scalp to ends",
   },
+  fr: {
+    kicker: "Soins capillaires",
+    title: "La même précision, pour vos cheveux.",
+    body: "Un rituel IOMA Paris complet, du cuir chevelu aux pointes, fondé sur la même science que nos soins de la peau.",
+    items: [
+      "Shampooings",
+      "Après-shampooings",
+      "Masque baume réparateur",
+      "Sérum hydratant",
+    ],
+    cta: "Découvrir les soins capillaires",
+    alt: "La gamme capillaire IOMA Paris",
+    modelAlt: "Femme souriante appliquant un masque de soin bleu au pinceau",
+    badge: "Du cuir chevelu aux pointes",
+  },
   ar: {
     kicker: "العناية بالشعر",
     title: "الدقة نفسها لشعرك.",
@@ -28,7 +44,7 @@ const COPY = {
 } as const;
 
 export function HaircareBand() {
-  const c = COPY[useLocale() === "ar" ? "ar" : "en"];
+  const c = COPY[toLoc(useLocale())];
   return (
     <section className="overflow-hidden border-t border-border bg-[#eef3f8]">
       <div className="mx-auto grid max-w-[1440px] items-stretch md:grid-cols-2">

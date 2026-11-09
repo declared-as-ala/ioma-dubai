@@ -6,6 +6,7 @@ import { motion } from "motion/react";
 import { Link } from "@/i18n/navigation";
 import { ArrowRight, Sparkles } from "lucide-react";
 import type { ResolvedNavigationItem } from "@/hooks/use-navigation-query";
+import { toLoc } from "@/lib/l10n";
 
 interface SoinsSurMesureDropdownProps {
   isOpen: boolean;
@@ -99,15 +100,18 @@ export function SoinsSurMesureDropdown({
 }: SoinsSurMesureDropdownProps) {
   const t = useTranslations("Nav");
   const locale = useLocale();
-  const lang = locale === "ar" ? "ar" : "en";
-  const fromPrefix = lang === "ar" ? "ابتداءً من " : "From ";
+  const lang = toLoc(locale);
+  const fromPrefix =
+    lang === "ar" ? "ابتداءً من " : lang === "fr" ? "À partir de " : "From ";
 
   if (!isOpen) return null;
 
   const bespokeDescription =
     lang === "ar"
       ? "كل علاج عبارة عن تركيبة فريدة مصممة خصيصاً لاحتياجات بشرتك من بين أكثر من 40,000 تركيبة ممكنة."
-      : "Each treatment is a unique formulation crafted specifically for your skin from over 40,000 possible combinations.";
+      : lang === "fr"
+        ? "Chaque soin est une formulation unique, conçue spécialement pour votre peau parmi plus de 40 000 combinaisons possibles."
+        : "Each treatment is a unique formulation crafted specifically for your skin from over 40,000 possible combinations.";
 
   const dropdownList =
     item?.dropdownItems && item.dropdownItems.length > 0
@@ -115,7 +119,9 @@ export function SoinsSurMesureDropdown({
           slug: d.url.replace(/^\/shop\//, ""),
           title: d.label,
           sizes: d.badge || "30 ml / 50 ml",
-          price: d.product?.priceFormatted || (lang === "ar" ? "حسب الطلب" : "Bespoke"),
+          price:
+            d.product?.priceFormatted ||
+            (lang === "ar" ? "حسب الطلب" : lang === "fr" ? "Sur mesure" : "Bespoke"),
           image:
             d.product?.image ||
             `/images/products/${d.url.replace(/^\/shop\//, "")}-1.jpg`,
@@ -152,7 +158,9 @@ export function SoinsSurMesureDropdown({
               <span className="text-[0.65rem] uppercase tracking-widest font-bold">
                 {lang === "ar"
                   ? "In.Lab مستحضرات التجميل الراقية"
-                  : "In.Lab High-End Cosmetics"}
+                  : lang === "fr"
+                    ? "In.Lab Haute Cosmétique"
+                    : "In.Lab High-End Cosmetics"}
               </span>
             </div>
             <h3 className="text-lg font-serif font-medium tracking-tight text-foreground">

@@ -64,7 +64,7 @@ export const envSchema = z.object({
 
   SEARCH_PROVIDER: z.string().default("mongo"),
   DEFAULT_LOCALE: z.string().default("en"),
-  SUPPORTED_LOCALES: z.string().default("en,ar"),
+  SUPPORTED_LOCALES: z.string().default("en,fr,ar"),
 });
 
 export type EnvConfig = z.infer<typeof envSchema>;

@@ -11,6 +11,7 @@ import {
   UserRound,
   Briefcase,
 } from "lucide-react";
+import { toLoc, tr } from "@/lib/l10n";
 import { useLocale, useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import { useAuthStore } from "@/stores/auth-store";
@@ -25,7 +26,7 @@ import { Button } from "@/components/ui/button";
  */
 export function AccountLink() {
   const t = useTranslations("Nav");
-  const ar = useLocale() === "ar";
+  const locale = toLoc(useLocale());
   const router = useRouter();
   const hydrated = useAuthHydrated();
   const user = useAuthStore((s) => s.user);
@@ -67,14 +68,30 @@ export function AccountLink() {
 
   const isPro = user.roles.some((r) => r === "professional_approved");
   const items = [
-    { href: "/account", label: ar ? "حسابي" : "My account", icon: UserRound },
-    { href: "/account/orders", label: ar ? "طلباتي" : "Orders", icon: Package },
-    { href: "/account/wishlist", label: ar ? "المفضلة" : "Wishlist", icon: Heart },
+    {
+      href: "/account",
+      label: tr(locale, { en: "My account", fr: "Mon compte", ar: "حسابي" }),
+      icon: UserRound,
+    },
+    {
+      href: "/account/orders",
+      label: tr(locale, { en: "Orders", fr: "Mes commandes", ar: "طلباتي" }),
+      icon: Package,
+    },
+    {
+      href: "/account/wishlist",
+      label: tr(locale, { en: "Wishlist", fr: "Favoris", ar: "المفضلة" }),
+      icon: Heart,
+    },
     ...(isPro
       ? [
           {
             href: "/portal",
-            label: ar ? "المساحة المهنية" : "Pro space",
+            label: tr(locale, {
+              en: "Pro space",
+              fr: "Espace pro",
+              ar: "المساحة المهنية",
+            }),
             icon: Briefcase,
           },
         ]
@@ -141,12 +158,8 @@ export function AccountLink() {
           >
             <LogOut className="size-4 text-muted-foreground" aria-hidden />
             {logout.isPending
-              ? ar
-                ? "جارٍ الخروج…"
-                : "Signing out…"
-              : ar
-                ? "تسجيل الخروج"
-                : "Sign out"}
+              ? tr(locale, { en: "Signing out…", fr: "Déconnexion…", ar: "جارٍ الخروج…" })
+              : tr(locale, { en: "Sign out", fr: "Se déconnecter", ar: "تسجيل الخروج" })}
           </button>
         </div>
       )}

@@ -1,4 +1,5 @@
 import { getLocale } from "next-intl/server";
+import { toLoc } from "@/lib/l10n";
 import { TechnologyExperience } from "@/components/technology/cinematic/technology-experience";
 
 // SEO is unchanged from the previous version of this page.
@@ -14,7 +15,7 @@ export const metadata = {
 const FLAG = `document.documentElement.classList.add('tx-js');setTimeout(function(){if(!window.__txReady)document.documentElement.classList.remove('tx-js')},4500)`;
 
 export default async function TechnologyPage() {
-  const loc = (await getLocale()) === "ar" ? "ar" : "en";
+  const loc = toLoc(await getLocale());
   return (
     <main>
       <script dangerouslySetInnerHTML={{ __html: FLAG }} />

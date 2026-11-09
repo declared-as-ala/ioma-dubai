@@ -2,7 +2,7 @@ import { Fragment, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import type { L } from "@/content/technology-cinematic";
 
-export type Loc = "en" | "ar";
+export type Loc = "en" | "fr" | "ar";
 export const t = (v: L, loc: Loc) => v[loc];
 
 /** Masked words: each word sits in an overflow-hidden slot so it can rise into place (a "text mask" reveal). */

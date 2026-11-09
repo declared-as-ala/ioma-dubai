@@ -5,9 +5,87 @@ import { PRODUCT_RANGE_COLORS } from "@ioma/config";
 import { Link } from "@/i18n/navigation";
 import { ImageReveal, MaskText, Reveal, StaggerGrid } from "@/components/motion/cine";
 
-type Loc = "en" | "ar";
+import { toLoc, type Loc } from "@/lib/l10n";
+
 type T = Record<Loc, string>;
-const l = (en: string, ar: string): T => ({ en, ar });
+
+// French copy, keyed by the English string.
+const FR: Record<string, string> = {
+  "About IOMA": "À propos d'IOMA",
+  "A Parisian house of personalised skincare":
+    "Une maison parisienne de soins personnalisés",
+  "IOMA Paris is a French house of personalised skincare. We measure your skin first, then formulate for it — and today we bring that experience to Dubai and the UAE.":
+    "IOMA Paris est une maison française de soins personnalisés. Nous mesurons d'abord votre peau, puis nous formulons pour elle — et nous apportons aujourd'hui cette expérience à Dubaï et aux Émirats.",
+  Origin: "Origine",
+  "Paris, France": "Paris, France",
+  Approach: "Approche",
+  "Measure, then formulate": "Mesurer, puis formuler",
+  Ranges: "Gammes",
+  "7 expert ranges": "7 gammes expertes",
+  Bespoke: "Sur mesure",
+  "In.Lab on demand": "In.Lab à la demande",
+  "Our story": "Notre histoire",
+  "One conviction: no two skins are alike.":
+    "Une conviction : deux peaux ne se ressemblent jamais.",
+  "IOMA was founded in Paris on one conviction: no two skins are alike. Skincare should be prescribed, not guessed at.":
+    "IOMA est née à Paris d'une conviction : deux peaux ne se ressemblent jamais. Un soin doit être prescrit, non deviné.",
+  "Every formula is developed and made in France, with the rigour of a house that treats skincare as a precise discipline — and every routine begins by reading what your skin actually needs.":
+    "Chaque formule est développée et fabriquée en France, avec la rigueur d'une maison qui considère le soin de la peau comme une discipline précise — et chaque routine commence par la lecture de ce dont votre peau a réellement besoin.",
+  "In the Gulf, heat, sun and air conditioning shape a skin's daily needs. Our approach takes them into account as real factors.":
+    "Dans le Golfe, la chaleur, le soleil et la climatisation façonnent les besoins quotidiens de la peau. Notre approche les prend en compte comme de véritables facteurs.",
+  "What guides us": "Ce qui nous guide",
+  Personalisation: "Personnalisation",
+  "Our technology and our formulas are built to reflect your skin, not to average it away.":
+    "Notre technologie et nos formules sont conçues pour refléter votre peau, et non pour la standardiser.",
+  "French savoir-faire": "Savoir-faire français",
+  "Formulated and developed in France, under dermatological control.":
+    "Formulées et développées en France, sous contrôle dermatologique.",
+  "Considered formulas": "Des formules réfléchies",
+  "Every range has a clear purpose — hydration, renewal, calm — not a long list of unrelated promises.":
+    "Chaque gamme a un objectif clair — hydratation, renouvellement, apaisement — et non une longue liste de promesses sans lien.",
+  "How IOMA works": "Comment fonctionne IOMA",
+  Measure: "Mesurer",
+  "A precise reading of your skin — with our technology or in person at a partner institute.":
+    "Une lecture précise de votre peau — grâce à notre technologie ou en personne dans un institut partenaire.",
+  Formulate: "Formuler",
+  "A range and routine chosen for you, or an In.Lab formula prepared drop by drop.":
+    "Une gamme et une routine choisies pour vous, ou une formule In.Lab préparée goutte à goutte.",
+  "Follow through": "Accompagner",
+  "A clear morning and evening routine, and appointments with our partners when you want advice.":
+    "Une routine claire pour le matin et le soir, et des rendez-vous chez nos partenaires lorsque vous souhaitez un conseil.",
+  "Seven ranges, one colour each": "Sept gammes, une couleur chacune",
+  "Each range answers one skin need and carries its own official colour.":
+    "Chaque gamme répond à un besoin de la peau et porte sa propre couleur officielle.",
+  Hydration: "Hydratation",
+  "Radiance & vitality": "Éclat & vitalité",
+  "Firmness & anti-ageing": "Fermeté & anti-âge",
+  "Comfort & soothing": "Confort & apaisement",
+  "Clarity & detox": "Clarté & détox",
+  "Matte finish & pores": "Effet mat & pores",
+  "Dark spots & light": "Taches & lumière",
+  "In.Lab": "In.Lab",
+  "Bespoke care, made on demand": "Un soin sur mesure, préparé à la demande",
+  "From your skin diagnosis, In.Lab combines pure active capsules, dosed for you and prepared fresh. Day cream, night cream, serum and eye care — each made for one skin.":
+    "À partir de votre diagnostic de peau, In.Lab associe des capsules d'actifs purs, dosées pour vous et préparées au moment même. Crème de jour, crème de nuit, sérum et soin des yeux — chacun conçu pour une seule peau.",
+  "Create my formula": "Créer ma formule",
+  "The founder": "Le fondateur",
+  "Jean Michel Karam": "Jean Michel Karam",
+  "A doctor in micro-electronics and an engineer, whose technology is at the origin of IOMA.":
+    "Docteur en micro-électronique et ingénieur, dont la technologie est à l'origine d'IOMA.",
+  "Meet the founder": "Rencontrer le fondateur",
+  "IOMA in Dubai": "IOMA à Dubaï",
+  "Our flagship for the UAE": "Notre vitrine pour les Émirats",
+  "Shop online, visit an approved partner institute across the UAE, or — if you run a spa, clinic or hotel — apply for professional access.":
+    "Achetez en ligne, rendez-vous dans un institut partenaire agréé aux Émirats ou — si vous dirigez un spa, une clinique ou un hôtel — demandez un accès professionnel.",
+  Shop: "Boutique",
+  "Find a Partner": "Trouver un partenaire",
+  Professionals: "Professionnels",
+  "Our technology": "Notre technologie",
+  Magazine: "Magazine",
+  "*N°1 in personalized skincare sales (source: Cosmétiquemag, November 2018).":
+    "*N°1 de la cosmétique personnalisée en ventes (source : Cosmétiquemag, novembre 2018).",
+};
+const l = (en: string, ar: string): T => ({ en, fr: FR[en] ?? en, ar });
 
 // All copy here restates facts already published on the site (Paris origin, In.Lab, the seven
 // ranges, the technology, the partner network). No new figures or clinical claims are introduced.
@@ -148,7 +226,7 @@ const h2 =
   "text-balance font-display text-[clamp(1.9rem,3.6vw,3rem)] font-medium leading-[1.1] tracking-[-0.02em] rtl:leading-[1.35] rtl:tracking-normal";
 
 export default function AboutPage() {
-  const loc = (useLocale() === "ar" ? "ar" : "en") as Loc;
+  const loc = toLoc(useLocale());
 
   return (
     <main className="bg-background">

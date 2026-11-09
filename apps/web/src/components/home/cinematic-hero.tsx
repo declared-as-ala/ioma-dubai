@@ -3,6 +3,7 @@
 import { CINE, gsap, useMotion } from "@/components/motion/cine";
 import { useEffect, useRef, useState, useCallback } from "react";
 import Image from "next/image";
+import { toLoc, tr } from "@/lib/l10n";
 import { useLocale } from "next-intl";
 import { ArrowRight, Pause, Play } from "lucide-react";
 import { Link } from "@/i18n/navigation";
@@ -13,8 +14,9 @@ interface CinematicHeroProps {
 }
 
 export function CinematicHero({ onScrollClick }: CinematicHeroProps) {
-  const locale = useLocale();
-  const ar = locale === "ar";
+  const locale = toLoc(useLocale());
+  const L = (en: string, fr: string, arText: string) =>
+    tr(locale, { en, fr, ar: arText });
   const [playing, setPlaying] = useState(true);
   const [reducedMotion, setReducedMotion] = useState(false);
   const [videoLoaded, setVideoLoaded] = useState(false);
@@ -172,10 +174,16 @@ export function CinematicHero({ onScrollClick }: CinematicHeroProps) {
           <div className="max-w-md space-y-1.5 text-start">
             <p className="flex items-center gap-2.5 text-[0.68rem] uppercase tracking-[0.28em] font-medium text-white/80">
               <span className="h-px w-6 bg-white/50" aria-hidden="true" />
-              <span>{ar ? "آيوما باريس — دبي" : "IOMA PARIS — DUBAI"}</span>
+              <span>
+                {L("IOMA PARIS — DUBAI", "IOMA PARIS — DUBAÏ", "آيوما باريس — دبي")}
+              </span>
             </p>
             <h1 className="font-serif italic text-lg sm:text-xl lg:text-2xl font-normal tracking-wide text-white/95">
-              {ar ? "فن العناية الشخصية بالبشرة." : "The art of personalised skincare."}
+              {L(
+                "The art of personalised skincare.",
+                "L'art du soin de la peau personnalisé.",
+                "فن العناية الشخصية بالبشرة.",
+              )}
             </h1>
           </div>
 
@@ -184,11 +192,15 @@ export function CinematicHero({ onScrollClick }: CinematicHeroProps) {
             <button
               type="button"
               onClick={handleScrollDown}
-              aria-label={ar ? "انتقل إلى محتوى الصفحة" : "Scroll to content"}
+              aria-label={L(
+                "Scroll to content",
+                "Défiler vers le contenu",
+                "انتقل إلى محتوى الصفحة",
+              )}
               className="group flex flex-col items-center gap-2 text-white/60 transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             >
               <span className="text-[0.62rem] uppercase tracking-[0.26em] font-light text-white/70 group-hover:text-white transition-colors">
-                {ar ? "اكتشف" : "Discover"}
+                {L("Discover", "Découvrir", "اكتشف")}
               </span>
               <div className="relative h-8 w-px overflow-hidden bg-white/20">
                 <span className="absolute top-0 left-0 h-3 w-full bg-white transition-transform duration-1000 ease-in-out motion-safe:animate-pulse" />
@@ -203,7 +215,7 @@ export function CinematicHero({ onScrollClick }: CinematicHeroProps) {
               data-testid="hero-discover-cta"
               className="group inline-flex items-center gap-2.5 border-b border-white/40 pb-1 text-xs uppercase tracking-[0.22em] font-medium text-white transition-all hover:border-white hover:text-white/90 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
             >
-              <span>{ar ? "اكتشف آيوما" : "Discover IOMA"}</span>
+              <span>{L("Discover IOMA", "Découvrir IOMA", "اكتشف آيوما")}</span>
               <ArrowRight
                 className="size-3.5 transition-transform group-hover:translate-x-1 rtl:rotate-180 rtl:group-hover:-translate-x-1"
                 aria-hidden="true"
@@ -215,12 +227,8 @@ export function CinematicHero({ onScrollClick }: CinematicHeroProps) {
               onClick={togglePlay}
               aria-label={
                 playing
-                  ? ar
-                    ? "إيقاف الفيديو مؤقتاً"
-                    : "Pause video"
-                  : ar
-                    ? "تشغيل الفيديو"
-                    : "Play video"
+                  ? L("Pause video", "Mettre la vidéo en pause", "إيقاف الفيديو مؤقتاً")
+                  : L("Play video", "Lire la vidéo", "تشغيل الفيديو")
               }
               className="grid size-9 shrink-0 place-items-center rounded-full border border-white/30 text-white/80 transition-all hover:border-white hover:bg-white/10 hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             >

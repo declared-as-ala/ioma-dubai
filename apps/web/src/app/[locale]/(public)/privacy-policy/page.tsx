@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { useLocale, useTranslations } from "next-intl";
+import { toLoc } from "@/lib/l10n";
 import { OfficialPolicy } from "@/components/legal/official-policy";
 import {
   PRIVACY_OFFICIAL,
@@ -19,12 +20,15 @@ const COPY = {
   en: {
     lede: "How we collect, use, share and protect your personal data, and the rights you have over it.",
   },
+  fr: {
+    lede: "Comment nous collectons, utilisons, partageons et protégeons vos données personnelles, et les droits dont vous disposez à leur égard.",
+  },
   ar: {
     lede: "كيف نجمع بياناتكم الشخصية ونستخدمها ونشاركها ونحميها، وما هي حقوقكم بشأنها.",
   },
 } as const;
 
-/** Rebuilds the French section list with the translated headings and blocks, id for id. */
+/** Rebuilds the section list with the translated headings and blocks, id for id. */
 function translate(tr: PolicyTranslation): PolicySection[] {
   return PRIVACY_OFFICIAL.map((s) => {
     const t = tr[s.id];
@@ -44,7 +48,7 @@ const EN_SECTIONS = translate(PRIVACY_EN);
 const AR_SECTIONS = translate(PRIVACY_AR);
 
 export default function PrivacyPolicyPage() {
-  const loc = useLocale() === "ar" ? "ar" : "en";
+  const loc = toLoc(useLocale());
   const t = useTranslations("Legal");
   const c = COPY[loc];
 
@@ -54,7 +58,9 @@ export default function PrivacyPolicyPage() {
       kicker={t("privacy.kicker")}
       title={t("privacy.title")}
       lede={c.lede}
-      sections={loc === "ar" ? AR_SECTIONS : EN_SECTIONS}
+      sections={
+        loc === "ar" ? AR_SECTIONS : loc === "en" ? EN_SECTIONS : PRIVACY_OFFICIAL
+      }
     />
   );
 }

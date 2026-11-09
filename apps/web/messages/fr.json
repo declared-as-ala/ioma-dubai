@@ -31,13 +31,17 @@
       "phase3Subtitle": "L'intelligence cutanée transformée en votre formule sur-mesure quotidienne.",
       "phase3Cta": "Commencer le diagnostic",
       "phase3Badge": "ATLAS MONDIAL IOMA — 1M+ DIAGNOSTICS",
-      "technologyCta": "Notre technologie"
+      "technologyCta": "Notre technologie",
+      "badgeParams": "18 paramètres cutanés",
+      "badgeBespoke": "Soin sur mesure In.Lab",
+      "badgeMade": "Fabriqué à Paris, France",
+      "scrollCue": "Découvrir le soin"
     },
     "maison": {
-      "label": "La Maison",
+      "label": "À propos",
       "title": "La précision parisienne, écrite pour le climat du Golfe.",
       "body": "Fondée à Paris autour d'une conviction — aucune peau ne se ressemble — IOMA mesure avant de formuler. Notre méthode de diagnostic tient compte de la chaleur, du soleil et de la climatisation comme de véritables facteurs qui façonnent les besoins d'une peau au quotidien.",
-      "cta": "Découvrir la Maison"
+      "cta": "Découvrir IOMA"
     },
     "diagnosis": {
       "label": "Diagnostic de peau",
@@ -112,7 +116,7 @@
     }
   },
   "MaisonPage": {
-    "kicker": "La Maison",
+    "kicker": "À propos",
     "title": "Une maison fondée sur la précision",
     "intro": "IOMA est née à Paris d'une conviction qui guide encore chaque formule aujourd'hui : le soin devrait être prescrit, jamais deviné.",
     "philosophyTitle": "Le diagnostic avant la formule",
@@ -125,7 +129,7 @@
     "pillar3Title": "Des formules pensées",
     "pillar3Body": "Chaque gamme répond à un objectif clair — hydratation, renouveau, apaisement — plutôt qu'à une longue liste de promesses éparses.",
     "ctaTitle": "Faites-en l'expérience",
-    "ctaBody": "La meilleure façon de comprendre La Maison IOMA est de passer votre propre diagnostic.",
+    "ctaBody": "La meilleure façon de comprendre IOMA est de passer votre propre diagnostic.",
     "cta": "Commencer mon diagnostic"
   },
   "TechnologyPage": {
@@ -226,7 +230,7 @@
     "routinesKits": "Kits & Routines",
     "insideIoma": "Inside IOMA",
     "diagnosis": "Diagnostic de Peau",
-    "maison": "La Maison",
+    "maison": "À propos",
     "technology": "Technologie",
     "treatments": "Soins",
     "partners": "Trouver un partenaire",
@@ -272,7 +276,7 @@
     "shopTitle": "Boutique",
     "supportTitle": "Aide",
     "legalTitle": "Mentions légales",
-    "maison": "La Maison IOMA",
+    "maison": "À propos d'IOMA",
     "founder": "Jean Michel Karam",
     "iomaPrive": "IOMA Privé",
     "technology": "Notre Technologie",
@@ -1061,7 +1065,33 @@
         "title": "Accompagnement dédié",
         "body": "Un support commercial et marketing privilégié basé à Dubai pour votre établissement."
       }
-    }
+    },
+    "heroStats": {
+      "partners": "Adresses partenaires",
+      "emirates": "Émirats",
+      "cities": "Villes"
+    },
+    "resultsCount": "{count, plural, =0 {Aucun partenaire} one {# partenaire} other {# partenaires}}",
+    "clearFilters": "Effacer les filtres",
+    "locating": "Localisation…",
+    "nearMeActive": "Près de moi · 50 km",
+    "locationError": "Impossible d'accéder à votre position. Vérifiez les autorisations de votre navigateur.",
+    "directions": "Itinéraire",
+    "call": "Appeler",
+    "book": "Réserver",
+    "moreServices": "+{count} de plus",
+    "typeLabels": {
+      "spa": "Spa",
+      "clinic": "Clinique",
+      "beauty_institute": "Institut de beauté",
+      "hotel": "Hôtel",
+      "retail": "Point de vente",
+      "diagnostic_center": "Centre de diagnostic",
+      "distributor": "Distributeur"
+    },
+    "noPartnersHint": "Essayez un autre émirat ou un autre type de partenaire, ou effacez vos filtres.",
+    "mapLabel": "Carte des partenaires",
+    "ctaSecondary": "En savoir plus"
   },
   "PartnerDetail": {
     "notFound": "Partenaire introuvable.",

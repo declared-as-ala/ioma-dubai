@@ -6,7 +6,7 @@ import { PRODUCT_RANGE_COLORS } from "@ioma/config";
 import { ArrowRight } from "lucide-react";
 import { useLocale } from "next-intl";
 
-type Loc = "en" | "ar";
+import type { Loc } from "@/lib/l10n";
 type T = Record<Loc, string>;
 
 const RANGES_DATA = [
@@ -15,9 +15,10 @@ const RANGES_DATA = [
     num: "1",
     name: "Hydra",
     color: PRODUCT_RANGE_COLORS.hydra,
-    tagline: { en: "Lasting hydration", ar: "ترطيب يدوم" },
+    tagline: { en: "Lasting hydration", fr: "Hydratation durable", ar: "ترطيب يدوم" },
     desc: {
       en: "Replenishes water and strengthens the protective film of thirsty skin.",
+      fr: "Restitue l'eau aux peaux assoiffées et renforce leur film protecteur.",
       ar: "يعيد الماء للبشرة العطشى ويقوّي طبقتها الواقية.",
     },
     heroProduct: "Sérum Hydratant Optimum",
@@ -28,9 +29,10 @@ const RANGES_DATA = [
     num: "2",
     name: "Energize",
     color: PRODUCT_RANGE_COLORS.energize,
-    tagline: { en: "Radiance & vitality", ar: "إشراقة وحيوية" },
+    tagline: { en: "Radiance & vitality", fr: "Éclat & vitalité", ar: "إشراقة وحيوية" },
     desc: {
       en: "Wakes up dull skin and neutralises the effects of urban stress.",
+      fr: "Réveille les peaux ternes et neutralise les effets du stress urbain.",
       ar: "يوقظ البشرة الباهتة ويحيّد آثار ضغوط المدينة.",
     },
     heroProduct: "Vitality Shot",
@@ -41,9 +43,14 @@ const RANGES_DATA = [
     num: "3",
     name: "Renew",
     color: PRODUCT_RANGE_COLORS.renew,
-    tagline: { en: "Firmness & anti-ageing", ar: "شدّ ومكافحة الشيخوخة" },
+    tagline: {
+      en: "Firmness & anti-ageing",
+      fr: "Fermeté & anti-âge",
+      ar: "شدّ ومكافحة الشيخوخة",
+    },
     desc: {
       en: "Activates cell renewal and visibly smooths wrinkles.",
+      fr: "Stimule le renouvellement cellulaire et atténue visiblement les rides.",
       ar: "ينشّط تجدد الخلايا ويلطّف التجاعيد بشكل ملحوظ.",
     },
     heroProduct: "Crème Sublime Revitalisante",
@@ -54,9 +61,10 @@ const RANGES_DATA = [
     num: "4",
     name: "Calm",
     color: PRODUCT_RANGE_COLORS.calm,
-    tagline: { en: "Comfort & soothing", ar: "راحة وتهدئة" },
+    tagline: { en: "Comfort & soothing", fr: "Confort & apaisement", ar: "راحة وتهدئة" },
     desc: {
       en: "Instantly relieves redness and feelings of discomfort.",
+      fr: "Soulage immédiatement les rougeurs et les sensations d'inconfort.",
       ar: "يخفف فورًا الاحمرار وأحاسيس عدم الراحة.",
     },
     heroProduct: "Crème Apaisante Jour & Nuit",
@@ -67,9 +75,10 @@ const RANGES_DATA = [
     num: "5",
     name: "Pureté",
     color: PRODUCT_RANGE_COLORS.purete,
-    tagline: { en: "Clarity & detox", ar: "صفاء وتنقية" },
+    tagline: { en: "Clarity & detox", fr: "Clarté & détox", ar: "صفاء وتنقية" },
     desc: {
       en: "Deep-cleanses, refines skin texture and clears imperfections.",
+      fr: "Purifie en profondeur, affine le grain de peau et traite les imperfections.",
       ar: "ينقّي بعمق ويصقل ملمس البشرة ويعالج الشوائب.",
     },
     heroProduct: "Gel Réparateur Jour & Nuit",
@@ -80,9 +89,14 @@ const RANGES_DATA = [
     num: "6",
     name: "Matte",
     color: PRODUCT_RANGE_COLORS.matte,
-    tagline: { en: "Matte finish & pores", ar: "مظهر مطفي ومسام" },
+    tagline: {
+      en: "Matte finish & pores",
+      fr: "Fini mat & pores",
+      ar: "مظهر مطفي ومسام",
+    },
     desc: {
       en: "Regulates sebum production and leaves a lasting velvety finish.",
+      fr: "Régule la production de sébum et offre un toucher velouté qui dure.",
       ar: "ينظّم إفراز الدهون ويمنح لمسة مخملية تدوم.",
     },
     heroProduct: "Crème Régulatrice Matifiante",
@@ -93,9 +107,10 @@ const RANGES_DATA = [
     num: "7",
     name: "Illumine",
     color: PRODUCT_RANGE_COLORS.illumine,
-    tagline: { en: "Dark spots & light", ar: "بقع وإضاءة" },
+    tagline: { en: "Dark spots & light", fr: "Taches & lumière", ar: "بقع وإضاءة" },
     desc: {
       en: "Evens out skin tone, fades dark spots and protects against UV rays.",
+      fr: "Unifie le teint, atténue les taches et protège des UV.",
       ar: "يوحّد لون البشرة ويخفف البقع ويحمي من الأشعة فوق البنفسجية.",
     },
     heroProduct: "Cell Protector SPF50+",
@@ -106,9 +121,10 @@ const RANGES_DATA = [
     num: "",
     name: "Cocoon",
     color: PRODUCT_RANGE_COLORS.coco,
-    tagline: { en: "Body care", ar: "العناية بالجسم" },
+    tagline: { en: "Body care", fr: "Soin du corps", ar: "العناية بالجسم" },
     desc: {
       en: "Body care that nourishes, exfoliates and leaves skin soft.",
+      fr: "Un soin du corps qui nourrit, exfolie et laisse la peau douce.",
       ar: "عناية بالجسم تغذّي وتقشّر وتترك البشرة ناعمة.",
     },
     heroProduct: "Genius Balm",
@@ -119,17 +135,27 @@ const RANGES_DATA = [
 export function RangesShowcase() {
   const loc = useLocale() as Loc;
   const c: Record<string, T> = {
-    kicker: { en: "Our 7 expert ranges", ar: "مجموعاتنا الخبيرة السبع" },
+    kicker: {
+      en: "Our 7 expert ranges",
+      fr: "Nos 7 gammes expertes",
+      ar: "مجموعاتنا الخبيرة السبع",
+    },
     title: {
       en: "Seven targeted answers to every skin need",
+      fr: "Sept réponses ciblées à chaque besoin de la peau",
       ar: "سبع إجابات مستهدفة لكل احتياج للبشرة",
     },
     body: {
       en: "Each IOMA Paris range is identified by an official colour code and concentrates pure actives at clinically proven concentrations.",
+      fr: "Chaque gamme IOMA Paris est identifiée par un code couleur officiel et concentre des actifs purs à des concentrations cliniquement prouvées.",
       ar: "تتميّز كل مجموعة من آيوما باريس برمز لوني رسمي، وتحتوي على مكوّنات فعّالة نقية بتركيزات مثبتة سريريًا.",
     },
-    explore: { en: "Explore", ar: "استكشف" },
-    all: { en: "View the whole catalogue", ar: "عرض الكتالوج بالكامل" },
+    explore: { en: "Explore", fr: "Découvrir", ar: "استكشف" },
+    all: {
+      en: "View the whole catalogue",
+      fr: "Voir tout le catalogue",
+      ar: "عرض الكتالوج بالكامل",
+    },
   };
   return (
     <section className="py-24 lg:py-32 max-w-[1440px] mx-auto px-4 md:px-8">

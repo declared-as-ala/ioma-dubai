@@ -6,15 +6,20 @@ import { StaggerGrid } from "@/components/motion/cine";
 import { ArrowRight } from "lucide-react";
 import { useLocale } from "next-intl";
 
-type Loc = "en" | "ar";
+import type { Loc } from "@/lib/l10n";
 
 const ROUTINES = [
   {
     id: "hydra-protocol",
-    title: { en: "Optimal Hydration Protocol", ar: "بروتوكول الترطيب الأمثل" },
+    title: {
+      en: "Optimal Hydration Protocol",
+      fr: "Protocole Hydratation Optimale",
+      ar: "بروتوكول الترطيب الأمثل",
+    },
     range: "1 Hydra",
     desc: {
       en: "A 3-step ritual formulated to replenish the skin's water and strengthen the hydrolipidic film in hot climates.",
+      fr: "Un rituel en 3 étapes conçu pour restituer l'eau à la peau et renforcer le film hydrolipidique par temps chaud.",
       ar: "طقس من 3 خطوات مصمم لإعادة الماء للبشرة وتقوية الغشاء المائي الدهني في الأجواء الحارة.",
     },
     steps: [
@@ -30,11 +35,13 @@ const ROUTINES = [
     id: "renew-protocol",
     title: {
       en: "Anti-Ageing Regeneration Protocol",
+      fr: "Protocole Régénération & Anti-âge",
       ar: "بروتوكول التجدد ومكافحة الشيخوخة",
     },
     range: "3 Renew",
     desc: {
       en: "High cellular synergy to smooth wrinkles, firm contours and stimulate tissue renewal.",
+      fr: "Une synergie cellulaire intense pour atténuer les rides, redessiner les traits et stimuler le renouvellement des tissus.",
       ar: "تآزر خلوي عالٍ لتلطيف التجاعيد وشدّ الملامح وتحفيز تجدد الأنسجة.",
     },
     steps: [
@@ -50,11 +57,13 @@ const ROUTINES = [
     id: "illumine-protocol",
     title: {
       en: "Radiance & UV Defence Protocol",
+      fr: "Protocole Éclat & Protection UV",
       ar: "بروتوكول الإشراقة والحماية من الأشعة فوق البنفسجية",
     },
     range: "7 Illumine",
     desc: {
       en: "Expert correction of pigmentation spots and a high-protection cell shield, SPF50+ PA++++.",
+      fr: "Une correction professionnelle des taches pigmentaires et un bouclier cellulaire haute protection SPF50+ PA++++.",
       ar: "تصحيح احترافي للتصبغات ودرع خلوي عالي الحماية SPF50+ PA++++.",
     },
     steps: [
@@ -70,9 +79,13 @@ const ROUTINES = [
 
 export function RoutinesShowcase() {
   const loc = useLocale() as Loc;
-  const steps = { en: "Your ritual", ar: "طقسكِ" };
-  const discover = { en: "Discover the protocol", ar: "اكتشفي البروتوكول" };
-  const from = { en: "Protocol from", ar: "البروتوكول من" };
+  const steps = { en: "Your ritual", fr: "Votre rituel", ar: "طقسكِ" };
+  const discover = {
+    en: "Discover the protocol",
+    fr: "Découvrir le protocole",
+    ar: "اكتشفي البروتوكول",
+  };
+  const from = { en: "Protocol from", fr: "Protocole dès", ar: "البروتوكول من" };
   return (
     <StaggerGrid
       revision="routines"

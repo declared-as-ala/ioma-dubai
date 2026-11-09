@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { toLoc, tr } from "@/lib/l10n";
 import { useLocale } from "next-intl";
 import { MaskText, StaggerGrid } from "@/components/motion/cine";
 import { INSTAGRAM_POSTS } from "@/content/instagram";
@@ -28,18 +29,25 @@ function InstagramIcon({ className }: { className?: string }) {
 }
 
 export function InstagramBand() {
-  const loc = useLocale() === "ar" ? "ar" : "en";
-  const ar = loc === "ar";
+  const loc = toLoc(useLocale());
   return (
     <section aria-label="Instagram" className="border-t border-border py-16 md:py-20">
       <div className="mx-auto max-w-[1440px] px-4 text-center md:px-8">
         <MaskText
           as="h2"
           className="font-display text-[clamp(1.5rem,2.6vw,2.2rem)] font-medium uppercase tracking-[0.06em] text-foreground rtl:tracking-normal"
-          text={ar ? "تابعونا على إنستغرام" : "Follow us on Instagram"}
+          text={tr(loc, {
+            en: "Follow us on Instagram",
+            fr: "Suivez-nous sur Instagram",
+            ar: "تابعونا على إنستغرام",
+          })}
         />
         <p className="mt-2 text-sm text-muted-foreground">
-          {ar ? "وعلى شبكاتنا الأخرى " : "and on our other networks "}
+          {tr(loc, {
+            en: "and on our other networks ",
+            fr: "et sur nos autres réseaux ",
+            ar: "وعلى شبكاتنا الأخرى ",
+          })}
           <a
             href={PROFILE}
             target="_blank"
@@ -50,7 +58,13 @@ export function InstagramBand() {
             @ioma.paris
             <span className="sr-only">
               {" "}
-              ({ar ? "يفتح في نافذة جديدة" : "opens in a new tab"})
+              (
+              {tr(loc, {
+                en: "opens in a new tab",
+                fr: "s'ouvre dans un nouvel onglet",
+                ar: "يفتح في نافذة جديدة",
+              })}
+              )
             </span>
           </a>
         </p>

@@ -42,33 +42,30 @@ const nextConfig: NextConfig = {
     ];
   },
   async redirects() {
-    // French was removed from the site; keep old /fr links working.
     // AI skin diagnostic was removed; redirect to technology and privacy policy.
     // Consumer booking was removed; redirect to partners and account.
     return [
       // Superseded service and legal URLs.
       {
-        source: "/:locale(en|ar)/shipping-policy",
+        source: "/:locale(en|fr|ar)/shipping-policy",
         destination: "/:locale/shipping-returns",
         permanent: true,
       },
       {
-        source: "/:locale(en|ar)/return-policy",
+        source: "/:locale(en|fr|ar)/return-policy",
         destination: "/:locale/shipping-returns",
         permanent: true,
       },
       {
-        source: "/:locale(en|ar)/terms-and-conditions",
+        source: "/:locale(en|fr|ar)/terms-and-conditions",
         destination: "/:locale/terms",
         permanent: true,
       },
       {
-        source: "/:locale(en|ar)/maison",
+        source: "/:locale(en|fr|ar)/maison",
         destination: "/:locale/about",
         permanent: true,
       },
-      { source: "/fr", destination: "/en", permanent: false },
-      { source: "/fr/:path*", destination: "/en/:path*", permanent: false },
       {
         source: "/:locale/diagnosis",
         destination: "/:locale/technology",

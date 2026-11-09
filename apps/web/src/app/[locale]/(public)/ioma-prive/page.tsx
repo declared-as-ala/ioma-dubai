@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
 import { getLocale } from "next-intl/server";
 import { PrivePage } from "@/components/prive/prive-page";
-import { PRIVE, PRIVE_IMAGES, type Loc } from "@/content/prive-official";
+import { toLoc } from "@/lib/l10n";
+import { PRIVE, PRIVE_IMAGES } from "@/content/prive-official";
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 const PATH = "/ioma-prive";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const loc = ((await getLocale()) === "ar" ? "ar" : "en") as Loc;
+  const loc = toLoc(await getLocale());
   const title = PRIVE.seo.title[loc];
   const description = PRIVE.seo.description[loc];
   return {
@@ -17,6 +18,7 @@ export async function generateMetadata(): Promise<Metadata> {
       canonical: `${baseUrl}/${loc}${PATH}`,
       languages: {
         en: `${baseUrl}/en${PATH}`,
+        fr: `${baseUrl}/fr${PATH}`,
         ar: `${baseUrl}/ar${PATH}`,
         "x-default": `${baseUrl}/en${PATH}`,
       },
@@ -27,14 +29,14 @@ export async function generateMetadata(): Promise<Metadata> {
       description,
       url: `${baseUrl}/${loc}${PATH}`,
       siteName: "IOMA Paris Dubai",
-      locale: loc === "ar" ? "ar_AE" : "en_AE",
+      locale: loc === "ar" ? "ar_AE" : loc === "fr" ? "fr_FR" : "en_AE",
       images: [{ url: `${baseUrl}${PRIVE_IMAGES.model}`, alt: PRIVE.hero.alt[loc] }],
     },
   };
 }
 
 export default async function IomaPrivePage() {
-  const loc = ((await getLocale()) === "ar" ? "ar" : "en") as Loc;
+  const loc = toLoc(await getLocale());
 
   // Structured data from the official page only: the Paris address, the treatment menu with its listed prices, the FAQ.
   const structuredData = {

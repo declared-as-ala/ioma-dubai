@@ -5,11 +5,20 @@ import { Link } from "@/i18n/navigation";
 import { getMagazineArticles, type MagazineArticleItem } from "@/lib/server-content";
 import { MaskText, StaggerGrid } from "@/components/motion/cine";
 
+import { toLoc } from "@/lib/l10n";
+
 const COPY = {
   en: {
     kicker: "The IOMA Magazine",
     title: "Skin science, rituals & longevity",
     all: "Read all articles",
+    min: "min",
+    fallbackCategory: "Magazine",
+  },
+  fr: {
+    kicker: "Le Magazine IOMA",
+    title: "Science de la peau, rituels & longévité",
+    all: "Lire tous les articles",
     min: "min",
     fallbackCategory: "Magazine",
   },
@@ -27,7 +36,7 @@ const pick = (v: Record<string, string> | undefined, loc: string) =>
 
 /** Latest magazine articles for the home page. Renders nothing when there are none (or the API is unreachable). */
 export async function JournalBand() {
-  const locale = (await getLocale()) === "ar" ? "ar" : "en";
+  const locale = toLoc(await getLocale());
   const c = COPY[locale];
   const { items } = await getMagazineArticles({ limit: 3 });
   const articles: MagazineArticleItem[] = (items ?? []).slice(0, 3);
@@ -35,11 +44,14 @@ export async function JournalBand() {
 
   const date = (iso?: string) =>
     iso
-      ? new Intl.DateTimeFormat(locale === "ar" ? "ar-AE" : "en-AE", {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-        }).format(new Date(iso))
+      ? new Intl.DateTimeFormat(
+          locale === "ar" ? "ar-AE" : locale === "fr" ? "fr-FR" : "en-AE",
+          {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+          },
+        ).format(new Date(iso))
       : "";
 
   return (

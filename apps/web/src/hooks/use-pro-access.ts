@@ -4,7 +4,7 @@ import { useAuthStore } from "@/stores/auth-store";
 import { useAuthHydrated } from "@/hooks/use-auth-hydrated";
 
 export type AccessLevel = "visitor" | "validated" | "customer";
-export type Localized = { en?: string; ar?: string };
+export type Localized = { en?: string; fr?: string; ar?: string };
 export interface Contact {
   name: string;
   phone: string;
@@ -108,7 +108,7 @@ export interface LeadInput {
   companyName: string;
   phone: string;
   email: string;
-  locale: "en" | "ar";
+  locale: "en" | "fr" | "ar";
   businessType?: string;
   emirate?: string;
   city?: string;

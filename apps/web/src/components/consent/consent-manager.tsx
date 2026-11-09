@@ -20,41 +20,63 @@ import {
   useConsent,
 } from "@/lib/consent";
 
-type Loc = "en" | "ar";
+import { toLoc, type Loc } from "@/lib/l10n";
 const T = {
-  bannerTitle: { en: "Your cookie choices", ar: "خياراتكم بشأن ملفات تعريف الارتباط" },
+  bannerTitle: {
+    en: "Your cookie choices",
+    fr: "Vos choix en matière de cookies",
+    ar: "خياراتكم بشأن ملفات تعريف الارتباط",
+  },
   bannerBody: {
     en: "We use necessary cookies to run the site. With your consent we would also use analytics and marketing cookies. You can change your choice at any time.",
+    fr: "Nous utilisons des cookies nécessaires au fonctionnement du site. Avec votre consentement, nous utiliserions également des cookies d'analyse et de marketing. Vous pouvez modifier votre choix à tout moment.",
     ar: "نستخدم ملفات تعريف الارتباط الضرورية لتشغيل الموقع. وبموافقتكم قد نستخدم أيضًا ملفات التحليلات والتسويق. يمكنكم تغيير اختياركم في أي وقت.",
   },
-  acceptAll: { en: "Accept all", ar: "قبول الكل" },
-  reject: { en: "Reject optional", ar: "رفض الاختيارية" },
-  customise: { en: "Customise", ar: "تخصيص" },
-  policy: { en: "Cookie policy", ar: "سياسة ملفات تعريف الارتباط" },
-  title: { en: "Cookie preferences", ar: "تفضيلات ملفات تعريف الارتباط" },
+  acceptAll: { en: "Accept all", fr: "Tout accepter", ar: "قبول الكل" },
+  reject: {
+    en: "Reject optional",
+    fr: "Refuser les cookies optionnels",
+    ar: "رفض الاختيارية",
+  },
+  customise: { en: "Customise", fr: "Personnaliser", ar: "تخصيص" },
+  policy: {
+    en: "Cookie policy",
+    fr: "Politique relative aux cookies",
+    ar: "سياسة ملفات تعريف الارتباط",
+  },
+  title: {
+    en: "Cookie preferences",
+    fr: "Préférences en matière de cookies",
+    ar: "تفضيلات ملفات تعريف الارتباط",
+  },
   intro: {
     en: "Choose which optional cookies you allow. Necessary cookies cannot be switched off because the site needs them.",
+    fr: "Choisissez les cookies optionnels que vous autorisez. Les cookies nécessaires ne peuvent pas être désactivés, car le site en a besoin.",
     ar: "اختاروا ملفات تعريف الارتباط الاختيارية التي تسمحون بها. لا يمكن إيقاف الضرورية لأن الموقع يحتاجها.",
   },
-  save: { en: "Save my choices", ar: "حفظ اختياراتي" },
-  always: { en: "Always on", ar: "مفعّلة دائمًا" },
-  necessary: { en: "Necessary", ar: "ضرورية" },
+  save: { en: "Save my choices", fr: "Enregistrer mes choix", ar: "حفظ اختياراتي" },
+  always: { en: "Always on", fr: "Toujours actifs", ar: "مفعّلة دائمًا" },
+  necessary: { en: "Necessary", fr: "Nécessaires", ar: "ضرورية" },
   necessaryText: {
     en: "Keep the site working: your basket, language, security and this consent choice.",
+    fr: "Ils assurent le bon fonctionnement du site : votre panier, la langue, la sécurité et ce choix de consentement.",
     ar: "تُبقي الموقع يعمل: سلتكم واللغة والأمان وخيار الموافقة هذا.",
   },
-  analytics: { en: "Analytics", ar: "التحليلات" },
+  analytics: { en: "Analytics", fr: "Analyse", ar: "التحليلات" },
   analyticsText: {
     en: "Help us understand how the site is used, in aggregate, so we can improve it.",
+    fr: "Ils nous aident à comprendre, de manière agrégée, comment le site est utilisé afin de l'améliorer.",
     ar: "تساعدنا على فهم كيفية استخدام الموقع بشكل مجمّع لتحسينه.",
   },
-  marketing: { en: "Marketing", ar: "التسويق" },
+  marketing: { en: "Marketing", fr: "Marketing", ar: "التسويق" },
   marketingText: {
     en: "Allow us and partners to measure campaigns and show relevant offers.",
+    fr: "Ils permettent à nos partenaires et à nous-mêmes de mesurer les campagnes et d'afficher des offres pertinentes.",
     ar: "تتيح لنا ولشركائنا قياس الحملات وعرض عروض مناسبة.",
   },
   none: {
     en: "No analytics or marketing tool is active on this site at the moment. Your choice is saved and will apply as soon as one is added.",
+    fr: "Aucun outil d'analyse ou de marketing n'est actif sur ce site pour le moment. Votre choix est enregistré et s'appliquera dès qu'un outil sera ajouté.",
     ar: "لا توجد أدوات تحليلات أو تسويق مفعّلة على الموقع حاليًا. يُحفظ اختياركم وسيُطبَّق فور إضافة أي منها.",
   },
 } as const;
@@ -62,7 +84,7 @@ const tx = (k: keyof typeof T, loc: Loc) => T[k][loc];
 
 /** The three consent controls, reused by the dialog and by the cookie policy page. */
 export function ConsentPreferencesPanel({ onDone }: { onDone?: () => void }) {
-  const loc = (useLocale() === "ar" ? "ar" : "en") as Loc;
+  const loc = toLoc(useLocale());
   const c = useConsent();
   const [analytics, setAnalytics] = useState(c.analytics);
   const [marketing, setMarketing] = useState(c.marketing);
@@ -168,7 +190,7 @@ export function ConsentPreferencesPanel({ onDone }: { onDone?: () => void }) {
 
 /** Mounted once in the locale layout: first-visit banner + preferences dialog that the footer can reopen. */
 export function ConsentManager() {
-  const loc = (useLocale() === "ar" ? "ar" : "en") as Loc;
+  const loc = toLoc(useLocale());
   const c = useConsent();
   const [open, setOpen] = useState(false);
 

@@ -2,12 +2,12 @@ import type { ReactNode } from "react";
 import { PageHero } from "@/components/layout/page-hero";
 import type { PolicySection } from "@/content/privacy-official";
 
-type Loc = "en" | "ar";
+import type { Loc } from "@/lib/l10n";
 
 const ANCHORS: Record<string, string> = { "#who": "#s-1", "#rights": "#s-7" };
 
 /** Renders text that carries {{url|label}} links. Empty links are dropped to their label. */
-function Rich({ text }: { text: string }): ReactNode {
+function Rich({ text, loc }: { text: string; loc: Loc }): ReactNode {
   const parts = text.split(/(\{\{[^}]*\}\})/g);
   return parts.map((part, i) => {
     const m = /^\{\{([^|]*)\|([^}]*)\}\}$/.exec(part);
@@ -24,16 +24,20 @@ function Rich({ text }: { text: string }): ReactNode {
         className="font-medium text-sf-mauve underline underline-offset-4 hover:no-underline"
       >
         {label}
-        {external ? <span className="sr-only"> ({OPENS_NEW_TAB})</span> : null}
+        {external ? <span className="sr-only"> ({OPENS_NEW_TAB[loc]})</span> : null}
       </a>
     );
   });
 }
 
-const OPENS_NEW_TAB = "opens in a new tab";
+const OPENS_NEW_TAB: Record<Loc, string> = {
+  en: "opens in a new tab",
+  fr: "s'ouvre dans un nouvel onglet",
+  ar: "يفتح في علامة تبويب جديدة",
+};
 
 const UI = {
-  toc: { en: "On this page", ar: "في هذه الصفحة" },
+  toc: { en: "On this page", fr: "Sur cette page", ar: "في هذه الصفحة" },
 } as const;
 
 function Sections({
@@ -42,17 +46,13 @@ function Sections({
   dir,
 }: {
   sections: PolicySection[];
-  lang: string;
+  lang: Loc;
   dir: "ltr" | "rtl";
 }) {
   return (
     <div lang={lang} dir={dir} className="space-y-14 text-start">
       {sections.map((s) => (
-        <section
-          key={s.id}
-          id={lang === "fr" ? `fr-${s.id}` : s.id}
-          className="scroll-mt-40"
-        >
+        <section key={s.id} id={s.id} className="scroll-mt-40">
           {s.level === 1 ? (
             <h2 className="font-display text-2xl font-medium tracking-[-0.01em] md:text-3xl rtl:tracking-normal">
               {s.heading}
@@ -73,14 +73,14 @@ function Sections({
                         className="mt-2.5 size-1.5 shrink-0 rounded-full bg-sf-mauve"
                       />
                       <span>
-                        <Rich text={item} />
+                        <Rich text={item} loc={lang} />
                       </span>
                     </li>
                   ))}
                 </ul>
               ) : (
                 <p key={i}>
-                  <Rich text={b.x} />
+                  <Rich text={b.x} loc={lang} />
                 </p>
               ),
             )}
@@ -93,7 +93,7 @@ function Sections({
 
 /**
  * Official policy document: sticky table of contents (top-level sections), numbered sections, notice about the
- * language of the text. The policy body is rendered verbatim and left-to-right in French.
+ * language of the text. English and French render left-to-right, Arabic right-to-left.
  */
 export function OfficialPolicy({
   loc,

@@ -24,7 +24,7 @@ export function DimensionsExplorer({
   eyeBody: L;
   measuredLabel: L;
 }) {
-  const locale = useLocale() as "en" | "ar";
+  const locale = useLocale() as "en" | "fr" | "ar";
   const [active, setActive] = useState(0);
   const current = items[active]!;
 

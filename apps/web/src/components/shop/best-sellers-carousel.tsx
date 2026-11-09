@@ -1,6 +1,7 @@
 "use client";
 
 import { ProductCardMedia } from "@/components/shop/product-card-media";
+import { toLoc, tr } from "@/lib/l10n";
 import { useLocale, useTranslations } from "next-intl";
 import type { Locale } from "@ioma/config";
 import { useProductsQuery } from "@/hooks/use-catalog-queries";
@@ -12,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Star, ArrowRight, ShoppingBag } from "lucide-react";
 
 export function BestSellersCarousel() {
-  const locale = useLocale() as Locale;
+  const locale = toLoc(useLocale());
   const t = useTranslations("Shop");
   const { data: allProducts, isLoading } = useProductsQuery({});
   const addCartItem = useAddCartItem();
@@ -87,7 +88,11 @@ export function BestSellersCarousel() {
                         className="size-2.5 fill-amber-400 text-amber-400"
                         aria-hidden
                       />
-                      {locale === "ar" ? "الأكثر مبيعًا" : "Best seller"}
+                      {tr(locale, {
+                        en: "Best seller",
+                        fr: "Best-seller",
+                        ar: "الأكثر مبيعًا",
+                      })}
                     </span>
                   </ProductCardMedia>
                 </Link>
@@ -122,15 +127,21 @@ export function BestSellersCarousel() {
                   {product.priceFromMinor !== null ? (
                     <span className="text-[0.95rem] font-semibold text-foreground">
                       {hasMultipleSizes
-                        ? locale === "ar"
-                          ? "ابتداءً من "
-                          : "From "
+                        ? tr(locale, {
+                            en: "From ",
+                            fr: "À partir de ",
+                            ar: "ابتداءً من ",
+                          })
                         : ""}
                       {formatMinor(product.priceFromMinor, locale)}
                     </span>
                   ) : (
                     <span className="text-xs text-muted-foreground">
-                      {locale === "ar" ? "سعر حسب الطلب" : "Bespoke pricing"}
+                      {tr(locale, {
+                        en: "Bespoke pricing",
+                        fr: "Prix sur mesure",
+                        ar: "سعر حسب الطلب",
+                      })}
                     </span>
                   )}
                   {firstVariant?.size && (
@@ -154,7 +165,11 @@ export function BestSellersCarousel() {
         >
           <Link href="/shop?bestSeller=true" className="inline-flex items-center gap-2">
             <span>
-              {locale === "ar" ? "اكتشف جميع الأكثر مبيعًا" : "Discover all best sellers"}
+              {tr(locale, {
+                en: "Discover all best sellers",
+                fr: "Découvrir tous nos best-sellers",
+                ar: "اكتشف جميع الأكثر مبيعًا",
+              })}
             </span>
             <ArrowRight className="size-4 rtl:rotate-180" />
           </Link>
