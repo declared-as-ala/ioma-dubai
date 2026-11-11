@@ -211,7 +211,11 @@ export function Header() {
             <Button
               asChild
               size="sm"
-              className={`ms-2 hidden uppercase tracking-widest xl:inline-flex font-semibold bg-primary hover:bg-primary/90 text-primary-foreground`}
+              className={`ms-2 hidden rounded-full px-5 font-semibold uppercase tracking-widest rtl:tracking-normal transition-colors duration-300 xl:inline-flex ${
+                isDarkHeader
+                  ? "bg-ioma-white text-foreground hover:bg-sf-mauve hover:text-white"
+                  : "bg-foreground text-background hover:bg-sf-mauve hover:text-white"
+              }`}
             >
               <Link href="/partners" prefetch={false}>
                 {t("findPartner")}

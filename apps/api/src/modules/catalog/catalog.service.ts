@@ -28,6 +28,22 @@ type PopulatedConcern = {
 };
 type PopulatedSkinType = { _id: Types.ObjectId; slug: string; name: LocalizedText };
 
+const LEGACY_CONCERN_SLUGS: Record<string, string> = {
+  dehydration: "deshydratation",
+  "first-signs-of-aging": "anti-age",
+  blemishes: "imperfections",
+  "dark-spots": "taches",
+  "fatigue-dullness": "teint-terne",
+  sensitivity: "sensibilite",
+  "shine-control": "matite",
+  "uv-protection": "pollution",
+};
+
+const LEGACY_CATEGORY_SLUGS: Record<string, string> = {
+  cleansers: "nettoyants",
+  creams: "cremes",
+};
+
 @Injectable()
 export class CatalogService {
   constructor(
@@ -55,15 +71,28 @@ export class CatalogService {
       .lean();
   }
 
-  listCategories() {
+  /** Only categories that hold at least one published storefront product. */
+  async listCategories() {
+    const used = await this.productModel.distinct("categoryIds", {
+      status: "published",
+      visibility: { $in: ["b2c", "both"] },
+    });
     return this.categoryModel
-      .find({ status: { $ne: "inactive" } })
+      .find({ _id: { $in: used }, status: { $ne: "inactive" } })
       .sort({ "name.en": 1 })
       .lean();
   }
 
-  listConcerns() {
-    return this.concernModel.find().sort({ "name.en": 1 }).lean();
+  /** Only concerns that actually have a published storefront product, so a filter never leads to 0 results. */
+  async listConcerns() {
+    const used = await this.productModel.distinct("concernIds", {
+      status: "published",
+      visibility: { $in: ["b2c", "both"] },
+    });
+    return this.concernModel
+      .find({ _id: { $in: used }, status: { $ne: "inactive" } })
+      .sort({ "name.en": 1 })
+      .lean();
   }
 
   listSkinTypes() {
@@ -93,13 +122,16 @@ export class CatalogService {
     }
 
     if (query.category) {
-      const category = await this.categoryModel.findOne({ slug: query.category }).lean();
+      const categorySlug = LEGACY_CATEGORY_SLUGS[query.category] ?? query.category;
+      const category = await this.categoryModel.findOne({ slug: categorySlug }).lean();
       if (!category) return [];
       filter.categoryIds = category._id;
     }
 
     if (query.concern) {
-      const concern = await this.concernModel.findOne({ slug: query.concern }).lean();
+      // Older menu links use legacy concern slugs that carry no products; map them to the live ones.
+      const slug = LEGACY_CONCERN_SLUGS[query.concern] ?? query.concern;
+      const concern = await this.concernModel.findOne({ slug }).lean();
       if (!concern) return [];
       filter.concernIds = concern._id;
     }
@@ -319,7 +351,8 @@ export class CatalogService {
     }
 
     if (query.category) {
-      const category = await this.categoryModel.findOne({ slug: query.category }).lean();
+      const categorySlug = LEGACY_CATEGORY_SLUGS[query.category] ?? query.category;
+      const category = await this.categoryModel.findOne({ slug: categorySlug }).lean();
       if (!category) return [];
       filter.categoryIds = category._id;
     }
