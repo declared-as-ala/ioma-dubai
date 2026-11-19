@@ -25,6 +25,14 @@ export class ProductVariant {
   @Prop({ type: Number, default: null })
   b2bPriceMinor!: number | null;
 
+  /** Barcode (EAN-13) from the official UAE price lists. */
+  @Prop({ type: String, default: null, index: true })
+  ean?: string | null;
+
+  /** Suggested public resale price (VAT inclusive, AED fils) shown to professionals only. */
+  @Prop({ type: Number, default: null })
+  suggestedRetailMinor?: number | null;
+
   @Prop({ type: Number, default: null })
   moq!: number | null;
 
