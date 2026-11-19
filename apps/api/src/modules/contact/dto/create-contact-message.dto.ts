@@ -4,9 +4,13 @@ import {
   IsIn,
   IsOptional,
   IsString,
+  Matches,
   MaxLength,
   MinLength,
 } from "class-validator";
+
+// Header-injection guard: single-line fields may never carry CR/LF.
+const NO_LINE_BREAKS = /^[^\r\n]*$/;
 
 // Mirrors packages/validation/src/contact.ts — see CLAUDE.md.
 export class CreateContactMessageDto {
@@ -14,16 +18,25 @@ export class CreateContactMessageDto {
   @IsString()
   @MinLength(1)
   @MaxLength(100)
+  @Matches(NO_LINE_BREAKS, { message: "must not contain line breaks" })
   name!: string;
 
   @ApiProperty()
   @IsEmail()
+  @MaxLength(200)
   email!: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  @Matches(/^[+0-9 ()\-.]{6,25}$/, { message: "invalid phone number" })
+  phone?: string;
 
   @ApiProperty()
   @IsString()
   @MinLength(1)
   @MaxLength(150)
+  @Matches(NO_LINE_BREAKS, { message: "must not contain line breaks" })
   subject!: string;
 
   @ApiProperty()

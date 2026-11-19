@@ -1,6 +1,9 @@
 // French translations of the service and legal pages in services.ts, keyed by the English source string.
 // Strings without an entry fall back to English.
 export const SERVICES_FR: Record<string, string> = {
+  "Phone (optional)": "Téléphone (facultatif)",
+  "Enter a valid phone number.": "Saisissez un numéro de téléphone valide.",
+  "Write to us directly": "Écrivez-nous directement",
   "Pending approval": "En attente de validation",
   Information: "Informations",
   "To be confirmed for the UAE": "À confirmer pour les Émirats",

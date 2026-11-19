@@ -184,6 +184,8 @@ export const CONTACT = {
     category: l("What is it about?", "ما موضوع رسالتكم؟"),
     name: l("Your name", "الاسم"),
     email: l("Email", "البريد الإلكتروني"),
+    phone: l("Phone (optional)", "الهاتف (اختياري)"),
+    badPhone: l("Enter a valid phone number.", "أدخلوا رقم هاتف صحيحًا."),
     order: l("Order reference (optional)", "رقم الطلب (اختياري)"),
     orderHint: l(
       "You will find it in your confirmation email.",
@@ -226,6 +228,7 @@ export const CONTACT = {
       "يمكن للمهنيين التواصل معنا أيضًا عبر المساحة المهنية.",
     ),
   ],
+  emailLabel: l("Write to us directly", "راسلونا مباشرة"),
   detailsNote: l(
     "UAE telephone and address details will appear here once confirmed.",
     "ستظهر هنا بيانات الهاتف والعنوان في الإمارات فور اعتمادها.",

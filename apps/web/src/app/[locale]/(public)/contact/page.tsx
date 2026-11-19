@@ -37,6 +37,17 @@ export default async function ContactPage() {
               </li>
             ))}
           </ul>
+          <div data-cine-item className="space-y-2 border-t border-border pt-6">
+            <p className="text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
+              {P.emailLabel[loc]}
+            </p>
+            <a
+              href="mailto:contact@iomaparis.ae"
+              className="block font-display text-xl underline-offset-4 hover:underline"
+            >
+              contact@iomaparis.ae
+            </a>
+          </div>
           <p
             data-cine-item
             className="rounded-2xl bg-sf-ivory p-5 text-sm leading-relaxed text-muted-foreground"

@@ -27,6 +27,7 @@ export function ServiceContactForm() {
     defaultValues: {
       name: "",
       email: "",
+      phone: "",
       subject: "",
       message: "",
       locale,
@@ -50,6 +51,7 @@ export function ServiceContactForm() {
     const e = errors[field];
     if (!e) return undefined;
     if (field === "email") return F.badEmail[loc];
+    if (field === "phone") return F.badPhone[loc];
     if (field === "message") return F.shortMessage[loc];
     return F.required[loc];
   };
@@ -59,6 +61,7 @@ export function ServiceContactForm() {
       {
         ...values,
         orderReference: values.orderReference?.trim() || undefined,
+        phone: values.phone?.trim() || undefined,
         website: values.website ?? "",
       },
       {
@@ -66,6 +69,7 @@ export function ServiceContactForm() {
           form.reset({
             name: "",
             email: "",
+            phone: "",
             subject: "",
             message: "",
             locale,
@@ -165,6 +169,26 @@ export function ServiceContactForm() {
             </p>
           ) : null}
         </div>
+      </div>
+
+      <div className={field}>
+        <label htmlFor="cf-phone" className={label}>
+          {F.phone[loc]}
+        </label>
+        <Input
+          id="cf-phone"
+          type="tel"
+          autoComplete="tel"
+          aria-invalid={!!errors.phone}
+          aria-describedby={errors.phone ? "cf-phone-err" : undefined}
+          className="h-12 rounded-xl bg-white"
+          {...register("phone")}
+        />
+        {errors.phone ? (
+          <p id="cf-phone-err" role="alert" className={err}>
+            {msg("phone")}
+          </p>
+        ) : null}
       </div>
 
       <div className="grid gap-6 sm:grid-cols-2">

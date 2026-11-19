@@ -5,6 +5,12 @@ import { z } from "zod";
 export const contactMessageSchema = z.object({
   name: z.string().min(1).max(100),
   email: z.string().email(),
+  phone: z
+    .string()
+    .trim()
+    .regex(/^[+0-9 ()\-.]{6,25}$/)
+    .optional()
+    .or(z.literal("")),
   subject: z.string().min(1).max(150),
   message: z.string().min(10).max(2000),
   locale: z.enum(["en", "fr", "ar"]),

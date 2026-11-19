@@ -16,6 +16,9 @@ export class ContactMessage {
   @Prop({ required: true, lowercase: true, trim: true, index: true })
   email!: string;
 
+  @Prop({ type: String, trim: true, maxlength: 25 })
+  phone?: string;
+
   @Prop({ required: true, trim: true })
   subject!: string;
 

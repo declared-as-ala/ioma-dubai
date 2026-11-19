@@ -54,6 +54,32 @@ export const envSchema = z.object({
   SMTP_PORT: z.coerce.number().optional(),
   SMTP_USER: z.string().optional(),
   SMTP_PASS: z.string().optional(),
+  SMTP_SECURE: z.preprocess(
+    (v) => (v === "" ? undefined : v),
+    z
+      .enum(["true", "false"])
+      .optional()
+      .transform((v) => (v === undefined ? undefined : v === "true")),
+  ),
+  // One mailbox per sender identity (Tasjeel mailboxes). Passwords come only from the environment.
+  SMTP_CONTACT_USER: z.preprocess(
+    (v) => (v === "" ? undefined : v),
+    z.string().email().optional(),
+  ),
+  SMTP_CONTACT_PASSWORD: z.string().optional(),
+  SMTP_SUPPORT_USER: z.preprocess(
+    (v) => (v === "" ? undefined : v),
+    z.string().email().optional(),
+  ),
+  SMTP_SUPPORT_PASSWORD: z.string().optional(),
+  CONTACT_EMAIL: z.preprocess(
+    (v) => (v === "" ? undefined : v),
+    z.string().email().optional(),
+  ),
+  SUPPORT_EMAIL: z.preprocess(
+    (v) => (v === "" ? undefined : v),
+    z.string().email().optional(),
+  ),
   EMAIL_FROM: z.string().default("no-reply@ioma-dev.local"),
   // Where new contact-form messages are announced. Optional: messages are always stored either way.
   CONTACT_NOTIFY_EMAIL: z.string().email().optional(),

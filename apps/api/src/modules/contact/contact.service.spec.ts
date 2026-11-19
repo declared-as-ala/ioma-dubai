@@ -10,14 +10,12 @@ const base = {
 
 function build(notify?: string) {
   const save = jest.fn().mockResolvedValue(undefined);
-  const ctor = jest
-    .fn()
-    .mockImplementation((data) => ({
-      ...data,
-      id: "m1",
-      save,
-      get: () => new Date("2026-01-01"),
-    }));
+  const ctor = jest.fn().mockImplementation((data) => ({
+    ...data,
+    id: "m1",
+    save,
+    get: () => new Date("2026-01-01"),
+  }));
   const mail = { sendHtml: jest.fn().mockResolvedValue(undefined) };
   const config = { get: jest.fn().mockReturnValue(notify) };
   const service = new ContactService(ctor as never, mail as never, config as never);
@@ -61,5 +59,23 @@ describe("ContactService", () => {
     await service.create(base);
     expect(save).toHaveBeenCalled();
     expect(mail.sendHtml).not.toHaveBeenCalled();
+  });
+
+  it("sets Reply-To to the customer and sends from the contact identity", async () => {
+    const { service, mail } = build("contact@example.com");
+    await service.create({ ...base, phone: "+971 50 123 4567" });
+    expect(mail.sendHtml.mock.calls[0][3]).toEqual({
+      identity: "contact",
+      replyTo: "ada@example.com",
+    });
+  });
+
+  it("ignores an identical resubmission so the team is not mailed twice", async () => {
+    const { service, mail, ctor } = build("contact@example.com");
+    await service.create(base);
+    const second = await service.create(base);
+    expect(second.id).toBe("duplicate");
+    expect(ctor).toHaveBeenCalledTimes(1);
+    expect(mail.sendHtml).toHaveBeenCalledTimes(1);
   });
 });
