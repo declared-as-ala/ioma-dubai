@@ -22,7 +22,6 @@ import type { Locale } from "@ioma/config";
 import { profileSchema, type ProfileInput } from "@ioma/validation";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import {
@@ -33,7 +32,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { LOCALE_LABELS } from "@ioma/config";
-import { useConcernsQuery } from "@/hooks/use-catalog-queries";
 import { useProfileQuery, useUpdateProfileMutation } from "@/hooks/use-account";
 import { useResendMyVerificationMutation } from "@/hooks/use-auth";
 import { useOrdersQuery } from "@/hooks/use-orders";
@@ -269,7 +267,6 @@ function PersonalInfo() {
   const locale = useLocale() as Locale;
   const loc = toLoc(locale);
   const profile = useProfileQuery();
-  const concerns = useConcernsQuery();
   const update = useUpdateProfileMutation();
   const form = useForm<ProfileInput>({
     resolver: zodResolver(profileSchema),
@@ -469,67 +466,6 @@ function PersonalInfo() {
               />
             </div>
           </FieldGroup>
-
-          <Controller
-            name="skinConcerns"
-            control={form.control}
-            render={({ field }) => (
-              <fieldset>
-                <legend className={label}>
-                  {tr(loc, {
-                    en: "Skin priorities",
-                    fr: "Priorités de peau",
-                    ar: "أولويات البشرة",
-                  })}
-                </legend>
-                {concerns.isLoading ? (
-                  <Skeleton className="mt-3 h-12" />
-                ) : (
-                  <div className="mt-3 flex flex-wrap gap-2.5">
-                    {concerns.data?.map((c) => {
-                      const on = field.value.includes(c.slug);
-                      return (
-                        <button
-                          key={c.slug}
-                          type="button"
-                          aria-pressed={on}
-                          onClick={() =>
-                            field.onChange(
-                              on
-                                ? field.value.filter((s) => s !== c.slug)
-                                : [...field.value, c.slug],
-                            )
-                          }
-                          className={`min-h-11 rounded-full border px-4 text-xs font-medium transition-colors ${
-                            on
-                              ? "border-foreground bg-foreground text-background"
-                              : "border-border/80 bg-background hover:border-foreground/40"
-                          }`}
-                        >
-                          {c.name[locale]}
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
-              </fieldset>
-            )}
-          />
-
-          <Controller
-            name="newsletterOptIn"
-            control={form.control}
-            render={({ field }) => (
-              <label className="flex cursor-pointer items-start gap-3">
-                <Checkbox
-                  checked={field.value}
-                  onCheckedChange={(v) => field.onChange(Boolean(v))}
-                  className="mt-0.5"
-                />
-                <span className="text-sm leading-6">{t("profile.newsletterOptIn")}</span>
-              </label>
-            )}
-          />
 
           <div className="flex flex-wrap items-center justify-between gap-4 border-t border-border/60 pt-6">
             <div aria-live="polite" className="min-h-5 text-sm">
