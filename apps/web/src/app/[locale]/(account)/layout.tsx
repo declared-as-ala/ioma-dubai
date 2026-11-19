@@ -2,7 +2,8 @@
 
 import { useEffect } from "react";
 import { useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/navigation";
+import { usePathname, useRouter } from "@/i18n/navigation";
+import { VerifyEmailBanner } from "@/components/account/verify-email-banner";
 import { AccountNav } from "@/components/account/account-nav";
 import { useAuthStore } from "@/stores/auth-store";
 import { useAuthHydrated } from "@/hooks/use-auth-hydrated";
@@ -11,6 +12,7 @@ import { PageLoader } from "@/components/ui/loading-screen";
 export default function AccountLayout({ children }: { children: React.ReactNode }) {
   const t = useTranslations("Account");
   const router = useRouter();
+  const pathname = usePathname();
   const user = useAuthStore((state) => state.user);
   const hydrated = useAuthHydrated();
 
@@ -33,7 +35,10 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
     <main className="mx-auto max-w-[1440px] px-4 md:px-6 py-10 md:py-16">
       <div className="account-experience grid gap-8 lg:gap-12 lg:grid-cols-[260px_minmax(0,1fr)]">
         <AccountNav />
-        <div className="min-w-0">{children}</div>
+        <div className="min-w-0">
+          {pathname.endsWith("/account/profile") ? null : <VerifyEmailBanner />}
+          {children}
+        </div>
       </div>
     </main>
   );

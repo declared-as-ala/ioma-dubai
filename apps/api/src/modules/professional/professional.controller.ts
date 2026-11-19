@@ -26,6 +26,7 @@ import {
   parseReview,
   validateApplicationFile,
 } from "./application-validation";
+import { VerifiedEmailGuard } from "../auth/guards/verified-email.guard";
 
 @ApiTags("professional")
 @UseGuards(JwtAuthGuard)
@@ -89,11 +90,13 @@ export class ProfessionalController {
   }
 
   @Post("applications/draft")
+  @UseGuards(VerifiedEmailGuard)
   getOrCreateDraft(@CurrentUser() user: JwtPayload) {
     return this.professionalService.getOrCreateDraft(user.sub).then(publicApplication);
   }
 
   @Post("applications/:id/submit")
+  @UseGuards(VerifiedEmailGuard)
   submitApplication(
     @CurrentUser() user: JwtPayload,
     @Param("id") id: string,
@@ -107,6 +110,7 @@ export class ProfessionalController {
   }
 
   @Post("applications/:id/documents")
+  @UseGuards(VerifiedEmailGuard)
   async addDocument(
     @CurrentUser() user: JwtPayload,
     @Param("id") id: string,
@@ -131,6 +135,7 @@ export class ProfessionalController {
   }
 
   @Post("applications/:id/upload")
+  @UseGuards(VerifiedEmailGuard)
   @UseInterceptors(
     FileInterceptor("file", { limits: { fileSize: 10 * 1024 * 1024, files: 1 } }),
   )

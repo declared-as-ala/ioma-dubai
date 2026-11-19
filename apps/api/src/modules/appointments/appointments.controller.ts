@@ -9,6 +9,7 @@ import {
   RescheduleAppointmentDto,
   CancelAppointmentDto,
 } from "./dto/appointment.dto";
+import { VerifiedEmailGuard } from "../auth/guards/verified-email.guard";
 
 @ApiTags("appointments")
 @Controller("appointments")
@@ -16,7 +17,7 @@ export class AppointmentsController {
   constructor(private readonly appointmentsService: AppointmentsService) {}
 
   @Post()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, VerifiedEmailGuard)
   book(@CurrentUser() user: JwtPayload, @Body() dto: CreateAppointmentDto) {
     return this.appointmentsService.book(user.sub, dto);
   }

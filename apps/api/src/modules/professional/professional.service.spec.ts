@@ -5,6 +5,8 @@ import { ProfessionalService } from "./professional.service";
 import { ProfessionalApplication } from "./schemas/professional-application.schema";
 import { ProfessionalProfile } from "./schemas/professional-profile.schema";
 import { UsersService } from "../users/users.service";
+import { ConfigService } from "@nestjs/config";
+import { MailOutboxService } from "../../common/mail/mail-outbox.service";
 
 describe("ProfessionalService", () => {
   let service: ProfessionalService;
@@ -14,6 +16,7 @@ describe("ProfessionalService", () => {
   let mockProfileModel: any;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let mockUsersService: any;
+  let outbox: { enqueue: jest.Mock };
 
   const userId = new Types.ObjectId().toString();
   const adminId = new Types.ObjectId().toString();
@@ -38,7 +41,14 @@ describe("ProfessionalService", () => {
     mockUsersService = {
       addRole: jest.fn().mockResolvedValue(true),
       removeRole: jest.fn().mockResolvedValue(true),
+      findById: jest.fn().mockResolvedValue({
+        email: "owner@example.com",
+        firstName: "Ola",
+        lastName: "Owner",
+        locale: "fr",
+      }),
     };
+    outbox = { enqueue: jest.fn().mockResolvedValue({ created: true }) };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -49,6 +59,19 @@ describe("ProfessionalService", () => {
         },
         { provide: getModelToken(ProfessionalProfile.name), useValue: mockProfileModel },
         { provide: UsersService, useValue: mockUsersService },
+        { provide: MailOutboxService, useValue: outbox },
+        {
+          provide: ConfigService,
+          useValue: {
+            get: (k: string) =>
+              ({
+                CONTACT_EMAIL: "contact@iomaparis.ae",
+                SUPPORT_EMAIL: "support@iomaparis.ae",
+                APP_URL: "https://iomaparis.ae",
+                ADMIN_APP_URL: "https://admin.iomaparis.ae",
+              })[k],
+          },
+        },
       ],
     }).compile();
 
@@ -176,6 +199,27 @@ describe("ProfessionalService", () => {
       );
       expect(mockProfileModel.create).toHaveBeenCalled();
       expect(result.profile.status).toBe("approved");
+      // Approval email is queued by the backend transition, once, to the applicant.
+      await new Promise((r) => setImmediate(r));
+      expect(outbox.enqueue).toHaveBeenCalledTimes(1);
+      expect(outbox.enqueue).toHaveBeenCalledWith(
+        expect.objectContaining({
+          key: `pro-app-approved:${applicationId}`,
+          to: "owner@example.com",
+        }),
+      );
+    });
+
+    it("does not approve (or email) a second time", async () => {
+      mockApplicationModel.findById.mockResolvedValue({
+        _id: new Types.ObjectId(applicationId),
+        userId: new Types.ObjectId(userId),
+        status: "approved",
+      });
+      await expect(service.approveApplication(adminId, applicationId)).rejects.toThrow(
+        "not in a reviewable state",
+      );
+      expect(outbox.enqueue).not.toHaveBeenCalled();
     });
   });
 
@@ -203,6 +247,10 @@ describe("ProfessionalService", () => {
       expect(mockUsersService.removeRole).toHaveBeenCalledWith(
         userId,
         "professional_pending",
+      );
+      await new Promise((r) => setImmediate(r));
+      expect(outbox.enqueue).toHaveBeenCalledWith(
+        expect.objectContaining({ key: `pro-app-rejected:${applicationId}` }),
       );
       expect(result.status).toBe("rejected");
     });

@@ -69,6 +69,13 @@ export class UsersService {
     await this.userModel.updateOne({ _id: userId }, { $pull: { roles: role } });
   }
 
+  async markEmailVerified(userId: string) {
+    await this.userModel.updateOne(
+      { _id: userId, emailVerifiedAt: null },
+      { $set: { emailVerifiedAt: new Date() } },
+    );
+  }
+
   async updatePasswordHash(userId: string, passwordHash: string) {
     await this.userModel.updateOne({ _id: userId }, { $set: { passwordHash } });
   }

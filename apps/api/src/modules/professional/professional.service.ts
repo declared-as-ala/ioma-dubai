@@ -5,8 +5,16 @@
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model, Types } from "mongoose";
+import { MailOutboxService } from "../../common/mail/mail-outbox.service";
+import {
+  partnerApplicationTeamEmail,
+  partnerApprovedEmail,
+  partnerRejectedEmail,
+  toEmailLocale,
+} from "../../common/mail/email-templates";
 import {
   ProfessionalApplication,
   ProfessionalApplicationDocument,
@@ -25,7 +33,95 @@ export class ProfessionalService {
     @InjectModel(ProfessionalProfile.name)
     private readonly profileModel: Model<ProfessionalProfileDocument>,
     private readonly usersService: UsersService,
+    private readonly outbox: MailOutboxService,
+    private readonly config: ConfigService,
   ) {}
+
+  // --- Notifications (triggered by backend state transitions, never by the UI) ---
+
+  private reference(id: unknown): string {
+    return `IOMA-PRO-${String(id).slice(-8).toUpperCase()}`;
+  }
+
+  /** To contact@: a partner application was submitted. Durable + idempotent via the outbox key. */
+  private async notifyTeamSubmitted(app: ProfessionalApplicationDocument) {
+    try {
+      const to =
+        this.config.get<string>("CONTACT_EMAIL") ??
+        this.config.get<string>("CONTACT_NOTIFY_EMAIL");
+      if (!to) return;
+      const user = await this.usersService.findById(app.userId.toString());
+      const adminBase = this.config.get<string>("ADMIN_APP_URL") ?? "";
+      const reviewUrl = `${adminBase}/en/admin/professionals?application=${String(app._id)}`;
+      const mail = partnerApplicationTeamEmail(
+        {
+          reference: this.reference(app._id),
+          status: app.status,
+          contactPerson: app.contactPerson,
+          applicantName: user ? `${user.firstName} ${user.lastName}`.trim() : null,
+          email: app.email || user?.email,
+          phone: app.phone,
+          companyName: app.companyName,
+          businessType: app.businessType,
+          city: app.city,
+          emirate: app.emirate,
+          address: app.address,
+          tradeLicenceNumber: app.tradeLicenceNumber,
+          vatNumber: app.vatNumber,
+          website: app.website,
+          socialMedia: app.socialMedia,
+          locationsCount: app.locationsCount,
+          expectedOrderVolume: app.expectedOrderVolume,
+          message: app.message,
+          submittedAt: app.submittedAt,
+          documentsCount: app.documents.length,
+        },
+        reviewUrl,
+      );
+      await this.outbox.enqueue({
+        key: `pro-app-submitted:${String(app._id)}:${app.statusHistory.length}`,
+        identity: "contact",
+        to,
+        replyTo: app.email || user?.email || undefined,
+        ...mail,
+      });
+    } catch (err) {
+      // The application is already saved: a notification problem must never undo or fail it.
+      console.warn(`Partner submission notice not queued: ${(err as Error).message}`);
+    }
+  }
+
+  /** To the applicant after a status transition (approved / rejected). Once per application. */
+  private async notifyApplicant(
+    app: ProfessionalApplicationDocument,
+    kind: "approved" | "rejected",
+  ) {
+    try {
+      const user = await this.usersService.findById(app.userId.toString());
+      if (!user) return;
+      const locale = toEmailLocale(user.locale);
+      const name = app.contactPerson || user.firstName;
+      const support = this.config.get<string>("SUPPORT_EMAIL") ?? "support@iomaparis.ae";
+      const appUrl = this.config.get<string>("APP_URL") ?? "";
+      const mail =
+        kind === "approved"
+          ? partnerApprovedEmail(
+              locale,
+              name,
+              `${appUrl}/${locale}/account/professional`,
+              support,
+            )
+          : partnerRejectedEmail(locale, name, app.applicantMessage, support);
+      await this.outbox.enqueue({
+        key: `pro-app-${kind}:${String(app._id)}`,
+        identity: "contact",
+        to: user.email,
+        ...mail,
+      });
+    } catch (err) {
+      console.warn(`Partner ${kind} notice not queued: ${(err as Error).message}`);
+    }
+  }
 
   // --- Application lifecycle ---
 
@@ -131,6 +227,8 @@ export class ProfessionalService {
         "Application changed. Reload its status before retrying.",
       );
     await this.usersService.addRole(userId, "professional_pending");
+    // The application is saved above; mailing the team happens in the background.
+    void this.notifyTeamSubmitted(updated);
     return updated.toObject();
   }
 
@@ -237,6 +335,7 @@ export class ProfessionalService {
       status: "approved",
     });
 
+    void this.notifyApplicant(app, "approved");
     return { application: app.toObject(), profile: profile.toObject() };
   }
 
@@ -256,6 +355,7 @@ export class ProfessionalService {
 
     await this.usersService.removeRole(app.userId.toString(), "professional_pending");
 
+    void this.notifyApplicant(app, "rejected");
     return app.toObject();
   }
 

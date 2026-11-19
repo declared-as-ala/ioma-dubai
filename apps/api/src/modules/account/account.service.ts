@@ -50,6 +50,7 @@ export class AccountService {
 
     return {
       email: user.email,
+      emailVerified: !!user.emailVerifiedAt,
       firstName: user.firstName,
       lastName: user.lastName,
       locale: user.locale,

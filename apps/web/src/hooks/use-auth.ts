@@ -75,3 +75,40 @@ export function useResetPasswordMutation() {
       }),
   });
 }
+
+export function useVerifyEmailMutation() {
+  return useMutation({
+    mutationFn: (token: string) =>
+      apiFetch<{ status: "verified" | "already_verified" }>("/auth/verify-email", {
+        method: "POST",
+        body: JSON.stringify({ token }),
+      }),
+  });
+}
+
+/** Signed-in "Resend verification email". The API rate-limits and applies a cooldown. */
+export function useResendMyVerificationMutation() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: () =>
+      apiFetch<{ status: "sent" | "cooldown" | "already_verified" }>(
+        "/auth/resend-verification/me",
+        { method: "POST" },
+      ),
+    onSuccess: (r) => {
+      if (r.status === "already_verified")
+        void qc.invalidateQueries({ queryKey: ["account", "profile"] });
+    },
+  });
+}
+
+/** Public resend by address: the answer is the same whether or not the account exists. */
+export function useResendVerificationMutation() {
+  return useMutation({
+    mutationFn: (email: string) =>
+      apiFetch<{ message: string }>("/auth/resend-verification", {
+        method: "POST",
+        body: JSON.stringify({ email }),
+      }),
+  });
+}

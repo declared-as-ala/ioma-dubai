@@ -9,6 +9,8 @@ export interface JwtPayload {
   sub: string;
   email: string;
   roles: string[];
+  /** False until the email link was used. Absent on tokens' own payload; set from the database. */
+  emailVerified?: boolean;
 }
 
 @Injectable()
@@ -29,6 +31,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     const user = await this.users.findById(payload.sub);
     if (!user || user.status === "locked" || user.status === "deleted")
       throw new UnauthorizedException();
-    return { sub: payload.sub, email: user.email, roles: user.roles };
+    return {
+      sub: payload.sub,
+      email: user.email,
+      roles: user.roles,
+      emailVerified: !!user.emailVerifiedAt,
+    };
   }
 }

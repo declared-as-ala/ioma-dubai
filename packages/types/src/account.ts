@@ -2,6 +2,8 @@ import type { Locale } from "@ioma/config";
 
 export interface CustomerProfile {
   email: string;
+  /** False until the verification link in the signup email was used. */
+  emailVerified: boolean;
   firstName: string;
   lastName: string;
   locale: Locale;

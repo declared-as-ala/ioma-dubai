@@ -1,7 +1,8 @@
 ﻿"use client";
 
 import { ApprovedProfiles } from "@/components/professional/approved-profiles";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import {
   usePendingApplications,
@@ -39,6 +40,13 @@ export default function AdminProfessionalsPage() {
   const [documentUrl, setDocumentUrl] = useState<string | null>(null);
 
   const [selectedApp, setSelectedApp] = useState<string | null>(null);
+  const focusId = useSearchParams().get("application");
+  useEffect(() => {
+    if (!focusId || !applications) return;
+    document
+      .querySelector(`[data-testid="admin-application-${CSS.escape(focusId)}"]`)
+      ?.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [focusId, applications]);
   const [reviewNotes, setReviewNotes] = useState("");
   const [action, setAction] = useState<"approve" | "reject" | "request" | null>(null);
 
@@ -108,7 +116,11 @@ export default function AdminProfessionalsPage() {
         <div className="mt-8 space-y-4">
           {applications.map((app) => {
             return (
-              <Card key={app._id} data-testid={`admin-application-${app._id}`}>
+              <Card
+                key={app._id}
+                data-testid={`admin-application-${app._id}`}
+                className={app._id === focusId ? "ring-2 ring-ioma-black" : undefined}
+              >
                 <CardHeader className="flex flex-wrap items-center justify-between gap-4 pb-2">
                   <div className="flex items-center gap-3">
                     <div className="rounded-full bg-ioma-grey-50 p-2">

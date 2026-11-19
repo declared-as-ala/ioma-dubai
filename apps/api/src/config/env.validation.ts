@@ -83,7 +83,7 @@ export const envSchema = z.object({
   EMAIL_FROM: z.string().default("no-reply@ioma-dev.local"),
   // Where new contact-form messages are announced. Optional: messages are always stored either way.
   CONTACT_NOTIFY_EMAIL: z.string().email().optional(),
-  PASSWORD_RESET_TTL_MINUTES: z.coerce.number().default(45),
+  PASSWORD_RESET_TTL_MINUTES: z.coerce.number().default(30),
 
   SENTRY_DSN: z.string().optional(),
   LOG_LEVEL: z.string().default("debug"),

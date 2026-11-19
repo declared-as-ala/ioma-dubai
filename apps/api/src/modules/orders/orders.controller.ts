@@ -20,6 +20,7 @@ import { CheckoutDto } from "./dto/checkout.dto";
 import { RetryPaymentDto } from "./dto/retry-payment.dto";
 import { RequireProfessional } from "../../common/guards/auth.decorators";
 import { ProfessionalApprovedGuard } from "../../common/guards/professional-approved.guard";
+import { VerifiedEmailGuard } from "../auth/guards/verified-email.guard";
 
 function resolveOwner(
   user: JwtPayload | undefined,
@@ -49,7 +50,7 @@ export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
   @Post()
-  @UseGuards(OptionalJwtAuthGuard)
+  @UseGuards(OptionalJwtAuthGuard, VerifiedEmailGuard)
   checkout(
     @OptionalUser() user: JwtPayload | undefined,
     @Headers("x-guest-session-id") guestSessionId: string | undefined,

@@ -13,6 +13,10 @@ import {
   PasswordResetToken,
   PasswordResetTokenSchema,
 } from "./schemas/password-reset-token.schema";
+import {
+  EmailVerificationToken,
+  EmailVerificationTokenSchema,
+} from "./schemas/email-verification-token.schema";
 import type { EnvConfig } from "../../config/env.validation";
 
 @Module({
@@ -22,6 +26,7 @@ import type { EnvConfig } from "../../config/env.validation";
     PassportModule,
     MongooseModule.forFeature([
       { name: PasswordResetToken.name, schema: PasswordResetTokenSchema },
+      { name: EmailVerificationToken.name, schema: EmailVerificationTokenSchema },
     ]),
     JwtModule.registerAsync({
       inject: [ConfigService],

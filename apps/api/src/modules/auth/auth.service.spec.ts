@@ -9,6 +9,8 @@ import { UsersService } from "../users/users.service";
 import { RefreshTokenService } from "./refresh-token.service";
 import { MailService } from "../../common/mail/mail.service";
 import { PasswordResetToken } from "./schemas/password-reset-token.schema";
+import { EmailVerificationToken } from "./schemas/email-verification-token.schema";
+import { createHash } from "crypto";
 import { REDIS_CLIENT } from "../../common/redis/redis.module";
 import type { UserDocument } from "../users/schemas/user.schema";
 
@@ -22,6 +24,7 @@ interface MockedUsersService {
   recordFailedLogin: jest.Mock;
   recordSuccessfulLogin: jest.Mock;
   findById: jest.Mock;
+  markEmailVerified: jest.Mock;
 }
 
 interface MockedRefreshTokenService {
@@ -35,6 +38,13 @@ describe("AuthService", () => {
   let authService: AuthService;
   let usersService: MockedUsersService;
   let refreshTokenService: MockedRefreshTokenService;
+  let verifyModel: {
+    findOne: jest.Mock;
+    findOneAndUpdate: jest.Mock;
+    deleteMany: jest.Mock;
+    create: jest.Mock;
+  };
+  let mail: { sendVerificationEmail: jest.Mock };
 
   const configValues: Record<string, string> = {
     JWT_ACCESS_SECRET: "a".repeat(32),
@@ -55,6 +65,7 @@ describe("AuthService", () => {
             recordFailedLogin: jest.fn(),
             recordSuccessfulLogin: jest.fn(),
             findById: jest.fn(),
+            markEmailVerified: jest.fn().mockResolvedValue(undefined),
           },
         },
         {
@@ -81,6 +92,16 @@ describe("AuthService", () => {
           provide: MailService,
           useValue: {
             sendPasswordResetEmail: jest.fn().mockResolvedValue(undefined),
+            sendVerificationEmail: jest.fn().mockResolvedValue(undefined),
+          },
+        },
+        {
+          provide: getModelToken(EmailVerificationToken.name),
+          useValue: {
+            findOne: jest.fn(),
+            findOneAndUpdate: jest.fn(),
+            deleteMany: jest.fn().mockResolvedValue({}),
+            create: jest.fn().mockResolvedValue({}),
           },
         },
         {
@@ -106,6 +127,98 @@ describe("AuthService", () => {
     refreshTokenService = moduleRef.get(
       RefreshTokenService,
     ) as unknown as MockedRefreshTokenService;
+    verifyModel = moduleRef.get(getModelToken(EmailVerificationToken.name));
+    mail = moduleRef.get(MailService) as unknown as typeof mail;
+  });
+
+  describe("email verification", () => {
+    const hash = (t: string) => createHash("sha256").update(t).digest("hex");
+    const record = (over: object = {}) => ({
+      _id: "t1",
+      userId: { toString: () => "user-1" },
+      tokenHash: hash("raw"),
+      expiresAt: new Date(Date.now() + 3_600_000),
+      usedAt: null,
+      ...over,
+    });
+    const user = (over: object = {}) => ({
+      id: "64b7f0f0f0f0f0f0f0f0f0f0",
+      status: "active",
+      emailVerifiedAt: null,
+      ...over,
+    });
+
+    it("verifies a valid link once and marks the user verified", async () => {
+      verifyModel.findOne.mockResolvedValue(record());
+      verifyModel.findOneAndUpdate.mockResolvedValue({});
+      usersService.findById.mockResolvedValue(user());
+      await expect(authService.verifyEmail("raw")).resolves.toEqual({
+        status: "verified",
+      });
+      expect(usersService.markEmailVerified).toHaveBeenCalledWith(
+        "64b7f0f0f0f0f0f0f0f0f0f0",
+      );
+    });
+
+    it("rejects an expired link with TOKEN_EXPIRED", async () => {
+      verifyModel.findOne.mockResolvedValue(
+        record({ expiresAt: new Date(Date.now() - 1000) }),
+      );
+      usersService.findById.mockResolvedValue(user());
+      await expect(authService.verifyEmail("raw")).rejects.toMatchObject({
+        response: { error: "TOKEN_EXPIRED" },
+      });
+      expect(usersService.markEmailVerified).not.toHaveBeenCalled();
+    });
+
+    it("rejects unknown and already-used links as invalid", async () => {
+      verifyModel.findOne.mockResolvedValue(null);
+      await expect(authService.verifyEmail("nope")).rejects.toMatchObject({
+        response: { error: "INVALID_TOKEN" },
+      });
+      verifyModel.findOne.mockResolvedValue(record({ usedAt: new Date() }));
+      usersService.findById.mockResolvedValue(user());
+      await expect(authService.verifyEmail("raw")).rejects.toMatchObject({
+        response: { error: "INVALID_TOKEN" },
+      });
+    });
+
+    it("is idempotent for an already-verified account", async () => {
+      verifyModel.findOne.mockResolvedValue(record());
+      usersService.findById.mockResolvedValue(user({ emailVerifiedAt: new Date() }));
+      await expect(authService.verifyEmail("raw")).resolves.toEqual({
+        status: "already_verified",
+      });
+      expect(usersService.markEmailVerified).not.toHaveBeenCalled();
+    });
+
+    it("resend answers identically for unknown and known addresses", async () => {
+      usersService.findByEmail.mockResolvedValueOnce(null);
+      const a = await authService.resendVerification("ghost@example.com");
+      usersService.findByEmail.mockResolvedValueOnce(
+        user({ email: "a@b.c", firstName: "A", locale: "en" }),
+      );
+      verifyModel.findOne.mockReturnValue({
+        sort: () => ({ select: () => ({ lean: async () => null }) }),
+      });
+      const b = await authService.resendVerification("a@b.c");
+      expect(a).toEqual(b);
+    });
+
+    it("does not resend within the cooldown window", async () => {
+      usersService.findById.mockResolvedValue(
+        user({ email: "a@b.c", firstName: "A", locale: "en" }),
+      );
+      verifyModel.findOne.mockReturnValue({
+        sort: () => ({
+          select: () => ({ lean: async () => ({ createdAt: new Date() }) }),
+        }),
+      });
+      await expect(authService.resendVerificationForUser("user-1")).resolves.toEqual({
+        status: "cooldown",
+      });
+      expect(mail.sendVerificationEmail).not.toHaveBeenCalled();
+    });
   });
 
   describe("register", () => {

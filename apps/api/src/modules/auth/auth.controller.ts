@@ -68,6 +68,28 @@ export class AuthController {
     return this.authService.resetPassword(dto);
   }
 
+  @Post("verify-email")
+  @HttpCode(HttpStatus.OK)
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  verifyEmail(@Body("token") token: string) {
+    return this.authService.verifyEmail(typeof token === "string" ? token : "");
+  }
+
+  @Post("resend-verification")
+  @HttpCode(HttpStatus.OK)
+  @Throttle({ default: { limit: 3, ttl: 600_000 } })
+  resendVerification(@Body("email") email: string) {
+    return this.authService.resendVerification(typeof email === "string" ? email : "");
+  }
+
+  @Post("resend-verification/me")
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
+  @Throttle({ default: { limit: 3, ttl: 600_000 } })
+  resendMyVerification(@CurrentUser() user: JwtPayload) {
+    return this.authService.resendVerificationForUser(user.sub);
+  }
+
   @Get("me")
   @UseGuards(JwtAuthGuard)
   me(@CurrentUser() user: JwtPayload) {

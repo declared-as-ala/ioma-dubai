@@ -28,9 +28,17 @@ import {
   PasswordResetToken,
   PasswordResetTokenDocument,
 } from "./schemas/password-reset-token.schema";
+import {
+  EmailVerificationToken,
+  EmailVerificationTokenDocument,
+} from "./schemas/email-verification-token.schema";
+import { Logger } from "@nestjs/common";
 
 const MAX_FAILED_LOGIN_ATTEMPTS = 5;
 const LOCK_MINUTES = 15;
+const VERIFY_TTL_HOURS = 24;
+/** Minimum gap between two verification emails for the same account. */
+const VERIFY_COOLDOWN_MS = 60_000;
 
 export interface AuthResult {
   user: AuthUser;
@@ -41,6 +49,8 @@ export interface AuthResult {
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
@@ -49,6 +59,8 @@ export class AuthService {
     private readonly mailService: MailService,
     @InjectModel(PasswordResetToken.name)
     private readonly resetTokenModel: Model<PasswordResetTokenDocument>,
+    @InjectModel(EmailVerificationToken.name)
+    private readonly verifyTokenModel: Model<EmailVerificationTokenDocument>,
     @Inject(REDIS_CLIENT) private readonly redis: Redis,
   ) {}
 
@@ -67,7 +79,101 @@ export class AuthService {
       locale: dto.locale,
     });
 
+    // Email verification is mandatory for sensitive actions; sending is best effort and never blocks signup.
+    void this.sendVerification(user).catch((err: Error) =>
+      this.logger.warn(`Verification email not sent: ${err.message}`),
+    );
+
     return this.issueSession(user);
+  }
+
+  /** Creates a fresh single-use token (old ones are invalidated) and mails the link. */
+  private async sendVerification(user: UserDocument): Promise<"sent" | "cooldown"> {
+    const userId = new Types.ObjectId(user.id);
+    const last = await this.verifyTokenModel
+      .findOne({ userId, usedAt: null })
+      .sort({ createdAt: -1 })
+      .select("createdAt")
+      .lean();
+    const lastAt = (last as { createdAt?: Date } | null)?.createdAt;
+    if (lastAt && Date.now() - lastAt.getTime() < VERIFY_COOLDOWN_MS) return "cooldown";
+
+    const rawToken = randomBytes(32).toString("hex");
+    const tokenHash = createHash("sha256").update(rawToken).digest("hex");
+    await this.verifyTokenModel.deleteMany({ userId, usedAt: null });
+    await this.verifyTokenModel.create({
+      userId,
+      tokenHash,
+      expiresAt: new Date(Date.now() + VERIFY_TTL_HOURS * 3_600_000),
+    });
+
+    const appUrl = this.configService.get("APP_URL", { infer: true });
+    const locale = user.locale ?? "en";
+    const url = `${appUrl}/${locale}/verify-email?token=${rawToken}`;
+    await this.mailService.sendVerificationEmail(
+      user.email,
+      locale,
+      user.firstName,
+      url,
+      VERIFY_TTL_HOURS,
+    );
+    return "sent";
+  }
+
+  /** Consumes a verification link. Idempotent for already-verified accounts. */
+  async verifyEmail(
+    rawToken: string,
+  ): Promise<{ status: "verified" | "already_verified" }> {
+    const tokenHash = createHash("sha256").update(rawToken).digest("hex");
+    const record = await this.verifyTokenModel.findOne({ tokenHash });
+    const invalid = () =>
+      new BadRequestException({
+        error: "INVALID_TOKEN",
+        message: "This verification link is invalid.",
+      });
+    if (!record) throw invalid();
+    const user = await this.usersService.findById(record.userId.toString());
+    if (!user || user.status === "deleted") throw invalid();
+    if (user.emailVerifiedAt) return { status: "already_verified" };
+    if (record.usedAt) throw invalid();
+    if (record.expiresAt < new Date()) {
+      throw new BadRequestException({
+        error: "TOKEN_EXPIRED",
+        message: "This verification link has expired.",
+      });
+    }
+    // Atomic claim: two concurrent clicks verify once.
+    const claimed = await this.verifyTokenModel.findOneAndUpdate(
+      { _id: record._id, usedAt: null },
+      { $set: { usedAt: new Date() } },
+    );
+    if (!claimed) return { status: "already_verified" };
+    await this.usersService.markEmailVerified(user.id);
+    await this.verifyTokenModel.deleteMany({ userId: record.userId, usedAt: null });
+    return { status: "verified" };
+  }
+
+  /** Public resend: identical answer whether or not the address is registered. */
+  async resendVerification(emailInput: string): Promise<{ message: string }> {
+    const GENERIC =
+      "If this address belongs to an account that still needs verification, a new email has been sent.";
+    const user = await this.usersService.findByEmail(emailInput);
+    if (user && user.status !== "deleted" && !user.emailVerifiedAt) {
+      void this.sendVerification(user).catch((err: Error) =>
+        this.logger.warn(`Verification email not sent: ${err.message}`),
+      );
+    }
+    return { message: GENERIC };
+  }
+
+  /** Signed-in resend ("Resend verification email" in the profile). */
+  async resendVerificationForUser(
+    userId: string,
+  ): Promise<{ status: "sent" | "cooldown" | "already_verified" }> {
+    const user = await this.usersService.findById(userId);
+    if (!user) throw new UnauthorizedException();
+    if (user.emailVerifiedAt) return { status: "already_verified" };
+    return { status: await this.sendVerification(user) };
   }
 
   /**
@@ -131,22 +237,29 @@ export class AuthService {
     const email = dto.email.toLowerCase().trim();
     const user = await this.usersService.findByEmail(email);
     if (!user || user.status === "deleted") {
-      // Silent no-op — never reveal whether account exists
+      // Silent no-op: never reveal whether the account exists.
       return { message: GENERIC };
     }
 
+    // Token creation + mailing run in the background so the response time is the same either way.
+    void this.issueResetEmail(user).catch((err: Error) =>
+      this.logger.warn(`Password reset email not sent: ${err.message}`),
+    );
+    return { message: GENERIC };
+  }
+
+  private async issueResetEmail(user: UserDocument): Promise<void> {
     const ttlMinutes = this.configService.get("PASSWORD_RESET_TTL_MINUTES", {
       infer: true,
     });
     const expiresAt = new Date(Date.now() + ttlMinutes * 60_000);
 
-    // Generate 256-bit raw token; only its hash is stored
+    // 256-bit raw token; only its hash is stored.
     const rawToken = randomBytes(32).toString("hex");
     const tokenHash = createHash("sha256").update(rawToken).digest("hex");
 
-    // Invalidate any prior reset tokens for this account
+    // Invalidate any prior reset tokens for this account.
     await this.resetTokenModel.deleteMany({ userId: new Types.ObjectId(user.id) });
-
     await this.resetTokenModel.create({
       userId: new Types.ObjectId(user.id),
       tokenHash,
@@ -156,10 +269,12 @@ export class AuthService {
     const appUrl = this.configService.get("APP_URL", { infer: true });
     const locale = user.locale ?? "en";
     const resetUrl = `${appUrl}/${locale}/reset-password?token=${rawToken}`;
-
-    await this.mailService.sendPasswordResetEmail(email, locale, resetUrl, ttlMinutes);
-
-    return { message: GENERIC };
+    await this.mailService.sendPasswordResetEmail(
+      user.email,
+      locale,
+      resetUrl,
+      ttlMinutes,
+    );
   }
 
   /**
@@ -209,6 +324,8 @@ export class AuthService {
     // Hash new password with argon2id
     const passwordHash = await argon2.hash(dto.password, { type: argon2.argon2id });
     await this.usersService.updatePasswordHash(user.id, passwordHash);
+    // Owning the mailbox that received the link also proves the address.
+    await this.usersService.markEmailVerified(user.id);
 
     // Mark token used and delete all reset tokens for this user
     await this.resetTokenModel.updateOne(

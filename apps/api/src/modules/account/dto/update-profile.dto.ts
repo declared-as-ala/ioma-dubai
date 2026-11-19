@@ -6,6 +6,7 @@ import {
   IsIn,
   IsOptional,
   IsString,
+  Matches,
   MaxLength,
   ValidateIf,
 } from "class-validator";
@@ -27,6 +28,7 @@ export class UpdateProfileDto {
   @IsOptional()
   @IsString()
   @MaxLength(20)
+  @Matches(/^$|^[+0-9 ()\-.]{6,20}$/, { message: "invalid phone number" })
   phone?: string;
 
   @ApiPropertyOptional()

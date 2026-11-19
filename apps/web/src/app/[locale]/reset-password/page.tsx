@@ -7,7 +7,7 @@ import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useSearchParams } from "next/navigation";
-import { Link } from "@/i18n/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -28,6 +28,7 @@ import {
 function ResetPasswordForm() {
   const t = useTranslations("ResetPassword");
   const searchParams = useSearchParams();
+  const router = useRouter();
   const token = searchParams.get("token") || "";
 
   const [showPassword, setShowPassword] = useState(false);
@@ -67,6 +68,8 @@ function ResetPasswordForm() {
       {
         onSuccess: () => {
           setIsSuccess(true);
+          // Brief confirmation, then the login page carries the success message.
+          setTimeout(() => router.replace("/login?reset=success"), 1800);
         },
         onError: (err: any) => {
           const detail = err?.message || err?.error || t("errorGeneric");

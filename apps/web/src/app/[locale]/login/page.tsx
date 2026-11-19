@@ -26,11 +26,15 @@ import {
 } from "lucide-react";
 
 import { useSearchParams } from "next/navigation";
+import { tr, toLoc } from "@/lib/l10n";
+import { useLocale } from "next-intl";
 
 export default function LoginPage() {
   const t = useTranslations("Login");
   const router = useRouter();
   const searchParams = useSearchParams();
+  const loc = toLoc(useLocale());
+  const resetDone = searchParams.get("reset") === "success";
   const rawRedirect = searchParams.get("redirect");
   const redirectUrl =
     rawRedirect?.startsWith("/") &&
@@ -89,6 +93,20 @@ export default function LoginPage() {
                   {t("description")}
                 </p>
               </div>
+
+              {resetDone && (
+                <p
+                  role="status"
+                  className="mt-6 flex items-start gap-2.5 rounded-2xl border border-emerald-500/25 bg-emerald-500/10 p-4 text-sm leading-6 text-emerald-800"
+                >
+                  <CheckCircle2 className="mt-0.5 size-4 shrink-0" />
+                  {tr(loc, {
+                    en: "Your password has been changed. Sign in with your new password.",
+                    fr: "Votre mot de passe a été modifié. Connectez-vous avec le nouveau.",
+                    ar: "تم تغيير كلمة المرور. سجّلوا الدخول بكلمة المرور الجديدة.",
+                  })}
+                </p>
+              )}
 
               {/* Role Switcher Tabs */}
               <div className="mt-8 grid grid-cols-2 gap-1.5 rounded-full bg-muted p-1.5">
