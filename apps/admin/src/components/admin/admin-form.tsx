@@ -7,6 +7,7 @@ import { normalizeShopifyRichText } from "@ioma/validation";
 import { useAdminQuery } from "@/hooks/use-admin";
 import { apiFetch } from "@/lib/api";
 import { useAdminFormat } from "./admin-ui";
+import { MediaField } from "./admin-media-field";
 
 const inputClass = "pl-input";
 export function fieldLabel(t: ReturnType<typeof useTranslations>, key: string) {
@@ -68,6 +69,17 @@ export function FieldEditor({
 }) {
   const t = useTranslations("AdminExperience");
   const title = fieldLabel(t, field.key);
+  if (field.type === "image" || field.type === "video")
+    return (
+      <MediaField
+        kind={field.type}
+        value={value}
+        onChange={onChange}
+        disabled={disabled}
+        title={title}
+        required={field.required}
+      />
+    );
   if (field.type === "localized")
     return (
       <fieldset className="min-w-0 md:col-span-2">

@@ -16,6 +16,7 @@ import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import type { JwtPayload } from "../auth/strategies/jwt.strategy";
 import { requirePermission } from "../admin/admin-permissions";
 import { ProfessionalHubService } from "./professional-hub.service";
+import { ProfessionalPricingService } from "./professional-pricing.service";
 
 const parse = <T>(schema: z.ZodType<T>, body: unknown): T => {
   const r = schema.safeParse(body);
@@ -169,5 +170,30 @@ export class ProfessionalBusinessController {
       body,
     );
     return this.hub.updateMyBusiness(user.sub, user.roles, input);
+  }
+}
+
+/** Professional pricing management (prices, recommended retail, minimum quantities). */
+@ApiTags("professional-pricing")
+@UseGuards(JwtAuthGuard)
+@Controller("admin/pro-pricing")
+export class ProfessionalPricingController {
+  constructor(private readonly pricing: ProfessionalPricingService) {}
+
+  @Get()
+  list(@CurrentUser() user: JwtPayload, @Query() q: Record<string, string | undefined>) {
+    requirePermission(user, "b2b.view");
+    return this.pricing.list({
+      q: q.q,
+      visibility: q.visibility,
+      page: q.page ? Number(q.page) : undefined,
+      limit: q.limit ? Number(q.limit) : undefined,
+    });
+  }
+
+  @Patch()
+  change(@CurrentUser() user: JwtPayload, @Body() body: unknown) {
+    requirePermission(user, "b2b.manage");
+    return this.pricing.change(user, body);
   }
 }

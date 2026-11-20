@@ -21,9 +21,11 @@ import { AuthModule } from "../auth/auth.module";
 import { ProfessionalService } from "./professional.service";
 import { ProfessionalController } from "./professional.controller";
 import { ProfessionalHubService } from "./professional-hub.service";
+import { ProfessionalPricingService } from "./professional-pricing.service";
 import {
   ProfessionalBusinessController,
   ProfessionalHubController,
+  ProfessionalPricingController,
 } from "./professional-hub.controller";
 import { AuditModule } from "../audit/audit.module";
 import { UsersModule } from "../users/users.module";
@@ -49,8 +51,14 @@ import { DocumentsModule } from "../documents/documents.module";
     ProAccessController,
     ProfessionalHubController,
     ProfessionalBusinessController,
+    ProfessionalPricingController,
   ],
-  providers: [ProfessionalService, ProAccessService, ProfessionalHubService],
+  providers: [
+    ProfessionalService,
+    ProAccessService,
+    ProfessionalHubService,
+    ProfessionalPricingService,
+  ],
   exports: [MongooseModule, ProfessionalService, ProAccessService],
 })
 export class ProfessionalModule {}

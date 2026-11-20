@@ -146,7 +146,7 @@ export function ExperienceNav({ professional = false }: { professional?: boolean
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1.5">
               <span className="text-[10px] font-semibold uppercase tracking-widest text-foreground/70">
-                Club Privilège
+                IOMA Paris
               </span>
               <span className="inline-block size-1 rounded-full bg-sf-champagne" />
             </div>

@@ -13,6 +13,8 @@ import {
   PartnerMediaController,
 } from "./partner-media.controller";
 
+import { AdminProMediaController, ProMediaController } from "./pro-media.controller";
+
 @Global()
 @Module({
   imports: [
@@ -28,6 +30,8 @@ import {
     AdminProductMediaController,
     PartnerMediaController,
     AdminPartnerMediaController,
+    ProMediaController,
+    AdminProMediaController,
   ],
   exports: [ProductMediaService],
 })

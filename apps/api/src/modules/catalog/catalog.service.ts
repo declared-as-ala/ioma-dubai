@@ -395,6 +395,7 @@ export class CatalogService {
           size: v.size,
           b2cPriceMinor: v.b2cPriceMinor,
           b2bPriceMinor: v.b2bPriceMinor,
+          suggestedRetailMinor: v.suggestedRetailMinor ?? null,
           moq: v.moq,
           inStock: v.quantityOnHand - v.quantityReserved > 0 || v.backorderAllowed,
         })),

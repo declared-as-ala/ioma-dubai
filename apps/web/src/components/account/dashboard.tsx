@@ -39,16 +39,8 @@ export default function AccountDashboard() {
         <AccountHeading
           title={a("dashboard.welcomeBack", { firstName: firstName || "Client IOMA" })}
           description={t("intro")}
-          badge="ESPACE PRIVILÈGE"
-        >
-          {/* Member Status Badge */}
-          <div className="hidden sm:flex items-center gap-2 rounded-full border border-border/80 bg-muted/30 px-3.5 py-1.5 text-xs text-foreground/80 shadow-xs">
-            <Award className="size-3.5 text-sf-champagne" />
-            <span className="font-medium tracking-wide">Club Privilège</span>
-            <span className="text-muted-foreground/60">·</span>
-            <span className="text-muted-foreground text-[11px]">Membre Actif</span>
-          </div>
-        </AccountHeading>
+          badge="MON ESPACE"
+        ></AccountHeading>
       </QueryState>
 
       {/* Quick Access KPI Grid */}

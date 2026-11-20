@@ -45,12 +45,20 @@ function build(level: AccessLevel) {
     prodocuments: DOCS,
     probenefits: [],
   };
+  const progressWrites: unknown[] = [];
   const connection = {
     collection: (name: string) => ({
-      find: () => ({ sort: () => ({ toArray: async () => data[name] ?? [] }) }),
+      find: () => ({
+        sort: () => ({ toArray: async () => data[name] ?? [] }),
+        toArray: async () => data[name] ?? [],
+      }),
       findOne: async (q: { _id: { toString(): string } }) =>
         (data[name] as typeof DOCS).find((d) => d._id.toString() === q._id.toString()) ??
         null,
+      updateOne: async (...args: unknown[]) => {
+        progressWrites.push(args);
+        return {};
+      },
     }),
   };
   const access = {
@@ -63,13 +71,15 @@ function build(level: AccessLevel) {
     access as never,
     documents as never,
   );
-  return { service, documents };
+  return { service, documents, progressWrites };
 }
+
+const UID = "507f1f77bcf86cd799439001";
 
 describe("ProContentService locking", () => {
   it("validated account: the video list never contains the real video URL", async () => {
     const { service } = build("validated");
-    const [v] = await service.videos("u", []);
+    const [v] = await service.videos(UID, []);
     expect(v!.locked).toBe(true);
     expect(v!.videoUrl).toBeNull();
     expect(v!.preview).toBe("/previews/v1.jpg");
@@ -78,14 +88,14 @@ describe("ProContentService locking", () => {
 
   it("customer: the video URL is delivered", async () => {
     const { service } = build("customer");
-    const [v] = await service.videos("u", []);
+    const [v] = await service.videos(UID, []);
     expect(v!.locked).toBe(false);
     expect(v!.videoUrl).toBe("https://videos.example/secret-full-video.mp4");
   });
 
   it("validated account: the gallery never contains the full-resolution image", async () => {
     const { service } = build("validated");
-    const [p] = await service.gallery("u", []);
+    const [p] = await service.gallery(UID, []);
     expect(p!.locked).toBe(true);
     expect(p!.image).toBeNull();
     expect(JSON.stringify(p)).not.toContain("full-resolution");
@@ -119,5 +129,27 @@ describe("ProContentService locking", () => {
       service.documentUrl("u", [], "507f1f77bcf86cd799439033"),
     ).resolves.toEqual({ url: "https://signed.example/file" });
     expect(documents.getSignedUrl).toHaveBeenCalledTimes(1);
+  });
+
+  it("learning progress: a locked account cannot record it, an unlocked one can", async () => {
+    const locked = build("validated");
+    await expect(
+      locked.service.saveProgress(UID, [], "v1", { positionSeconds: 30 }),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    expect(locked.progressWrites).toHaveLength(0);
+
+    const open = build("customer");
+    (VIDEO._id as { toString: () => string }).toString = () => "507f1f77bcf86cd799439044";
+    await open.service.saveProgress(UID, [], "507f1f77bcf86cd799439044", {
+      positionSeconds: 61.4,
+      completed: true,
+    });
+    expect(open.progressWrites).toHaveLength(1);
+    const [, update] = open.progressWrites[0] as [
+      unknown,
+      { $set: Record<string, unknown> },
+    ];
+    expect(update.$set.positionSeconds).toBe(61);
+    expect(update.$set.completed).toBe(true);
   });
 });

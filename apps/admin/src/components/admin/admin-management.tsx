@@ -21,7 +21,7 @@ import { Badge } from "./polaris";
 import { AdminPanel, AdminEmpty, AdminQueryState, useAdminFormat } from "./admin-ui";
 import { AdminCustomers } from "./admin-customers";
 import { AdminOrders } from "./admin-orders";
-import { AdminPartnerDetail, PartnerDrawer } from "./admin-partner";
+import { PartnerDrawer } from "./admin-partner";
 const control = "pl-input";
 // Multi-select bulk actions that exist for a resource (status changes go through the
 // generic PATCH endpoint, one record at a time). Every list can export its selection.
@@ -1214,7 +1214,6 @@ function RecordActions({
 }
 
 export function AdminDetail({ resourceKey, id }: { resourceKey: string; id: string }) {
-  if (resourceKey === "partners") return <AdminPartnerDetail id={id} />;
   return <AdminGenericDetail resourceKey={resourceKey} id={id} />;
 }
 

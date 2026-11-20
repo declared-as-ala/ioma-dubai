@@ -97,6 +97,9 @@ function fieldSchema(field: AdminField): z.ZodTypeAny {
         )
         .max(7)
         .refine((hours) => new Set(hours.map((h) => h.day)).size === hours.length);
+    case "image":
+    case "video":
+      return safeUrl;
     case "json":
       return z.any();
     default:

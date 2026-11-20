@@ -17,7 +17,9 @@ export type AdminFieldType =
   | "breaks"
   | "dates"
   | "blocks"
-  | "json";
+  | "json"
+  | "image"
+  | "video";
 export interface AdminField {
   key: string;
   type: AdminFieldType;
@@ -327,15 +329,19 @@ export const ADMIN_RESOURCES: AdminResource[] = [
     collection: "provideos",
     title: "Training videos",
     group: "b2b",
-    columns: ["title", "category", "durationMinutes", "status"],
-    search: ["title.en", "title.ar"],
+    columns: ["title", "course", "category", "durationMinutes", "status"],
+    search: ["title.en", "title.ar", "course"],
     create: true,
     fields: [
       localized("title", true),
+      localized("description"),
+      f("course", "text"),
       select("category", ["sales", "treatments", "diagnosis_inlab"], true),
       f("durationMinutes", "number", false, { min: 1, max: 600 }),
-      f("videoUrl", "text"),
-      f("preview", "text"),
+      f("videoUrl", "video"),
+      f("thumbnail", "image"),
+      f("preview", "image"),
+      f("featured", "boolean"),
       f("sortOrder", "number", false, { min: 0, max: 9999 }),
       select("status", ["draft", "published"], true),
     ],
@@ -346,14 +352,17 @@ export const ADMIN_RESOURCES: AdminResource[] = [
     collection: "prophotos",
     title: "Cabin gallery",
     group: "b2b",
-    columns: ["title", "category", "status"],
-    search: ["title.en", "title.ar"],
+    columns: ["title", "collection", "category", "status"],
+    search: ["title.en", "title.ar", "collection"],
     create: true,
     fields: [
       localized("title", true),
+      localized("caption"),
+      f("collection", "text"),
       select("category", ["cabins", "corners", "spaces"], true),
-      f("image", "text"),
-      f("preview", "text"),
+      f("image", "image"),
+      f("preview", "image"),
+      f("featured", "boolean"),
       f("sortOrder", "number", false, { min: 0, max: 9999 }),
       select("status", ["draft", "published"], true),
     ],
@@ -370,8 +379,18 @@ export const ADMIN_RESOURCES: AdminResource[] = [
     fields: [
       localized("title", true),
       localized("body", true),
+      select("icon", [
+        "tag",
+        "graduation",
+        "truck",
+        "support",
+        "palette",
+        "star",
+        "gift",
+      ]),
+      f("image", "image"),
       f("sortOrder", "number", false, { min: 0, max: 9999 }),
-      select("status", ["draft", "published"], true),
+      select("status", ["draft", "published", "archived"], true),
     ],
   },
   {
@@ -385,6 +404,7 @@ export const ADMIN_RESOURCES: AdminResource[] = [
     create: true,
     fields: [
       localized("title", true),
+      localized("description"),
       select(
         "kind",
         [
@@ -398,6 +418,8 @@ export const ADMIN_RESOURCES: AdminResource[] = [
         true,
       ),
       select("requiredAccess", ["validated", "customer"], true),
+      select("language", ["en", "fr", "ar", "multi"]),
+      f("version", "text"),
       ref("fileDocumentId", "documents"),
       f("sortOrder", "number", false, { min: 0, max: 9999 }),
       select("status", ["draft", "published"], true),

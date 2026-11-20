@@ -17,7 +17,7 @@ export async function apiUploadProgress<T>(
     new Promise<{ status: number; body: T & { message?: string } }>((resolve, reject) => {
       const xhr = new XMLHttpRequest();
       xhr.open("POST", `${API_BASE_URL}/api${path}`);
-      xhr.timeout = 120000;
+      xhr.timeout = 900000; // large videos
       if (token) xhr.setRequestHeader("Authorization", `Bearer ${token}`);
       xhr.upload.onprogress = (e) => {
         if (e.lengthComputable) onProgress(Math.round((e.loaded / e.total) * 100));

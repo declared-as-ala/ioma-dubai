@@ -29,16 +29,30 @@ export interface ProAccess {
 export interface ProVideo {
   id: string;
   title: Localized;
+  description: Localized;
+  course: string | null;
   category: string;
   durationMinutes: number | null;
+  featured: boolean;
+  sortOrder: number;
   preview: string | null;
+  thumbnail: string | null;
   locked: boolean;
   videoUrl: string | null;
+  /** Real, persisted learning progress. null while the content is locked. */
+  progress: {
+    positionSeconds: number;
+    completed: boolean;
+    updatedAt: string | null;
+  } | null;
 }
 export interface ProPhoto {
   id: string;
   title: Localized;
+  caption: Localized;
+  collection: string | null;
   category: string;
+  featured: boolean;
   preview: string | null;
   locked: boolean;
   image: string | null;
@@ -47,15 +61,47 @@ export interface ProBenefit {
   id: string;
   title: Localized;
   body: Localized;
+  icon: string | null;
+  image: string | null;
   locked: boolean;
 }
 export interface ProDocument {
   id: string;
   title: Localized;
+  description: Localized;
   kind: string;
+  language: string | null;
+  version: string | null;
   requiredAccess: "validated" | "customer";
   locked: boolean;
   hasFile: boolean;
+}
+
+export interface PortalCta {
+  label: Localized;
+  href: string;
+}
+export interface ProHome {
+  hero: {
+    image?: string;
+    headline?: Localized;
+    body?: Localized;
+    primaryCta?: PortalCta | null;
+    secondaryCta?: PortalCta | null;
+  };
+  announcements: { id: string; title: Localized; body?: Localized }[];
+  sections: { key: string; visible: boolean }[];
+  featuredProductSlugs: string[];
+  commerce: {
+    deliveryInfo?: Localized;
+    orderTerms?: Localized;
+    minimumOrderNote?: Localized;
+  };
+  contact: { phone?: string; email?: string; supportEmail?: string; hours?: Localized };
+  training: ProVideo[];
+  documents: ProDocument[];
+  benefits: ProBenefit[];
+  benefitsUnlocked: boolean;
 }
 
 /** The server decides the level; the UI only mirrors it. */
@@ -124,6 +170,28 @@ export function useRegisterLead() {
       apiFetch<{ received: true }>("/professional/leads", {
         method: "POST",
         body: JSON.stringify(input),
+      }),
+  });
+}
+
+export function useProHome(access?: ProAccess) {
+  return useQuery({
+    queryKey: ["pro", "home", access?.level],
+    queryFn: () => apiFetch<ProHome>("/pro/home"),
+    enabled: enabledFor(access),
+  });
+}
+
+/** Saves real learning progress (position, completion). Fire-and-forget from the player. */
+export function useSaveProgress() {
+  return useMutation({
+    mutationFn: (v: { id: string; positionSeconds: number; completed?: boolean }) =>
+      apiFetch<{ saved: true }>(`/pro/videos/${v.id}/progress`, {
+        method: "PUT",
+        body: JSON.stringify({
+          positionSeconds: v.positionSeconds,
+          ...(v.completed ? { completed: true } : {}),
+        }),
       }),
   });
 }

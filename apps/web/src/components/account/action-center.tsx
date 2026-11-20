@@ -30,21 +30,6 @@ export default function ActionCenter() {
 
         <div className="space-y-3">
           <div className="flex items-start gap-3.5 rounded-xl bg-muted/30 p-4 border border-border/50">
-            <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600">
-              <CheckCircle2 className="size-4" />
-            </span>
-            <div className="space-y-0.5">
-              <p className="text-xs font-medium text-foreground">
-                Bienvenue dans votre Club Privilège IOMA Paris
-              </p>
-              <p className="text-xs text-muted-foreground">
-                Votre profil UAE est actif. Vous bénéficiez désormais de la livraison
-                express offerte dès 300 AED à Dubai et aux Émirats.
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-start gap-3.5 rounded-xl bg-muted/30 p-4 border border-border/50">
             <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-sf-champagne/15 text-foreground">
               <Sparkles className="size-4 text-sf-champagne" />
             </span>

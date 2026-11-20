@@ -104,6 +104,8 @@ export interface B2BVariantSummary {
   size: string;
   b2cPriceMinor: number;
   b2bPriceMinor: number | null;
+  /** Recommended retail price (AED, fils) when IOMA configured one. */
+  suggestedRetailMinor?: number | null;
   moq: number | null;
   inStock: boolean;
 }

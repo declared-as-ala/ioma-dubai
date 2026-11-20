@@ -92,4 +92,46 @@ export class StorageService {
   async delete(bucket: StorageBucket, objectKey: string): Promise<void> {
     await this.client.removeObject(this.bucketName(bucket), objectKey);
   }
+
+  /** Streams a local file to the bucket (large videos): never loaded into memory. */
+  async uploadFile(
+    bucket: StorageBucket,
+    objectKey: string,
+    filePath: string,
+    mimeType: string,
+  ): Promise<void> {
+    const name = this.bucketName(bucket);
+    await this.ensureBucket(name);
+    await this.client.fPutObject(name, objectKey, filePath, { "Content-Type": mimeType });
+  }
+
+  /** Finds the single object under a prefix (extension unknown) and returns its key and size. */
+  async findByPrefix(
+    bucket: StorageBucket,
+    prefix: string,
+  ): Promise<{ key: string; size: number } | null> {
+    const stream = this.client.listObjectsV2(this.bucketName(bucket), prefix, false);
+    for await (const item of stream as AsyncIterable<{ name?: string; size?: number }>) {
+      if (item.name) return { key: item.name, size: item.size ?? 0 };
+    }
+    return null;
+  }
+
+  async getStream(bucket: StorageBucket, objectKey: string) {
+    return this.client.getObject(this.bucketName(bucket), objectKey);
+  }
+
+  async getRangeStream(
+    bucket: StorageBucket,
+    objectKey: string,
+    offset: number,
+    length: number,
+  ) {
+    return this.client.getPartialObject(
+      this.bucketName(bucket),
+      objectKey,
+      offset,
+      length,
+    );
+  }
 }

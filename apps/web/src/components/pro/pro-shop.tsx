@@ -188,9 +188,16 @@ export default function ProShop() {
                       {v.size} · {tx(SHOP.moq(moq))}
                     </p>
                     <div className="mt-3 flex flex-wrap items-baseline gap-x-4 gap-y-1 text-sm">
-                      <span className="text-muted-foreground">
-                        {tx(SHOP.rrp)} {formatMinor(v.b2cPriceMinor, loc)}
-                      </span>
+                      {(v.suggestedRetailMinor ??
+                        (v.b2cPriceMinor > 0 ? v.b2cPriceMinor : null)) !== null && (
+                        <span className="text-muted-foreground">
+                          {tx(SHOP.rrp)}{" "}
+                          {formatMinor(
+                            (v.suggestedRetailMinor ?? v.b2cPriceMinor) as number,
+                            loc,
+                          )}
+                        </span>
+                      )}
                       <span className="font-medium">
                         {priced
                           ? `${tx(SHOP.trade)} ${formatMinor(v.b2bPriceMinor!, loc)}`

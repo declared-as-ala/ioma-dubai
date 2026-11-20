@@ -126,7 +126,6 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
   // Commercial Price calculations
   const priceMinor = selectedVariant?.priceMinor ?? 0;
   const isPriced = priceMinor > 0 && product.uaeAvailability !== "PENDING";
-  const loyaltyPoints = isPriced ? Math.round(priceMinor / 100) : null;
 
   // Unit price per 100ml calculation if capacity has volume
   let unitPriceText: string | null = null;
@@ -357,16 +356,6 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
               </div>
             )}
           </div>
-
-          {/* Loyalty Points Counter */}
-          {loyaltyPoints && (
-            <div className="flex items-center gap-1.5 text-xs text-foreground/80">
-              <Sparkles className="size-3.5 text-sf-champagne" />
-              <span className="font-medium">
-                + {loyaltyPoints} Points de fidélité (IOMA Club Privilège)
-              </span>
-            </div>
-          )}
 
           {/* Capacity / Contenance Badge */}
           {product.contenance && (
