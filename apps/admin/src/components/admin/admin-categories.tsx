@@ -595,6 +595,15 @@ export function CategoryWorkspaceDrawer({
   const [seoDescAr, setSeoDescAr] = useState(category.seo?.description?.ar || "");
 
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  // For a new category the web address is built from the name until it is edited by hand.
+  const [slugTouched, setSlugTouched] = useState(!isCreating);
+  const slugify = (v: string) =>
+    v
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
 
   // Fetch Category Detail & Mapped Products
   const { data: detailData, isLoading: isDetailLoading } = useQuery<{
@@ -673,10 +682,10 @@ export function CategoryWorkspaceDrawer({
         <div className="flex items-center justify-between border-b border-neutral-300 px-6 py-4 bg-neutral-900 text-white">
           <div>
             <span className="text-[10px] uppercase tracking-widest text-neutral-400 font-semibold">
-              {isCreating ? "New Taxonomy Record" : `Category · /${category.slug}`}
+              {isCreating ? "New category" : "Category"}
             </span>
             <SheetTitle className="text-base font-semibold text-white mt-0.5">
-              {isCreating ? "Create Category" : nameEn || category.slug}
+              {isCreating ? "Add category" : nameEn || category.slug}
             </SheetTitle>
           </div>
 
@@ -701,7 +710,7 @@ export function CategoryWorkspaceDrawer({
                 : "border-transparent text-neutral-600 hover:text-neutral-900"
             }`}
           >
-            Overview & Hierarchy
+            Details
           </button>
           <button
             type="button"
@@ -723,7 +732,7 @@ export function CategoryWorkspaceDrawer({
                 : "border-transparent text-neutral-600 hover:text-neutral-900"
             }`}
           >
-            Mapped Products ({mappedProducts.length})
+            Products ({mappedProducts.length})
           </button>
           <button
             type="button"
@@ -750,16 +759,33 @@ export function CategoryWorkspaceDrawer({
           {/* OVERVIEW TAB */}
           {activeTab === "overview" && (
             <div className="space-y-4">
+              <label className="grid gap-1">
+                <span className="font-semibold text-neutral-700">Category name *</span>
+                <input
+                  type="text"
+                  value={nameEn}
+                  onChange={(e) => {
+                    setNameEn(e.target.value);
+                    if (!slugTouched) setSlug(slugify(e.target.value));
+                  }}
+                  placeholder="e.g. Cleansers"
+                  className="pl-input"
+                />
+                <span className="text-[10px] text-neutral-500">
+                  French and Arabic names are in the Translations tab.
+                </span>
+              </label>
               <div className="grid grid-cols-2 gap-4">
                 <label className="grid gap-1">
-                  <span className="font-semibold text-neutral-700">URL Slug *</span>
+                  <span className="font-semibold text-neutral-700">Web address *</span>
                   <input
                     type="text"
                     required
                     value={slug}
-                    onChange={(e) =>
-                      setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "-"))
-                    }
+                    onChange={(e) => {
+                      setSlugTouched(true);
+                      setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "-"));
+                    }}
                     placeholder="e.g. cleansers"
                     className="pl-input"
                   />
@@ -769,7 +795,7 @@ export function CategoryWorkspaceDrawer({
                 </label>
 
                 <label className="grid gap-1">
-                  <span className="font-semibold text-neutral-700">Parent Category</span>
+                  <span className="font-semibold text-neutral-700">Inside category</span>
                   <select
                     value={parentId || ""}
                     onChange={(e) => setParentId(e.target.value ? e.target.value : null)}
@@ -802,7 +828,7 @@ export function CategoryWorkspaceDrawer({
                 </label>
 
                 <label className="grid gap-1">
-                  <span className="font-semibold text-neutral-700">Sort Order</span>
+                  <span className="font-semibold text-neutral-700">Display order</span>
                   <input
                     type="number"
                     value={sortOrder}
@@ -812,7 +838,9 @@ export function CategoryWorkspaceDrawer({
                 </label>
 
                 <label className="grid gap-1">
-                  <span className="font-semibold text-neutral-700">Hero Image URL</span>
+                  <span className="font-semibold text-neutral-700">
+                    Image address (optional)
+                  </span>
                   <input
                     type="text"
                     value={image}
@@ -824,9 +852,7 @@ export function CategoryWorkspaceDrawer({
               </div>
 
               <div className="border border-neutral-200 bg-neutral-50 p-4 space-y-3 rounded-lg mt-4">
-                <span className="font-semibold text-neutral-800">
-                  Public Visibility Controls
-                </span>
+                <span className="font-semibold text-neutral-800">Where it appears</span>
                 <div className="grid grid-cols-2 gap-4">
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input
@@ -837,7 +863,7 @@ export function CategoryWorkspaceDrawer({
                     />
                     <div>
                       <span className="font-medium text-neutral-800">
-                        Visible in Shop Filters
+                        Show in the shop filters
                       </span>
                       <p className="text-[11px] text-neutral-500">
                         Appears as a filter option on the /shop PLP page.
@@ -854,7 +880,7 @@ export function CategoryWorkspaceDrawer({
                     />
                     <div>
                       <span className="font-medium text-neutral-800">
-                        Visible in Header Mega Menu
+                        Show in the website menu
                       </span>
                       <p className="text-[11px] text-neutral-500">
                         Available in Mega Menu &quot;Nos Catégories&quot; columns.
@@ -1209,7 +1235,7 @@ export function CategoryWorkspaceDrawer({
               {saveMutation.isPending
                 ? "Saving..."
                 : isCreating
-                  ? "Create Category"
+                  ? "Add category"
                   : "Save Changes"}
             </span>
           </Button>
