@@ -9,6 +9,19 @@ import { AdminSkinConcerns } from "@/components/admin/admin-skin-concerns";
 import { AdminProductRanges } from "@/components/admin/admin-product-ranges";
 import { AdminNavigation } from "@/components/admin/admin-navigation";
 
+// Training, Website and Import center sections were removed from the back office.
+const REMOVED = [
+  "trainings",
+  "training-sessions",
+  "training-bookings",
+  "protocols",
+  "documents",
+  "certificates",
+  "magazine",
+  "content",
+  "hero",
+];
+
 export default async function Page({
   params,
   searchParams,
@@ -72,6 +85,7 @@ export default async function Page({
 
   // Inventory is edited per product (Variants / Inventory cards), not as a separate page.
   if (["inventory", "stock-movements"].includes(resource)) notFound();
+  if (REMOVED.includes(resource)) notFound();
 
   if (resource === "roles" || resource === "settings")
     return <AdminSystem section={resource} />;

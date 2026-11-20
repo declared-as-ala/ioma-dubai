@@ -95,10 +95,7 @@ export function AdminProductStats() {
       {q.data && (
         <p className="pl-help px-4 pb-3 !mt-0">
           {q.data.imported} linked to the IOMA Paris source · {q.data.manual} created in
-          Dubai ·{" "}
-          <a className="pl-link" href="/admin/products/import">
-            Import center
-          </a>
+          Dubai
         </p>
       )}
     </section>

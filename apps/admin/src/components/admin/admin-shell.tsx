@@ -15,10 +15,8 @@ import {
   Users,
   UserCheck,
   MapPin,
-  GraduationCap,
   FileText,
   Settings,
-  Film,
   type LucideIcon,
 } from "lucide-react";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
@@ -44,6 +42,19 @@ import {
 import { AdminQueryState, AdminEmpty, useAdminFormat } from "./admin-ui";
 import { PageLoader } from "@/components/ui/loading-screen";
 
+// Sections removed from the back office (Training, Website, Import center).
+const REMOVED_RESOURCES = [
+  "trainings",
+  "training-sessions",
+  "training-bookings",
+  "protocols",
+  "documents",
+  "certificates",
+  "magazine",
+  "content",
+  "hero",
+];
+
 interface NavLeaf {
   label: string;
   href: string;
@@ -67,11 +78,6 @@ const NAV: NavGroup[] = [
     icon: Package,
     items: [
       { label: "Products", href: "/admin/products", also: ["/admin/products/new"] },
-      {
-        label: "Import center",
-        href: "/admin/products/import",
-        also: ["/admin/catalogue/imports"],
-      },
       {
         label: "Product Organization",
         href: "/admin/catalogue/organization",
@@ -123,30 +129,6 @@ const NAV: NavGroup[] = [
         href: "/admin/services",
         also: ["/admin/treatments"],
       },
-    ],
-  },
-  {
-    title: "Training",
-    icon: GraduationCap,
-    items: [
-      { label: "Trainings", href: "/admin/trainings" },
-      {
-        label: "Sessions & Bookings",
-        href: "/admin/training-sessions",
-        also: ["/admin/training-bookings"],
-      },
-      { label: "Protocols", href: "/admin/protocols" },
-      { label: "Professional Documents", href: "/admin/documents" },
-      { label: "Certificates", href: "/admin/certificates" },
-    ],
-  },
-  {
-    title: "Website",
-    icon: Film,
-    items: [
-      { label: "Home hero", href: "/admin/hero" },
-      { label: "Magazine", href: "/admin/magazine" },
-      { label: "Content Pages", href: "/admin/content" },
     ],
   },
   {
@@ -314,43 +296,45 @@ function AdminSearch() {
           <DialogDescription>{term}</DialogDescription>
           <AdminQueryState query={query}>
             {query.data?.every((g) => !g.items.length) && <AdminEmpty />}
-            {query.data?.map((group) => (
-              <section key={group.resource}>
-                {group.items.length > 0 && (
-                  <h3 className="mt-4 text-xs font-semibold uppercase">
-                    {t(`resources.${group.resource}`)}
-                  </h3>
-                )}
-                {group.items.map((item) => (
-                  <Link
-                    key={item._id}
-                    href={`/admin/${group.resource}/${item._id}`}
-                    onClick={() => setOpen(false)}
-                    className="flex min-h-11 items-center gap-3 border-b py-3 text-sm text-blue-700"
-                  >
-                    {group.resource === "products" && (
-                      <span className="relative block size-11 shrink-0">
-                        <ProductImage
-                          media={item.primaryImage}
-                          src={item.images?.[0]}
-                          alt={label(item.name)}
-                          fill
-                          variant="thumbnail"
-                          sizes="44px"
-                          className="object-contain"
-                        />
-                      </span>
-                    )}
-                    {label(
-                      item.name ??
-                        item.companyName ??
-                        item.orderNumber ??
-                        [item.firstName, item.lastName].filter(Boolean).join(" "),
-                    )}
-                  </Link>
-                ))}
-              </section>
-            ))}
+            {query.data
+              ?.filter((g) => !REMOVED_RESOURCES.includes(g.resource))
+              .map((group) => (
+                <section key={group.resource}>
+                  {group.items.length > 0 && (
+                    <h3 className="mt-4 text-xs font-semibold uppercase">
+                      {t(`resources.${group.resource}`)}
+                    </h3>
+                  )}
+                  {group.items.map((item) => (
+                    <Link
+                      key={item._id}
+                      href={`/admin/${group.resource}/${item._id}`}
+                      onClick={() => setOpen(false)}
+                      className="flex min-h-11 items-center gap-3 border-b py-3 text-sm text-blue-700"
+                    >
+                      {group.resource === "products" && (
+                        <span className="relative block size-11 shrink-0">
+                          <ProductImage
+                            media={item.primaryImage}
+                            src={item.images?.[0]}
+                            alt={label(item.name)}
+                            fill
+                            variant="thumbnail"
+                            sizes="44px"
+                            className="object-contain"
+                          />
+                        </span>
+                      )}
+                      {label(
+                        item.name ??
+                          item.companyName ??
+                          item.orderNumber ??
+                          [item.firstName, item.lastName].filter(Boolean).join(" "),
+                      )}
+                    </Link>
+                  ))}
+                </section>
+              ))}
           </AdminQueryState>
         </DialogContent>
       </Dialog>

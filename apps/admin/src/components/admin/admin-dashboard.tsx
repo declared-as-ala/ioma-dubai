@@ -567,6 +567,262 @@ export default function AdminDashboard() {
                   <BarChart data={statusData(data.partners.types)} format={f.number} />
                 </AdminPanel>
               )}
+            </div>
+            {data.commerce && (
+              <>
+                <div className="grid gap-4 xl:grid-cols-3">
+                  <AdminPanel title={t("revenueChart")} className="xl:col-span-2">
+                    <div className="mb-4 flex flex-wrap gap-2">
+                      {["total", "b2c", "b2b"].map((value) => (
+                        <button
+                          key={value}
+                          type="button"
+                          onClick={() => setChannel(value as typeof channel)}
+                          aria-pressed={channel === value}
+                          className={`min-h-11 border px-4 text-xs ${channel === value ? "border-blue-600 bg-blue-50 pl-link" : "border-neutral-200"}`}
+                        >
+                          {value === "total" ? t("total") : value.toUpperCase()}
+                        </button>
+                      ))}
+                    </div>
+                    <RevenueChart
+                      data={data.commerce.series.map((row: any) => ({
+                        label: row.date,
+                        value: row[channel],
+                      }))}
+                      previous={
+                        compare
+                          ? data.commerce.previousSeries.map((row: any) => ({
+                              label: row.date,
+                              value: row[channel],
+                            }))
+                          : undefined
+                      }
+                      format={f.money}
+                    />
+                    <p className="mt-3 text-xs leading-5 text-neutral-500">
+                      {t("revenueNote")}
+                    </p>
+                  </AdminPanel>
+                  <AdminPanel title={t("ordersByStatus")}>
+                    <BarChart
+                      data={statusData(
+                        data.commerce.statuses,
+                        `/admin/orders?from=${period.from}&to=${period.to}&fulfillmentStatus=`,
+                      )}
+                      format={f.number}
+                    />
+                  </AdminPanel>
+                </div>
+                <div className="grid gap-4 xl:grid-cols-2">
+                  <AdminPanel title={t("salesByChannel")}>
+                    <BarChart
+                      data={data.commerce.channels.map((row: any) => ({
+                        label: `${row._id.toUpperCase()} · ${f.number(row.orders)} ${t("orders")}`,
+                        value: row.revenue,
+                        href: `/admin/orders?type=${row._id}&from=${period.from}&to=${period.to}&paymentStatus=paid`,
+                      }))}
+                      format={f.money}
+                    />
+                  </AdminPanel>
+                  <AdminPanel title={t("salesByRange")}>
+                    <BarChart
+                      data={data.commerce.ranges.map((row: any) => ({
+                        label: row.name ? f.label(row.name) : t("unassigned"),
+                        value: row.revenue,
+                        href: row._id ? `/admin/products?rangeId=${row._id}` : undefined,
+                      }))}
+                      format={f.money}
+                    />
+                    <p className="mt-4 text-xs text-neutral-500">
+                      {t("lineRevenueNote")}
+                    </p>
+                  </AdminPanel>
+                </div>
+              </>
+            )}
+            <div className="hidden xl:block">
+              <ActionCenter data={data} />
+            </div>
+            <div className="grid gap-4 xl:grid-cols-2">
+              {data.commerce && (
+                <AdminPanel title={t("topProducts")} href="/admin/products">
+                  <SimpleTable
+                    headings={[
+                      t("fields.productName"),
+                      t("units"),
+                      t("revenue"),
+                      t("fields.available"),
+                    ]}
+                    rows={data.commerce.products.map((p: any) => [
+                      <Link
+                        href={
+                          p.productId
+                            ? `/admin/products/${p.productId}`
+                            : "/admin/products"
+                        }
+                        className="flex min-h-11 items-center gap-2 pl-link"
+                      >
+                        {p.image && (
+                          <ProductImage
+                            width={40}
+                            height={40}
+                            variant="thumbnail"
+                            src={p.image}
+                            alt=""
+                            className="size-10 shrink-0 object-contain"
+                          />
+                        )}
+                        {f.label(p.name)}
+                      </Link>,
+                      f.number(p.units),
+                      f.money(p.revenue),
+                      f.number(p.stock),
+                    ])}
+                  />
+                </AdminPanel>
+              )}
+              {data.inventory && (
+                <AdminPanel
+                  title={t("inventoryHealth")}
+                  href="/admin/products?status=low_stock"
+                >
+                  <Metrics
+                    rows={[
+                      [t("inStock"), f.number(data.inventory.health[0]?.inStock ?? 0)],
+                      [t("lowStock"), f.number(data.inventory.health[0]?.lowStock ?? 0)],
+                      [
+                        t("outOfStock"),
+                        f.number(data.inventory.health[0]?.outOfStock ?? 0),
+                      ],
+                      [t("reserved"), f.number(data.inventory.health[0]?.reserved ?? 0)],
+                    ]}
+                  />
+                  <div className="mt-5">
+                    <SimpleTable
+                      headings={[
+                        t("fields.sku"),
+                        t("fields.available"),
+                        t("reserved"),
+                        t("fields.lowStockThreshold"),
+                      ]}
+                      rows={data.inventory.low.map((v: any) => [
+                        <Link
+                          href={
+                            v.productId
+                              ? `/admin/products/${v.productId}`
+                              : "/admin/products?status=low_stock"
+                          }
+                          className="pl-link inline-flex items-center"
+                        >
+                          {v.sku}
+                        </Link>,
+                        v.available,
+                        v.quantityReserved,
+                        v.lowStockThreshold,
+                      ])}
+                    />
+                  </div>
+                </AdminPanel>
+              )}
+              {data.b2b && (
+                <AdminPanel title={t("pipeline")} href="/admin/b2b-leads">
+                  <BarChart data={statusData(data.b2b.pipeline)} format={f.number} />
+                  <div className="mt-5">
+                    <SimpleTable
+                      headings={[
+                        t("fields.companyName"),
+                        t("fields.businessType"),
+                        t("fields.emirate"),
+                        t("fields.status"),
+                      ]}
+                      rows={data.b2b.attention.map((a: any) => [
+                        <Link
+                          href={`/admin/professionals?application=${a._id}`}
+                          className="pl-link inline-flex items-center"
+                        >
+                          {a.companyName}
+                        </Link>,
+                        f.label(a.businessType),
+                        a.emirate,
+                        f.label(a.status),
+                      ])}
+                    />
+                  </div>
+                </AdminPanel>
+              )}
+              {data.appointments && (
+                <AdminPanel title={t("todayAppointments")} href="/admin/appointments">
+                  <Metrics
+                    rows={[
+                      [t("today"), f.number(count(data.appointments.today))],
+                      [t("upcoming"), f.number(count(data.appointments.upcoming))],
+                      [
+                        t("values.completed"),
+                        f.number(count(data.appointments.statuses, "completed")),
+                      ],
+                      [
+                        t("values.cancelled"),
+                        f.number(count(data.appointments.statuses, "cancelled")),
+                      ],
+                      [
+                        t("values.no_show"),
+                        f.number(count(data.appointments.statuses, "no_show")),
+                      ],
+                    ]}
+                  />
+                  <div className="mt-5">
+                    <SimpleTable
+                      headings={[
+                        t("fields.startsAt"),
+                        t("fields.customer"),
+                        t("fields.partner"),
+                        t("fields.service"),
+                        t("fields.status"),
+                      ]}
+                      rows={data.appointments.schedule.map((a: any) => [
+                        <Link
+                          href={`/admin/appointments/${a._id}`}
+                          className="pl-link inline-flex items-center"
+                        >
+                          {f.date(a.startsAt, true)}
+                        </Link>,
+                        a.customer,
+                        a.partner,
+                        f.label(a.service),
+                        f.label(a.status),
+                      ])}
+                    />
+                  </div>
+                </AdminPanel>
+              )}
+              {data.customers && (
+                <AdminPanel title={t("customerAnalytics")} href="/admin/customers">
+                  <Metrics
+                    rows={[
+                      [t("totalCustomers"), f.number(count(data.customers.total))],
+                      [t("customers"), f.number(data.customers.newCustomers.value)],
+                      [t("withOrders"), f.number(count(data.customers.withOrders))],
+                      ...(data.commerce
+                        ? [
+                            [
+                              t("returningCustomers"),
+                              f.number(count(data.commerce.returning)),
+                            ] as [string, string],
+                          ]
+                        : []),
+                    ]}
+                  />
+                </AdminPanel>
+              )}
+              {data.partners && (
+                <AdminPanel title={t("partnerNetwork")} href="/admin/partners">
+                  <p className="mb-4 text-2xl font-semibold">
+                    {f.number(count(data.partners.total))}
+                  </p>
+                  <BarChart data={statusData(data.partners.types)} format={f.number} />
+                </AdminPanel>
+              )}
               {data.training && (
                 <AdminPanel title={t("upcomingTraining")} href="/admin/training-sessions">
                   <Metrics
