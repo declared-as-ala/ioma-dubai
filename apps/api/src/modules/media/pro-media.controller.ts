@@ -15,10 +15,7 @@ import {
 import { FileInterceptor } from "@nestjs/platform-express";
 import { SkipThrottle } from "@nestjs/throttler";
 import type { Response } from "express";
-import { diskStorage } from "multer";
 import { randomUUID } from "node:crypto";
-import { promises as fs } from "node:fs";
-import { tmpdir } from "node:os";
 import { extname } from "node:path";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { CurrentUser } from "../auth/decorators/current-user.decorator";
@@ -29,7 +26,7 @@ import { StorageService } from "../../common/storage/storage.service";
 import { processProductImage } from "./product-media.service";
 
 export const PRO_IMAGE_LIMIT = 15 * 1024 * 1024;
-export const PRO_VIDEO_LIMIT = 200 * 1024 * 1024;
+export const PRO_VIDEO_LIMIT = 100 * 1024 * 1024;
 const VIDEO_TYPES: Record<string, string> = {
   "video/mp4": ".mp4",
   "video/webm": ".webm",
@@ -122,17 +119,13 @@ export class AdminProMediaController {
 
   /**
    * One endpoint for the admin media field. Images become optimised WebP (main + card);
-   * videos (MP4/WebM) are streamed from a temp file to object storage, never held in memory
-   * or in MongoDB. Type and size are validated here, on the server.
+   * videos (MP4/WebM, up to 100 MB) go to object storage, never into MongoDB.
+   * Type and size are validated here, on the server.
    */
   @Post()
   @UseInterceptors(
     FileInterceptor("file", {
       limits: { fileSize: PRO_VIDEO_LIMIT, files: 1 },
-      storage: diskStorage({
-        destination: tmpdir(),
-        filename: (_req, _file, cb) => cb(null, `ioma-upload-${randomUUID()}`),
-      }),
     }),
   )
   async upload(
@@ -141,16 +134,12 @@ export class AdminProMediaController {
   ) {
     requirePermission(user, "b2b.manage");
     if (!file) throw new BadRequestException("Choose a file to upload.");
-    const tmp = file.path;
     try {
       const id = randomUUID();
       if (IMAGE_TYPES.has(file.mimetype)) {
         if (file.size > PRO_IMAGE_LIMIT)
           throw new BadRequestException("Images can be up to 15 MB.");
-        const processed = await processProductImage({
-          ...file,
-          buffer: await fs.readFile(tmp),
-        } as Express.Multer.File);
+        const processed = await processProductImage(file);
         try {
           await this.storage.upload(
             "public",
@@ -185,7 +174,7 @@ export class AdminProMediaController {
       if (ext) {
         const key = `pro-video/${id}${ext || extname(file.originalname)}`;
         try {
-          await this.storage.uploadFile("public", key, tmp, file.mimetype);
+          await this.storage.upload("public", key, file.buffer, file.mimetype);
         } catch {
           throw new ServiceUnavailableException("Video storage is unavailable. Retry.");
         }
@@ -201,7 +190,7 @@ export class AdminProMediaController {
         "Upload a JPG, PNG, WebP, AVIF image or an MP4/WebM video.",
       );
     } finally {
-      await fs.rm(tmp, { force: true });
+      // nothing to clean: uploads are handled in memory
     }
   }
 
