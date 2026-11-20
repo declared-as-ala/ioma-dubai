@@ -139,7 +139,6 @@ const NAV: NavGroup[] = [
     items: [
       { label: "Users & Roles", href: "/admin/admin-users", also: ["/admin/roles"] },
       { label: "Audit Logs", href: "/admin/audit" },
-      { label: "Settings", href: "/admin/settings" },
     ],
   },
 ];

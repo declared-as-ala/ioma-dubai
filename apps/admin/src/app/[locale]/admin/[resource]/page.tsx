@@ -89,8 +89,9 @@ export default async function Page({
   // Partners are managed as Professionals now (one business, one record).
   if (resource === "partners") redirect(`/${locale}/admin/professional-accounts`);
 
-  if (resource === "roles" || resource === "settings")
-    return <AdminSystem section={resource} />;
+  // The server-configuration page was removed (no API keys are managed from the admin).
+  if (resource === "settings") notFound();
+  if (resource === "roles") return <AdminSystem section={resource} />;
 
   if (resource === "notifications") notFound();
 
