@@ -5,7 +5,7 @@ import { ImagePlus, Trash2, Upload, Video } from "lucide-react";
 import { apiUploadProgress } from "@/lib/api";
 
 const IMAGE_MAX = 15 * 1024 * 1024;
-const VIDEO_MAX = 200 * 1024 * 1024;
+const VIDEO_MAX = 100 * 1024 * 1024;
 
 interface UploadResult {
   kind: "image" | "video";

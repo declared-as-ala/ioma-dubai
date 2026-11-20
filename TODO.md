@@ -1,5 +1,77 @@
 # TODO.md — IOMA Paris Dubai
 
+## Production go-live, partners merge and portal — status as of 2026-11-20
+
+Production: https://iomaparis.ae (store) · https://admin.iomaparis.ae (admin) · OVH VPS. Last pushed commit: `1102436` (deploy of this batch building when this list was written). Security and operations items are intentionally excluded from the current work.
+
+### Done and live
+
+- [x] French (fr) language across the storefront
+- [x] Shop filter "0 results" bug fixed (legacy concern/category slugs)
+- [x] Migration to the OVH server, prices imported from the three official AED Excel files
+- [x] HTTPS for iomaparis.ae and admin.iomaparis.ae
+- [x] SMTP for contact@ and support@ and a premium Contact page
+- [x] Email verification at signup, forgot/reset password, verified-email guard on booking, checkout and partner applications
+- [x] Partner application, approval and rejection emails through a durable outbox; trade-lead notification fixed
+- [x] Profile page redesigned; Admin Training / Website / Import center sections removed
+- [x] Partners and Professionals merged into one admin system (list, 9-tab detail, visibility, linking migration, services with description/price/image/archive)
+- [x] Partner self-service "Business profile" in the portal with admin approval of name/address changes
+- [x] Portal colours moved from purple to ivory / champagne / charcoal
+
+### Built in the latest batch (deploying)
+
+- [x] Admin media upload: images (optimised WebP) and videos (MP4/WebM, streamed, Range support), drag-and-drop field with progress, preview, replace, remove
+- [x] Pro content fields: courses, descriptions, thumbnails, featured, collections, captions, icons, document language/version
+- [x] Portal home CMS (Admin → Portal home): banner, announcements with dates, section order and visibility, featured products and videos, delivery/terms/contact, EN/FR/AR
+- [x] Portal home rebuilt on that content (no hardcoded banner image or promo text)
+- [x] Training academy: courses, featured, continue watching, search, real saved progress, resume position
+- [x] Gallery with collections and captions; benefits and documents driven only by admin content (documents with description, language, version)
+- [x] Professional pricing admin: trade price, recommended retail, minimum quantity, bulk % change, preview, publish, audit; shop shows the recommended retail price
+- [x] Removed invented "Club Privilège", loyalty points and the free-delivery promise
+- [x] Deleted the unreachable partner detail component
+- [x] Tests: 230 API + 14 web pass; typechecks clean
+
+### To do — verify after this deploy
+
+- [ ] Upload a real image and a real video from the admin and play them in the portal (nginx body limit raised to 250 MB for the admin site)
+- [ ] Open Admin → Portal home, Professional pricing and the new Professionals tabs in a browser (desktop and mobile)
+- [ ] Open the portal pages as a partner (home, academy, gallery, benefits, documents, business profile)
+
+### To do — content and data
+
+- [ ] Pro benefits: 0 records. Create the real partner benefits in Admin → Pro benefits (content must come from IOMA, nothing was invented)
+- [ ] Portal home: set the banner image, headline and featured products in Admin → Portal home (until then the home shows the neutral default)
+- [ ] Training videos and gallery: re-upload or re-link the 8 seeded videos and 7 photos if they still use placeholder files
+- [ ] Review the 4 price-file size conflicts (IBP302, IBP180, IBP216, IBB007) and leftover placeholder variants with the old 60%-of-retail B2B price (now fixable in Professional pricing)
+
+### To do — still open (not built yet)
+
+- [ ] Price lists per partner: screen to create and assign them (API to assign exists; no price lists yet)
+- [ ] Partners upload their own photos and edit their own services (needs approval flow)
+- [ ] Portal shop: product detail drawer, sorting and a stronger commercial layout; cabin products page redesign
+- [x] B2B orders in admin: CSV export and admin notes already exist (Orders screen, type B2B)
+- [ ] Portal home: "recent announcements" per partner group and per-partner visibility of content
+- [ ] Idempotent migration of any remaining hardcoded portal text into the database (labels stay in translation files)
+- [ ] EAN field in the product variant editor (suggested retail price, trade price and minimum quantity are now editable in Professional pricing; EAN is imported from the price files)
+- [ ] Arabic (RTL) and French review of all new portal and admin screens
+- [ ] Verification matrix (page, API, database, admin CRUD, tested) for every B2B page
+
+### To do — other open items
+
+- [ ] Splash-screen video: decide between the DietTemple/UH video (`#6/DietTemple_UH_4K (1).mp4`) and an IOMA video
+- [ ] DNS: confirm the `.ae` registry delegation, keep mail records intact, check Chrome on the owner's PC after DNS caches clear
+- [ ] CI/CD: `.github/workflows/deploy.yml` targets a git checkout on another server; the OVH box is deployed by hand. Point the pipeline at OVH or document the manual deploy
+- [ ] Old admin `admin@ioma-dubai.com` password unknown (a separate admin account exists)
+- [ ] Keep `TODO.md`, `PROGRESS.md` and `SPRINTS.md` in sync (project rule)
+
+### Excluded for now — security and operations
+
+- [ ] Change the passwords that appeared in chat (both VPS accounts, SMTP mailbox, admin and demo partner accounts)
+- [ ] SSH key-only login; MongoDB authentication; off-server backups
+- [ ] Delete the demo accounts (`alamissaoui.dev+partner@`, `+iomatest@`) when no longer needed
+
+---
+
 ## Complete IOMA Paris Magazine Migration & Multilingual Experience — 2026-11-06
 
 - [x] Crawled and discovered all 78 official articles across all 9 pagination pages of https://ioma-paris.com/blogs/ioma-mag.
