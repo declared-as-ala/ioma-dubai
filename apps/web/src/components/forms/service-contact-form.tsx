@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useSearchParams } from "next/navigation";
 import { useLocale } from "next-intl";
 import { toLoc } from "@/lib/l10n";
 import { useForm } from "react-hook-form";
@@ -18,6 +19,7 @@ const F = CONTACT.form;
 export function ServiceContactForm() {
   const locale = toLoc(useLocale());
   const loc = locale;
+  const product = useSearchParams().get("product");
   const mutation = useContactMutation();
   const successRef = useRef<HTMLHeadingElement>(null);
 
@@ -28,10 +30,12 @@ export function ServiceContactForm() {
       name: "",
       email: "",
       phone: "",
-      subject: "",
-      message: "",
+      subject: product ? `Price request: ${product}` : "",
+      message: product
+        ? `Hello, could you tell me the price and availability of "${product}"? Thank you.`
+        : "",
       locale,
-      category: "order",
+      category: product ? "product" : "order",
       orderReference: "",
       website: "",
     },

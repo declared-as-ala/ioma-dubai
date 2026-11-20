@@ -276,4 +276,32 @@ describe("PriceImportService", () => {
       svc.preview(actor, sheet([{ foo: "bar" }]), "retail"),
     ).rejects.toBeInstanceOf(BadRequestException);
   });
+
+  it("never changes a size silently: only when approved for that SKU, with evidence, and it can be reverted", async () => {
+    const { svc, store } = mk();
+    const r = await svc.preview(actor, file(), "retail");
+    const row = r.rows.find((x) => x.sku === "IBP302")!;
+    expect(row.sizeFromFile).toBe("30 ml");
+    expect(row.evidence).toMatchObject({
+      eanMatches: true,
+      dbSize: "50 ml",
+      fileSize: "30 ml",
+    });
+
+    await svc.apply(actor, r.id, ["IBP302", "IBP104"]); // price approved, size NOT approved
+    expect(store.productvariants![2]!.size).toBe("50 ml");
+    expect(store.productvariants![2]!.b2cPriceMinor).toBe(10500);
+
+    const { svc: svc2, store: store2 } = mk();
+    const r2 = await svc2.preview(actor, file(), "retail");
+    await svc2.apply(actor, r2.id, ["IBP302"], ["IBP302"]); // size explicitly approved
+    expect(store2.productvariants![2]!.size).toBe("30 ml");
+    expect(
+      store2.pricehistory!.some(
+        (h) => h.field === "size" && h.from === "50 ml" && h.to === "30 ml",
+      ),
+    ).toBe(true);
+    await svc2.revert(actor, r2.id);
+    expect(store2.productvariants![2]!.size).toBe("50 ml");
+  });
 });

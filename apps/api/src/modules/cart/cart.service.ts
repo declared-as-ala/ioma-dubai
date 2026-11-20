@@ -10,6 +10,7 @@ import { Product, ProductDocument } from "../catalog/schemas/product.schema";
 import { PriceList, PriceListDocument } from "../professional/schemas/price-list.schema";
 import type { AddCartItemDto } from "./dto/add-cart-item.dto";
 import type { UpdateCartItemDto } from "./dto/update-cart-item.dto";
+import { canFulfil } from "../../common/inventory";
 
 export interface CartOwner {
   userId?: string;
@@ -72,10 +73,7 @@ export class CartService {
         },
       }));
     if (!variant) throw new NotFoundException(`Product variant "${dto.sku}" not found.`);
-    if (
-      variant.quantityOnHand - variant.quantityReserved < dto.qty &&
-      !variant.backorderAllowed
-    ) {
+    if (!canFulfil(variant, dto.qty)) {
       throw new BadRequestException("Not enough stock available for this variant.");
     }
 
@@ -98,12 +96,14 @@ export class CartService {
     const cart = await this.getOrCreateCart({ ...owner, type: cartType });
 
     const priceMinor = this.resolvePrice(variant, cartType, priceListId);
+    // Never sell at 0 AED: an unpriced item is "price on request", not purchasable.
+    if (priceMinor <= 0)
+      throw new BadRequestException(
+        "This product is available on request. Please contact IOMA for its price.",
+      );
     const existing = cart.items.find((item) => item.variantId.toString() === variant.id);
     if (existing) {
-      if (
-        !variant.backorderAllowed &&
-        existing.qty + dto.qty > variant.quantityOnHand - variant.quantityReserved
-      )
+      if (!canFulfil(variant, existing.qty + dto.qty))
         throw new BadRequestException("Not enough stock available.");
       existing.qty += dto.qty;
       existing.priceMinorSnapshot = priceMinor;
@@ -125,12 +125,7 @@ export class CartService {
     const cart = await this.getOrCreateCart(owner);
     const item = cart.items.find((i) => i.variantId.toString() === variant.id);
     if (!item) throw new NotFoundException("Item not in cart.");
-    if (
-      !Number.isInteger(dto.qty) ||
-      dto.qty < 1 ||
-      (!variant.backorderAllowed &&
-        dto.qty > variant.quantityOnHand - variant.quantityReserved)
-    )
+    if (!Number.isInteger(dto.qty) || dto.qty < 1 || !canFulfil(variant, dto.qty))
       throw new BadRequestException("Invalid quantity or insufficient stock.");
     item.qty = dto.qty;
     await cart.save();
@@ -195,20 +190,21 @@ export class CartService {
     };
   }
 
+  /**
+   * The unit price for a cart type, server side only. Retail carts use the retail price and professional
+   * carts the trade price: a professional cart never falls back to the retail price. 0 means "no price".
+   */
+  currentPriceMinor(variant: ProductVariantDocument, cartType: "b2c" | "b2b"): number {
+    const p = cartType === "b2b" ? variant.b2bPriceMinor : variant.b2cPriceMinor;
+    return typeof p === "number" && p > 0 ? p : 0;
+  }
+
   private resolvePrice(
     variant: ProductVariantDocument,
     cartType: "b2c" | "b2b",
-    priceListId?: string,
+    _priceListId?: string,
   ): number {
-    if (cartType === "b2b" && priceListId) {
-      // PriceList overrides are resolved synchronously — the caller
-      // should have pre-fetched the price list if one exists.
-      return variant.b2bPriceMinor ?? variant.b2cPriceMinor;
-    }
-    if (cartType === "b2b" && variant.b2bPriceMinor) {
-      return variant.b2bPriceMinor;
-    }
-    return variant.b2cPriceMinor;
+    return this.currentPriceMinor(variant, cartType);
   }
 
   private resolveMoq(

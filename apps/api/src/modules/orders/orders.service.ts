@@ -47,6 +47,7 @@ export class OrdersService {
       _id: { $in: variants.map((v) => v.productId) },
     });
 
+    const channel = owner.type ?? "b2c";
     const orderItems = cart.items.map((item) => {
       const variant = variants.find((v) => v.sku === item.sku);
       const product = variant
@@ -55,20 +56,30 @@ export class OrdersService {
       if (!variant || !product) {
         throw new BadRequestException(`Product no longer available: ${item.sku}`);
       }
+      // The price is recomputed from the catalogue at checkout (the cart snapshot may be stale)
+      // and an unpriced item can never be ordered: no order is ever created at 0 AED.
+      const unit = this.cartService.currentPriceMinor(variant, channel);
+      if (unit <= 0)
+        throw new BadRequestException(
+          `"${item.sku}" is available on request and cannot be ordered online.`,
+        );
       return {
         variantId: variant._id,
         sku: variant.sku,
         productNameSnapshot: product.name,
         qty: item.qty,
-        unitPriceMinorSnapshot: item.priceMinorSnapshot,
-        totalMinor: item.lineTotalMinor,
+        unitPriceMinorSnapshot: unit,
+        totalMinor: unit * item.qty,
       };
     });
+    const cartSubtotal = orderItems.reduce((sum, i) => sum + i.totalMinor, 0);
 
     const { subtotalMinor, taxMinor, shippingMinor, totalMinor } = computeOrderTotals(
-      cart.subtotalMinor,
+      cartSubtotal,
       dto.deliveryMethod,
     );
+    if (totalMinor <= 0)
+      throw new BadRequestException("The order total must be above 0 AED.");
 
     const order = await this.orderModel.create({
       orderNumber: this.generateOrderNumber(),
@@ -115,8 +126,9 @@ export class OrdersService {
 
   private async decrementStock(order: OrderDocument) {
     for (const item of order.items) {
+      // Untracked variants (made to order / managed elsewhere) never consume stock.
       await this.variantModel.updateOne(
-        { _id: item.variantId },
+        { _id: item.variantId, trackInventory: { $ne: false } },
         { $inc: { quantityOnHand: -item.qty } },
       );
     }

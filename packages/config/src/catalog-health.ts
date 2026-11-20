@@ -16,6 +16,8 @@ export interface HealthVariant {
   quantityReserved?: number | null;
   lowStockThreshold?: number | null;
   backorderAllowed?: boolean | null;
+  /** false = inventory is not tracked for this variant. */
+  trackInventory?: boolean | null;
 }
 
 export interface HealthProduct {
@@ -53,6 +55,9 @@ const available = (v: HealthVariant) =>
  * must not be reported as out of stock.
  */
 export function isUntracked(v: HealthVariant): boolean {
+  if (v.trackInventory === false) return true;
+  if (v.trackInventory === true) return false;
+  // legacy variants without the flag: never stocked and sellable on backorder
   return (
     !!v.backorderAllowed && (v.quantityOnHand ?? 0) <= 0 && (v.quantityReserved ?? 0) <= 0
   );

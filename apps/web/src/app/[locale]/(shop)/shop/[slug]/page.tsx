@@ -21,6 +21,7 @@ import { PdpInformationSections } from "@/components/shop/pdp-information-sectio
 import { formatMinor } from "@/lib/money";
 import { cn } from "@/lib/utils";
 import { Link } from "@/i18n/navigation";
+import { tr, toLoc } from "@/lib/l10n";
 import {
   Truck,
   Sparkles,
@@ -351,7 +352,11 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
             ) : (
               <div className="flex items-center gap-2">
                 <span className="inline-flex rounded bg-amber-50 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-amber-800 border border-amber-200">
-                  Prix UAE sur consultation / En réapprovisionnement
+                  {tr(toLoc(locale), {
+                    en: "Price on request",
+                    fr: "Prix sur demande",
+                    ar: "السعر عند الطلب",
+                  })}
                 </span>
               </div>
             )}
@@ -419,19 +424,32 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
 
           {/* Primary Action Buttons (Add to Bag + Wishlist) */}
           <div className="pt-2 flex items-center gap-3">
-            <Button
-              size="lg"
-              data-testid="add-to-cart"
-              className="flex-1 uppercase tracking-widest font-semibold h-12 text-xs bg-sf-charcoal hover:bg-sf-champagne text-white hover:text-sf-charcoal rounded-full"
-              disabled={!selectedVariant?.inStock || addCartItem.isPending || !isPriced}
-              onClick={handleAddToCart}
-            >
-              {!isPriced
-                ? "Prix UAE en cours"
-                : selectedVariant?.inStock
-                  ? t("addToCart")
-                  : t("outOfStock")}
-            </Button>
+            {isPriced ? (
+              <Button
+                size="lg"
+                data-testid="add-to-cart"
+                className="flex-1 uppercase tracking-widest font-semibold h-12 text-xs bg-sf-charcoal hover:bg-sf-champagne text-white hover:text-sf-charcoal rounded-full"
+                disabled={!selectedVariant?.inStock || addCartItem.isPending}
+                onClick={handleAddToCart}
+              >
+                {selectedVariant?.inStock ? t("addToCart") : t("outOfStock")}
+              </Button>
+            ) : (
+              <Button
+                asChild
+                size="lg"
+                data-testid="price-on-request"
+                className="flex-1 uppercase tracking-widest font-semibold h-12 text-xs bg-sf-charcoal hover:bg-sf-champagne text-white hover:text-sf-charcoal rounded-full"
+              >
+                <Link href={`/contact?product=${encodeURIComponent(product.slug)}`}>
+                  {tr(toLoc(locale), {
+                    en: "Ask for the price",
+                    fr: "Demander le prix",
+                    ar: "اطلبوا السعر",
+                  })}
+                </Link>
+              </Button>
+            )}
             <Button
               variant="outline"
               size="icon"

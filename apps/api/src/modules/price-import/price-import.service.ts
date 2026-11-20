@@ -38,6 +38,16 @@ export interface PreviewRow {
   newRrpFils: number | null;
   changePct: number | null;
   issues: string[];
+  /** Evidence to verify a size conflict before approving it. */
+  evidence?: {
+    dbProductName: string | null;
+    fileName: string;
+    eanMatches: boolean | null;
+    dbSize: string | null;
+    fileSize: string;
+  };
+  /** Set when the file size differs from the database size (the admin must approve changing it). */
+  sizeFromFile?: string | null;
   applied?: boolean;
 }
 
@@ -94,9 +104,12 @@ export class PriceImportService {
       .toArray()) as Row[];
     const products = (await this.db
       .collection("products")
-      .find({}, { projection: { slug: 1 } })
+      .find({}, { projection: { slug: 1, name: 1 } })
       .toArray()) as Row[];
     const slugById = new Map(products.map((p) => [String(p._id), p.slug as string]));
+    const nameById = new Map(
+      products.map((p) => [String(p._id), (p.name?.en as string | undefined) ?? null]),
+    );
     const bySku = new Map(variants.map((v) => [v.sku as string, v]));
     const byEan = new Map<string, Row[]>();
     for (const v of variants)
@@ -106,7 +119,7 @@ export class PriceImportService {
     for (const r of parsed) seen.set(r.sku, (seen.get(r.sku) ?? 0) + 1);
 
     const out: PreviewRow[] = parsed.map((r) =>
-      this.matchRow(r, kind, field, bySku, byEan, variants, slugById, seen),
+      this.matchRow(r, kind, field, bySku, byEan, variants, slugById, seen, nameById),
     );
     const summary = {
       rows: out.length,
@@ -150,6 +163,7 @@ export class PriceImportService {
     variants: Row[],
     slugById: Map<string, string>,
     seen: Map<string, number>,
+    nameById: Map<string, string | null>,
   ): PreviewRow {
     const base: PreviewRow = {
       sku: r.sku,
@@ -224,8 +238,17 @@ export class PriceImportService {
     };
     if (!slugById.has(String(v.productId)))
       row.issues.push("The variant's product no longer exists.");
-    if (r.size && v.size && normSize(r.size) !== normSize(v.size))
+    if (r.size && v.size && normSize(r.size) !== normSize(v.size)) {
       row.issues.push(`Size differs: file ${r.size}, database ${v.size}.`);
+      row.sizeFromFile = r.size;
+      row.evidence = {
+        dbProductName: nameById.get(String(v.productId)) ?? null,
+        fileName: r.name,
+        eanMatches: r.ean && v.ean ? r.ean === v.ean : null,
+        dbSize: (v.size as string) ?? null,
+        fileSize: r.size,
+      };
+    }
     if (r.ean && v.ean && r.ean !== v.ean)
       row.issues.push(`EAN differs: file ${r.ean}, database ${v.ean}.`);
     if (row.changePct !== null && Math.abs(row.changePct) > LARGE_CHANGE_PCT)
@@ -297,7 +320,12 @@ export class PriceImportService {
    * categories, translations and orders are never touched. Absolute target values make a re-run safe
    * (already-applied rows are skipped), so an interrupted apply can simply be repeated.
    */
-  async apply(actor: { sub: string; email: string }, id: string, approved: string[]) {
+  async apply(
+    actor: { sub: string; email: string },
+    id: string,
+    approved: string[],
+    sizes: string[] = [],
+  ) {
     if (!Types.ObjectId.isValid(id)) throw new NotFoundException();
     const _id = new Types.ObjectId(id);
     const doc = (await this.imports().findOne({ _id })) as Row | null;
@@ -336,7 +364,11 @@ export class PriceImportService {
       // capture the previous values BEFORE writing
       const fromValue = v[field] ?? null;
       const rrpFrom = v.suggestedRetailMinor ?? null;
+      const sizeBefore = v.size ?? null;
       const set: Row = { [field]: r.newFils, updatedAt: new Date() };
+      // The size is only changed when the admin explicitly approved it for this SKU.
+      const sizeApproved = sizes.includes(r.sku) && !!r.sizeFromFile;
+      if (sizeApproved) set.size = r.sizeFromFile;
       if (kind === "retail") set.retailTaxTreatment = "TTC";
       if (kind !== "retail") set.tradeTaxTreatment = "HT";
       if (kind === "b2b" && r.newRrpFils !== null)
@@ -358,6 +390,19 @@ export class PriceImportService {
         byEmail: actor.email,
         source: { filename: doc.filename, sha256: doc.sha256 },
       });
+      if (sizeApproved)
+        await this.db.collection("pricehistory").insertOne({
+          variantId: v._id,
+          sku: v.sku,
+          channel: kind,
+          field: "size",
+          from: sizeBefore,
+          to: r.sizeFromFile,
+          importId: _id,
+          at: new Date(),
+          byEmail: actor.email,
+          source: { filename: doc.filename, sha256: doc.sha256 },
+        });
       await this.imports().updateOne(
         { _id, "rows.sku": r.sku },
         { $set: { "rows.$.applied": true } },

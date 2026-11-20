@@ -13,6 +13,8 @@ import { AuditModule } from "../audit/audit.module";
 import { ImportRun, ImportRunSchema } from "./import-run.schema";
 import { CatalogSyncService } from "./catalog-sync.service";
 import { CatalogSyncController } from "./catalog-sync.controller";
+import { CatalogIntegrityService } from "./catalog-integrity.service";
+import { TranslationReviewService } from "./translation-review.service";
 
 @Module({
   imports: [
@@ -25,6 +27,6 @@ import { CatalogSyncController } from "./catalog-sync.controller";
     ]),
   ],
   controllers: [CatalogSyncController],
-  providers: [CatalogSyncService],
+  providers: [CatalogSyncService, CatalogIntegrityService, TranslationReviewService],
 })
 export class CatalogSyncModule {}

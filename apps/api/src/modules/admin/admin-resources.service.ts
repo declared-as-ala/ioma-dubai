@@ -1284,9 +1284,12 @@ export class AdminResourcesService implements OnModuleInit {
       const priced = variants.some((v) =>
         effective.visibility === "b2b_cabin" ? v.b2bPriceMinor > 0 : v.b2cPriceMinor > 0,
       );
-      if (effective.uaeAvailability === "PENDING" || !priced)
+      // "Price on request" (uaeAvailability PENDING) is an explicit, publishable state: the storefront shows
+      // a contact call to action and the server refuses any cart or order for an unpriced item. Anything
+      // else must really carry a price in the channel it is sold in.
+      if (effective.uaeAvailability !== "PENDING" && !priced)
         throw new BadRequestException(
-          "UAE price pending. Save a draft and configure an AED variant before publishing.",
+          "No price set. Add a price for this channel, or mark the product as price on request, before publishing.",
         );
       for (const field of [
         "name",
@@ -1382,17 +1385,15 @@ export class AdminResourcesService implements OnModuleInit {
     if (records.length !== references.length)
       throw new NotFoundException("One or more records were not found.");
     const now = new Date();
-    const result = await this.db
-      .collection(resource)
-      .updateMany(
-        { _id: { $in: references } },
-        {
-          $set:
-            resource === "products"
-              ? { status: "archived", deletedAt: now, updatedAt: now }
-              : { adminDeletedAt: now, updatedAt: now },
-        },
-      );
+    const result = await this.db.collection(resource).updateMany(
+      { _id: { $in: references } },
+      {
+        $set:
+          resource === "products"
+            ? { status: "archived", deletedAt: now, updatedAt: now }
+            : { adminDeletedAt: now, updatedAt: now },
+      },
+    );
     await this.event(user, `admin.${resource}.deleted`, resource, uniqueIds.join(","), {
       ids: uniqueIds,
       deletedCount: result.modifiedCount,

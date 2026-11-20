@@ -801,7 +801,7 @@ export class CatalogSyncService {
         .lean(),
       this.variants
         .find(
-          {},
+          { archivedAt: null },
           {
             productId: 1,
             sku: 1,

@@ -24,6 +24,14 @@ interface Row {
   newRrpFils: number | null;
   changePct: number | null;
   issues: string[];
+  sizeFromFile?: string | null;
+  evidence?: {
+    dbProductName: string | null;
+    fileName: string;
+    eanMatches: boolean | null;
+    dbSize: string | null;
+    fileSize: string;
+  };
   applied?: boolean;
 }
 interface Detail {
@@ -92,6 +100,8 @@ export function AdminPriceImport() {
   const [file, setFile] = useState<File | null>(null);
   const [detail, setDetail] = useState<Detail | null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  // sizes the admin explicitly approves changing to the value in the file
+  const [sizes, setSizes] = useState<Set<string>>(new Set());
   const [filter, setFilter] = useState<State | "">("");
   const [message, setMessage] = useState<string | null>(null);
 
@@ -106,6 +116,7 @@ export function AdminPriceImport() {
       ),
     );
     setFilter("");
+    setSizes(new Set());
   };
 
   const preview = useMutation({
@@ -125,7 +136,10 @@ export function AdminPriceImport() {
     mutationFn: () =>
       apiFetch<{ applied: number }>(`/admin/price-import/${detail!.id}/apply`, {
         method: "POST",
-        body: JSON.stringify({ skus: [...selected] }),
+        body: JSON.stringify({
+          skus: [...selected],
+          sizes: [...sizes].filter((x) => selected.has(x)),
+        }),
       }),
     onSuccess: async (r) => {
       setMessage(
@@ -317,7 +331,40 @@ export function AdminPriceImport() {
                         <td>
                           <Badge tone={TONE[r.state]}>{STATE_LABEL[r.state]}</Badge>
                         </td>
-                        <td className="text-[12px]">{r.issues.join(" ") || "—"}</td>
+                        <td className="text-[12px]">
+                          {r.issues.join(" ") || "—"}
+                          {r.sizeFromFile && r.evidence && (
+                            <div className="mt-1 space-y-1 rounded border p-2">
+                              <p>
+                                Evidence: EAN{" "}
+                                {r.evidence.eanMatches === null
+                                  ? "not comparable"
+                                  : r.evidence.eanMatches
+                                    ? "matches"
+                                    : "DIFFERS"}
+                                . Database: {r.evidence.dbProductName ?? "—"} (
+                                {r.evidence.dbSize}). File: {r.evidence.fileName} (
+                                {r.evidence.fileSize}). Check the physical packaging
+                                before approving.
+                              </p>
+                              <Checkbox
+                                disabled={!manage || !selected.has(r.sku)}
+                                checked={sizes.has(r.sku)}
+                                onChange={(e) =>
+                                  setSizes((x) => {
+                                    const n = new Set(x);
+                                    if (e.target.checked) n.add(r.sku);
+                                    else n.delete(r.sku);
+                                    return n;
+                                  })
+                                }
+                                label={
+                                  <span>Also change the size to {r.sizeFromFile}</span>
+                                }
+                              />
+                            </div>
+                          )}
+                        </td>
                       </tr>
                     );
                   })}

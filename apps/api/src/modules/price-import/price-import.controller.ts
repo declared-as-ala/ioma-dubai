@@ -72,13 +72,16 @@ export class PriceImportController {
     @Body() body: unknown,
   ) {
     const b = z
-      .object({ skus: z.array(z.string().min(1)).min(1).max(1000) })
+      .object({
+        skus: z.array(z.string().min(1)).min(1).max(1000),
+        sizes: z.array(z.string().min(1)).max(1000).optional(),
+      })
       .strict()
       .safeParse(body);
     if (!b.success) throw new BadRequestException("Select the rows to apply.");
     const doc = await this.imports.get(id);
     this.need(user, doc.kind as PriceKind, true);
-    return this.imports.apply(user, id, b.data.skus);
+    return this.imports.apply(user, id, b.data.skus, b.data.sizes ?? []);
   }
 
   @Post(":id/revert")

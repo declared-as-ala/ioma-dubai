@@ -14,6 +14,8 @@ import { CurrentUser } from "../auth/decorators/current-user.decorator";
 import type { JwtPayload } from "../auth/strategies/jwt.strategy";
 import { requirePermission } from "../admin/admin-permissions";
 import { CatalogSyncService, type ApplyChoice } from "./catalog-sync.service";
+import { CatalogIntegrityService } from "./catalog-integrity.service";
+import { TranslationReviewService } from "./translation-review.service";
 
 /**
  * Administrator-only catalogue synchronisation. Reads need `commerce.view`; anything that changes data needs
@@ -22,7 +24,65 @@ import { CatalogSyncService, type ApplyChoice } from "./catalog-sync.service";
 @Controller("catalog-sync")
 @UseGuards(JwtAuthGuard)
 export class CatalogSyncController {
-  constructor(private readonly sync: CatalogSyncService) {}
+  constructor(
+    private readonly sync: CatalogSyncService,
+    private readonly integrity: CatalogIntegrityService,
+    private readonly translations: TranslationReviewService,
+  ) {}
+
+  @Get("translations")
+  translationQueue(@CurrentUser() user: JwtPayload) {
+    requirePermission(user, "commerce.view");
+    return this.translations.queue();
+  }
+
+  @Get("translations/:productId")
+  translationOf(@CurrentUser() user: JwtPayload, @Param("productId") productId: string) {
+    requirePermission(user, "commerce.view");
+    return this.translations.get(productId);
+  }
+
+  @Post("translations/:productId/approve")
+  approveTranslation(
+    @CurrentUser() user: JwtPayload,
+    @Param("productId") productId: string,
+    @Body() body: { fields?: Record<string, string> },
+  ) {
+    requirePermission(user, "commerce.manage");
+    return this.translations.approve(user, productId, body?.fields ?? {});
+  }
+
+  @Post("translations/:productId/reject")
+  rejectTranslation(
+    @CurrentUser() user: JwtPayload,
+    @Param("productId") productId: string,
+  ) {
+    requirePermission(user, "commerce.manage");
+    return this.translations.reject(user, productId);
+  }
+
+  @Get("integrity/history/:productId")
+  productHistory(@CurrentUser() user: JwtPayload, @Param("productId") productId: string) {
+    requirePermission(user, "commerce.view");
+    return this.integrity.history(productId);
+  }
+
+  @Get("integrity/orphans")
+  orphans(@CurrentUser() user: JwtPayload) {
+    requirePermission(user, "commerce.view");
+    return this.integrity.orphans();
+  }
+
+  @Post("integrity/archive-orphans")
+  archiveOrphans(@CurrentUser() user: JwtPayload, @Body() body: { skus?: string[] }) {
+    requirePermission(user, "commerce.manage");
+    return this.integrity.archive(
+      user,
+      Array.isArray(body?.skus)
+        ? body.skus.filter((s) => typeof s === "string").slice(0, 200)
+        : [],
+    );
+  }
 
   @Get("overview")
   overview(@CurrentUser() user: JwtPayload) {

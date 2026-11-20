@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
+import { isInStock } from "../../common/inventory";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model, Types } from "mongoose";
 import { ProductRange, ProductRangeDocument } from "./schemas/product-range.schema";
@@ -197,7 +198,7 @@ export class CatalogService {
           sku: v.sku,
           size: v.size,
           priceMinor: v.b2cPriceMinor,
-          inStock: v.quantityOnHand - v.quantityReserved > 0 || v.backorderAllowed,
+          inStock: isInStock(v),
         })),
       };
     });
@@ -316,7 +317,7 @@ export class CatalogService {
         sku: v.sku,
         size: v.size,
         priceMinor: v.b2cPriceMinor,
-        inStock: v.quantityOnHand - v.quantityReserved > 0 || v.backorderAllowed,
+        inStock: isInStock(v),
       })),
       complementaryProducts: complementaryProducts.map((cp, idx) => {
         const pVariants = compVariants.filter(
@@ -397,7 +398,7 @@ export class CatalogService {
           b2bPriceMinor: v.b2bPriceMinor,
           suggestedRetailMinor: v.suggestedRetailMinor ?? null,
           moq: v.moq,
-          inStock: v.quantityOnHand - v.quantityReserved > 0 || v.backorderAllowed,
+          inStock: isInStock(v),
         })),
       };
     });

@@ -110,6 +110,10 @@ export interface Variant {
   lowStockThreshold: number;
   moq: number | null;
   backorderAllowed: boolean;
+  ean?: string | null;
+  suggestedRetailMinor?: number | null;
+  /** false = inventory is not tracked (always sellable). */
+  trackInventory?: boolean;
 }
 
 export interface ActiveIngredientItem {

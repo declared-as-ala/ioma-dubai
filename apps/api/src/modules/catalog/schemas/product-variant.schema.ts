@@ -33,6 +33,23 @@ export class ProductVariant {
   @Prop({ type: Number, default: null })
   suggestedRetailMinor?: number | null;
 
+  /** Set when an orphan variant is archived (kept in the database, excluded from every count). */
+  @Prop({ type: Date, default: null })
+  archivedAt?: Date | null;
+
+  @Prop({ type: String, default: undefined })
+  archivedReason?: string;
+
+  @Prop({ type: String, default: undefined })
+  archivedBy?: string;
+
+  /**
+   * false = inventory is not tracked for this variant (made to order / managed elsewhere): always sellable and
+   * never decremented. undefined behaves as tracked for legacy variants.
+   */
+  @Prop({ type: Boolean, default: undefined })
+  trackInventory?: boolean;
+
   /** Explicit tax treatment of the stored prices: retail prices are AED TTC, trade/cabin prices AED HT. */
   @Prop({ type: String, enum: ["TTC", "HT"], default: undefined })
   retailTaxTreatment?: "TTC" | "HT";
