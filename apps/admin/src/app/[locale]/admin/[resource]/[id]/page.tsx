@@ -1,11 +1,13 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { AdminDetail } from "@/components/admin/admin-management";
 export default async function Page({
   params,
 }: {
-  params: Promise<{ resource: string; id: string }>;
+  params: Promise<{ resource: string; id: string; locale: string }>;
 }) {
-  const { resource, id } = await params;
+  const { resource, id, locale } = await params;
+  if (resource === "partners")
+    redirect(`/${locale}/admin/professional-accounts/${encodeURIComponent(`b:${id}`)}`);
   if (
     [
       "trainings",

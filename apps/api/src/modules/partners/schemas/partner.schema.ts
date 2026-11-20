@@ -88,6 +88,10 @@ export class Partner {
   @Prop({ type: Types.ObjectId, ref: "User", default: null })
   professionalAccountId!: Types.ObjectId | null;
 
+  /** Back-reference to the ProfessionalProfile this public profile belongs to (null = standalone listing). */
+  @Prop({ type: Types.ObjectId, ref: "ProfessionalProfile", default: null })
+  professionalProfileId!: Types.ObjectId | null;
+
   @Prop({ type: Boolean, default: false })
   diagnosisAvailable!: boolean;
 
@@ -103,3 +107,10 @@ export class Partner {
 export const PartnerSchema = SchemaFactory.createForClass(Partner);
 PartnerSchema.index({ coordinates: "2dsphere" });
 PartnerSchema.index({ emirate: 1, city: 1, type: 1 });
+PartnerSchema.index(
+  { professionalProfileId: 1 },
+  {
+    unique: true,
+    partialFilterExpression: { professionalProfileId: { $type: "objectId" } },
+  },
+);

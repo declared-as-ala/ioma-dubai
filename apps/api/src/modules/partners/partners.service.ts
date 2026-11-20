@@ -77,6 +77,10 @@ export class PartnersService {
           name: Record<string, string>;
           durationMinutes: number;
           category: string;
+          description?: Record<string, string>;
+          priceMinor?: number | null;
+          image?: string | null;
+          status?: string;
         }[];
       }>("serviceIds")
       .lean();
@@ -99,13 +103,18 @@ export class PartnersService {
       website: doc.website ?? null,
       openingHours: doc.openingHours ?? null,
       diagnosisAvailable: doc.diagnosisAvailable,
-      services: doc.serviceIds.map((s) => ({
-        id: s._id.toString(),
-        slug: s.slug,
-        name: s.name,
-        durationMinutes: s.durationMinutes,
-        category: s.category,
-      })),
+      services: doc.serviceIds
+        .filter((s) => s.status !== "archived")
+        .map((s) => ({
+          id: s._id.toString(),
+          slug: s.slug,
+          name: s.name,
+          durationMinutes: s.durationMinutes,
+          category: s.category,
+          description: s.description ?? null,
+          priceMinor: s.priceMinor ?? null,
+          image: s.image ?? null,
+        })),
       mediaIds: doc.mediaIds ?? [],
     };
   }
@@ -117,11 +126,16 @@ export class PartnersService {
   }
 
   async listServices() {
-    return this.serviceModel.find().sort({ slug: 1 }).lean();
+    return this.serviceModel
+      .find({ status: { $ne: "archived" } })
+      .sort({ slug: 1 })
+      .lean();
   }
 
   async getServiceBySlug(slug: string) {
-    const doc = await this.serviceModel.findOne({ slug }).lean();
+    const doc = await this.serviceModel
+      .findOne({ slug, status: { $ne: "archived" } })
+      .lean();
     if (!doc) throw new NotFoundException("Service not found.");
     return doc;
   }
@@ -139,17 +153,20 @@ export class PartnersService {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private toListItem(doc: any) {
     const services = Array.isArray(doc.serviceIds)
-      ? doc.serviceIds.map(
-          (s: {
-            slug?: string;
-            name?: Record<string, string>;
-            durationMinutes?: number;
-          }) => ({
-            slug: s.slug,
-            name: s.name,
-            durationMinutes: s.durationMinutes,
-          }),
-        )
+      ? doc.serviceIds
+          .filter((s: { status?: string }) => s.status !== "archived")
+          .map(
+            (s: {
+              slug?: string;
+              name?: Record<string, string>;
+              durationMinutes?: number;
+              status?: string;
+            }) => ({
+              slug: s.slug,
+              name: s.name,
+              durationMinutes: s.durationMinutes,
+            }),
+          )
       : [];
 
     return {

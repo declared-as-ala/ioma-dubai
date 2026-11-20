@@ -560,7 +560,10 @@ export default function AdminDashboard() {
                 </AdminPanel>
               )}
               {data.partners && (
-                <AdminPanel title={t("partnerNetwork")} href="/admin/partners">
+                <AdminPanel
+                  title={t("partnerNetwork")}
+                  href="/admin/professional-accounts"
+                >
                   <p className="mb-4 text-2xl font-semibold">
                     {f.number(count(data.partners.total))}
                   </p>
@@ -816,7 +819,10 @@ export default function AdminDashboard() {
                 </AdminPanel>
               )}
               {data.partners && (
-                <AdminPanel title={t("partnerNetwork")} href="/admin/partners">
+                <AdminPanel
+                  title={t("partnerNetwork")}
+                  href="/admin/professional-accounts"
+                >
                   <p className="mb-4 text-2xl font-semibold">
                     {f.number(count(data.partners.total))}
                   </p>

@@ -449,7 +449,7 @@ export const ADMIN_RESOURCES: AdminResource[] = [
     collection: "services",
     title: "Services",
     group: "partners",
-    columns: ["name", "category", "durationMinutes"],
+    columns: ["name", "category", "durationMinutes", "status"],
     search: ["slug", "name.en"],
     create: true,
     fields: [
@@ -457,6 +457,10 @@ export const ADMIN_RESOURCES: AdminResource[] = [
       localized("name", true),
       f("durationMinutes", "number", true, { min: 1, max: 1440 }),
       select("category", ["diagnosis", "treatment", "training"], true),
+      localized("description"),
+      f("priceMinor", "money", false, { min: 0 }),
+      f("image", "text"),
+      select("status", ["active", "archived"]),
     ],
   },
   {

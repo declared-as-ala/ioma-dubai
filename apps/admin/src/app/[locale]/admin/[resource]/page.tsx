@@ -86,6 +86,8 @@ export default async function Page({
   // Inventory is edited per product (Variants / Inventory cards), not as a separate page.
   if (["inventory", "stock-movements"].includes(resource)) notFound();
   if (REMOVED.includes(resource)) notFound();
+  // Partners are managed as Professionals now (one business, one record).
+  if (resource === "partners") redirect(`/${locale}/admin/professional-accounts`);
 
   if (resource === "roles" || resource === "settings")
     return <AdminSystem section={resource} />;

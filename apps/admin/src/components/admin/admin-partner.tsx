@@ -658,7 +658,7 @@ export function AdminPartnerDetail({ id }: { id: string }) {
   return (
     <div className="mx-auto max-w-[1100px] space-y-4">
       <Link
-        href="/admin/partners"
+        href="/admin/professional-accounts"
         className="pl-link inline-flex items-center gap-1 text-[13px]"
       >
         <ArrowLeft className="size-4 rtl:rotate-180" aria-hidden /> {t("back")}

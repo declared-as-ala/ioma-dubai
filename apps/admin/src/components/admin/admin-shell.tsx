@@ -107,8 +107,16 @@ const NAV: NavGroup[] = [
     title: "Professional / B2B",
     icon: UserCheck,
     items: [
-      { label: "Professionals", href: "/admin/professional-accounts" },
-      { label: "B2B leads", href: "/admin/b2b-leads", also: ["/admin/professionals"] },
+      {
+        label: "Professionals",
+        href: "/admin/professional-accounts",
+        also: ["/admin/partners"],
+      },
+      {
+        label: "Partner applications (B2B leads)",
+        href: "/admin/b2b-leads",
+        also: ["/admin/professionals"],
+      },
       { label: "B2B Orders", href: "/admin/orders?type=b2b" },
       { label: "Professional Pricing", href: "/admin/products?visibility=both" },
       { label: "Cabin Products", href: "/admin/products?visibility=b2b_cabin" },
@@ -116,19 +124,12 @@ const NAV: NavGroup[] = [
       { label: "Cabin gallery", href: "/admin/pro-gallery" },
       { label: "Pro benefits", href: "/admin/pro-benefits" },
       { label: "Pro documents", href: "/admin/pro-documents" },
-      { label: "B2B settings", href: "/admin/b2b-settings" },
-    ],
-  },
-  {
-    title: "Partners & Spas",
-    icon: MapPin,
-    items: [
-      { label: "Partners", href: "/admin/partners" },
       {
         label: "Services & Treatments",
         href: "/admin/services",
         also: ["/admin/treatments"],
       },
+      { label: "B2B settings", href: "/admin/b2b-settings" },
     ],
   },
   {

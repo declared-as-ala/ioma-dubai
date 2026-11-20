@@ -62,6 +62,14 @@ export class ProfessionalProfile {
   @Prop({ type: Types.ObjectId, ref: "PriceList", default: null })
   priceListId!: Types.ObjectId | null;
 
+  /**
+   * The public business profile (partners collection) of this professional. Professionals and
+   * partners are one business: this is the stable link between the B2B identity and the public
+   * listing. null = no public profile yet. Public visibility stays on the partner (status).
+   */
+  @Prop({ type: Types.ObjectId, ref: "Partner", default: null })
+  partnerId!: Types.ObjectId | null;
+
   @Prop({
     type: [{ userId: { type: Types.ObjectId, ref: "User" }, role: String }],
     default: [],
@@ -72,3 +80,8 @@ export class ProfessionalProfile {
 export const ProfessionalProfileSchema =
   SchemaFactory.createForClass(ProfessionalProfile);
 ProfessionalProfileSchema.index({ status: 1 });
+// One partner profile per professional (several nulls allowed).
+ProfessionalProfileSchema.index(
+  { partnerId: 1 },
+  { unique: true, partialFilterExpression: { partnerId: { $type: "objectId" } } },
+);
