@@ -10,6 +10,25 @@ import { AuditService } from "../audit/audit.service";
 import { UsersService } from "../users/users.service";
 import { ProAccessService } from "./pro-access.service";
 
+// What a partner may change on their own public profile without review.
+export const SELF_FIELDS = [
+  "description",
+  "openingHours",
+  "phone",
+  "whatsapp",
+  "email",
+  "website",
+] as const;
+// Changes that need an IOMA admin decision (identity, location, listing category).
+export const REVIEW_FIELDS = [
+  "name",
+  "address",
+  "city",
+  "emirate",
+  "coordinates",
+  "type",
+] as const;
+
 type Row = Record<string, any>;
 
 export interface HubQuery {
@@ -479,5 +498,108 @@ export class ProfessionalHubService {
       )
       .sort({ name: 1 })
       .toArray()) as Row[];
+  }
+
+  // ------------------------------------------------------------------ partner self-service
+
+  private async myProfile(userId: string, roles: string[]) {
+    await this.access.assertLevel(userId, roles, "validated");
+    const profile = (await this.col("professionalprofiles").findOne({
+      userId: new Types.ObjectId(userId),
+      status: "approved",
+    })) as Row | null;
+    if (!profile) throw new NotFoundException("No professional profile.");
+    const partner = (await this.col("partners").findOne(
+      profile.partnerId
+        ? { _id: profile.partnerId }
+        : { professionalProfileId: profile._id },
+    )) as Row | null;
+    return { profile, partner };
+  }
+
+  async getMyBusiness(userId: string, roles: string[]) {
+    const { profile, partner } = await this.myProfile(userId, roles);
+    return {
+      companyName: profile.companyName,
+      hasPublicProfile: !!partner,
+      partner: partner
+        ? {
+            slug: partner.slug,
+            visible: partner.status === "active",
+            name: partner.name,
+            type: partner.type,
+            description: partner.description ?? { en: "", fr: "", ar: "" },
+            openingHours:
+              typeof partner.openingHours === "string"
+                ? partner.openingHours
+                : (partner.openingHours?.en ?? ""),
+            phone: partner.phone ?? "",
+            whatsapp: partner.whatsapp ?? "",
+            email: partner.email ?? "",
+            website: partner.website ?? "",
+            address: partner.address ?? "",
+            city: partner.city ?? "",
+            emirate: partner.emirate ?? "",
+          }
+        : null,
+      pendingChange: partner?.pendingChange ?? null,
+    };
+  }
+
+  /**
+   * Non-sensitive fields are applied at once. Sensitive ones are queued for admin approval and the
+   * public profile keeps showing the approved values until then.
+   */
+  async updateMyBusiness(
+    userId: string,
+    roles: string[],
+    input: Record<string, unknown>,
+  ) {
+    const { profile, partner } = await this.myProfile(userId, roles);
+    if (!partner) throw new BadRequestException("Your public profile is not set up yet.");
+    const set: Row = {};
+    const review: Row = {};
+    for (const k of SELF_FIELDS) if (k in input) set[k] = input[k];
+    for (const k of REVIEW_FIELDS) {
+      if (!(k in input)) continue;
+      if (JSON.stringify(input[k]) !== JSON.stringify(partner[k])) review[k] = input[k];
+    }
+    const applied = Object.keys(set);
+    const pending = Object.keys(review);
+    const update: Row = { ...set, updatedAt: new Date() };
+    if (pending.length)
+      update.pendingChange = { fields: review, requestedAt: new Date() };
+    await this.col("partners").updateOne({ _id: partner._id }, { $set: update });
+    await this.audit.recordEvent({
+      actorId: userId,
+      actorEmail: String((await this.users.findById(userId))?.email ?? ""),
+      action: "partner.profile.self_updated",
+      resource: "professionals",
+      resourceId: String(profile._id),
+      details: { applied, pendingReview: pending },
+    });
+    return { applied, pendingReview: pending };
+  }
+
+  async resolvePendingChange(
+    actor: { sub: string; email: string },
+    partnerId: string,
+    action: "approve" | "reject",
+  ) {
+    const partner = (await this.col("partners").findOne({
+      _id: oid(partnerId),
+    })) as Row | null;
+    if (!partner) throw new NotFoundException("Partner profile not found.");
+    if (!partner.pendingChange)
+      throw new BadRequestException("There is no pending change to review.");
+    const fields = (partner.pendingChange.fields ?? {}) as Row;
+    const $set: Row = { pendingChange: null, updatedAt: new Date() };
+    if (action === "approve")
+      for (const k of REVIEW_FIELDS) if (k in fields) $set[k] = fields[k];
+    await this.col("partners").updateOne({ _id: partner._id }, { $set });
+    await this.event(actor, `admin.partner.change.${action}d`, partnerId, {
+      fields: Object.keys(fields),
+    });
+    return { resolved: action };
   }
 }

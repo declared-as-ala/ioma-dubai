@@ -217,6 +217,13 @@ export function AdminProfessionalDetail({ keyParam }: { keyParam: string }) {
                         )}
                       </div>
                     </Card>
+                    {partner?.pendingChange && (
+                      <PendingChangeCard
+                        partner={partner}
+                        manage={manage}
+                        onDone={refresh}
+                      />
+                    )}
                     {p && (
                       <PublicProfileLink
                         profileId={String(p._id)}
@@ -536,6 +543,79 @@ export function AdminProfessionalDetail({ keyParam }: { keyParam: string }) {
           })()}
       </AdminQueryState>
     </div>
+  );
+}
+
+/** Sensitive edits the partner requested from the portal: approve applies them, reject discards. */
+function PendingChangeCard({
+  partner,
+  manage,
+  onDone,
+}: {
+  partner: Row;
+  manage: boolean;
+  onDone: () => void;
+}) {
+  const fmt = useAdminFormat();
+  const fields = (partner.pendingChange?.fields ?? {}) as Row;
+  const resolve = useMutation({
+    mutationFn: (action: "approve" | "reject") =>
+      apiFetch("/admin/hub/pending-change", {
+        method: "POST",
+        body: JSON.stringify({ partnerId: String(partner._id), action }),
+      }),
+    onSuccess: onDone,
+  });
+  const show = (v: unknown) =>
+    v && typeof v === "object" ? JSON.stringify(v) : String(v ?? "—");
+  return (
+    <Card title="Change requested by the partner" className="lg:col-span-2">
+      <div className="space-y-3 p-4 text-[13px]">
+        <p>
+          Requested {fmt.date(partner.pendingChange.requestedAt, true)}. The public
+          profile keeps its current values until you approve.
+        </p>
+        <table className="pl-table">
+          <thead>
+            <tr>
+              <th>Field</th>
+              <th>Current</th>
+              <th>Requested</th>
+            </tr>
+          </thead>
+          <tbody>
+            {Object.entries(fields).map(([k, v]) => (
+              <tr key={k}>
+                <td>{label(k)}</td>
+                <td>{show(partner[k])}</td>
+                <td>
+                  <strong>{show(v)}</strong>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {manage && (
+          <div className="flex gap-2">
+            <Button
+              variant="primary"
+              disabled={resolve.isPending}
+              onClick={() => resolve.mutate("approve")}
+            >
+              Approve change
+            </Button>
+            <Button disabled={resolve.isPending} onClick={() => resolve.mutate("reject")}>
+              Reject
+            </Button>
+          </div>
+        )}
+        {resolve.isError && (
+          <p role="alert" style={{ color: "var(--pl-critical)" }}>
+            Could not complete the action.
+          </p>
+        )}
+      </div>
+    </Card>
   );
 }
 

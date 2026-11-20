@@ -95,6 +95,10 @@ export class Partner {
   @Prop({ type: Boolean, default: false })
   diagnosisAvailable!: boolean;
 
+  /** Sensitive edits requested by the partner themselves, waiting for an admin decision. */
+  @Prop({ type: Object, default: null })
+  pendingChange!: { fields: Record<string, unknown>; requestedAt: Date } | null;
+
   @Prop({
     type: String,
     default: "active",

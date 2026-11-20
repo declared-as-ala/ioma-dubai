@@ -21,7 +21,10 @@ import { AuthModule } from "../auth/auth.module";
 import { ProfessionalService } from "./professional.service";
 import { ProfessionalController } from "./professional.controller";
 import { ProfessionalHubService } from "./professional-hub.service";
-import { ProfessionalHubController } from "./professional-hub.controller";
+import {
+  ProfessionalBusinessController,
+  ProfessionalHubController,
+} from "./professional-hub.controller";
 import { AuditModule } from "../audit/audit.module";
 import { UsersModule } from "../users/users.module";
 import { DocumentsModule } from "../documents/documents.module";
@@ -41,7 +44,12 @@ import { DocumentsModule } from "../documents/documents.module";
     AuthModule,
     AuditModule,
   ],
-  controllers: [ProfessionalController, ProAccessController, ProfessionalHubController],
+  controllers: [
+    ProfessionalController,
+    ProAccessController,
+    ProfessionalHubController,
+    ProfessionalBusinessController,
+  ],
   providers: [ProfessionalService, ProAccessService, ProfessionalHubService],
   exports: [MongooseModule, ProfessionalService, ProAccessService],
 })

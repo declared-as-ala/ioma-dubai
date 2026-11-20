@@ -7,6 +7,7 @@ import {
   FlaskConical,
   Gift,
   ImageIcon,
+  Building2,
   LayoutGrid,
   Lock,
   LogOut,
@@ -66,6 +67,15 @@ const NAV: NavItem[] = [
     lockedUntilOrder: true,
   },
   { href: "/portal/documents", label: SHELL.nav.documents, icon: FileText },
+  {
+    href: "/portal/business",
+    label: {
+      en: "Business profile",
+      fr: "Profil de l'établissement",
+      ar: "ملف المؤسسة",
+    },
+    icon: Building2,
+  },
 ];
 
 function ContactBox({ access }: { access: ProAccess }) {
@@ -74,7 +84,7 @@ function ContactBox({ access }: { access: ProAccess }) {
   const contact = isCustomer ? access.accountContact : access.teamContact;
   return (
     <div className="rounded-xl bg-sf-champagne/10 p-4 text-sm">
-      <p className="text-[0.62rem] font-semibold uppercase tracking-[0.18em] text-[#4a3f8f]/80">
+      <p className="text-[0.62rem] font-semibold uppercase tracking-[0.18em] text-[#6f5a36]/80">
         {isCustomer ? tx(SHELL.yourContact) : tx(SHELL.help)}
       </p>
       {contact ? (
@@ -124,7 +134,7 @@ export function ProShell({ children }: { children: React.ReactNode }) {
   if (!hydrated || !user || access.isLoading) {
     return (
       <div
-        className="grid min-h-screen place-items-center bg-[#f8f7fd]"
+        className="grid min-h-screen place-items-center bg-[#faf7f1]"
         role="status"
         aria-label={tx(SHELL.loading)}
       >
@@ -132,7 +142,7 @@ export function ProShell({ children }: { children: React.ReactNode }) {
           <p className="font-display text-2xl tracking-wide">
             ioma <span className="text-xs tracking-[0.3em]">PARIS</span>
           </p>
-          <div className="ioma-bar mx-auto text-[#5b4fd6]" />
+          <div className="ioma-bar mx-auto text-[#9c8157]" />
           <p className="text-xs text-muted-foreground">{tx(SHELL.loading)}</p>
         </div>
       </div>
@@ -142,7 +152,7 @@ export function ProShell({ children }: { children: React.ReactNode }) {
   const data = access.data;
   if (access.isError || !data || data.level === "visitor") {
     return (
-      <main className="grid min-h-screen place-items-center bg-[#f8f7fd] px-4">
+      <main className="grid min-h-screen place-items-center bg-[#faf7f1] px-4">
         <div className="max-w-md text-center">
           <p className="font-display text-2xl tracking-wide">
             ioma <span className="text-xs tracking-[0.3em]">PARIS</span>
@@ -169,7 +179,7 @@ export function ProShell({ children }: { children: React.ReactNode }) {
         );
 
   return (
-    <div className="min-h-screen bg-[#f8f7fd] text-foreground">
+    <div className="min-h-screen bg-[#faf7f1] text-foreground">
       <header className="sticky top-0 z-30 border-b border-border bg-white">
         <div className="flex h-14 items-center gap-3 px-4 md:px-6">
           <Link href="/portal" className="flex items-center gap-2" aria-label="IOMA Pro">
@@ -177,7 +187,7 @@ export function ProShell({ children }: { children: React.ReactNode }) {
             <span className="text-[0.6rem] tracking-[0.3em] text-muted-foreground">
               PARIS
             </span>
-            <span className="ms-1 rounded bg-[#5b4fd6] px-1.5 py-0.5 text-[0.6rem] font-bold tracking-wider text-white">
+            <span className="ms-1 rounded border border-[#bfa273] px-1.5 py-0.5 text-[0.6rem] font-semibold tracking-[0.2em] text-[#8c7347]">
               {SHELL.badge}
             </span>
           </Link>
@@ -263,7 +273,7 @@ export function ProShell({ children }: { children: React.ReactNode }) {
                       : "text-foreground/75 hover:bg-sf-champagne/10",
                   )}
                 >
-                  <item.icon className="size-[18px] text-[#5b4fd6]" aria-hidden />
+                  <item.icon className="size-[18px] text-[#9c8157]" aria-hidden />
                   <span className="flex-1">{tx(item.label)}</span>
                   {item.lockedUntilOrder && !customer && (
                     <Lock

@@ -75,7 +75,7 @@ export function ProCard({
   children: React.ReactNode;
 }) {
   return (
-    <section className={cn("rounded-xl border border-border bg-white", className)}>
+    <section className={cn("rounded-2xl border border-[#e8e1d4] bg-white", className)}>
       {children}
     </section>
   );
@@ -91,7 +91,7 @@ export function Chip({
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-md bg-sf-champagne/15 px-2 py-1 text-[0.62rem] font-semibold uppercase tracking-[0.14em] text-[#4a3f8f]",
+        "inline-flex items-center rounded-full bg-sf-champagne/15 px-2 py-1 text-[0.62rem] font-semibold uppercase tracking-[0.14em] text-[#6f5a36]",
         className,
       )}
     >
@@ -102,7 +102,7 @@ export function Chip({
 
 export function LockPill({ children }: { children: React.ReactNode }) {
   return (
-    <span className="inline-flex items-center gap-1.5 text-[0.62rem] font-semibold uppercase tracking-[0.14em] text-[#4a3f8f]/70">
+    <span className="inline-flex items-center gap-1.5 text-[0.62rem] font-semibold uppercase tracking-[0.14em] text-[#6f5a36]/70">
       <Lock className="size-3" aria-hidden />
       {children}
     </span>
@@ -110,9 +110,9 @@ export function LockPill({ children }: { children: React.ReactNode }) {
 }
 
 export const primaryBtn =
-  "inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-[#5b4fd6] px-6 text-xs font-semibold uppercase tracking-wider text-white transition-colors hover:bg-[#4a3f8f] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5b4fd6] disabled:opacity-50";
+  "inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-[#1a1a1d] px-6 text-xs font-semibold uppercase tracking-wider text-white transition-colors hover:bg-[#8c7347] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#bfa273] disabled:opacity-50";
 export const outlineBtn =
-  "inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-[#5b4fd6]/40 bg-white px-6 text-xs font-semibold uppercase tracking-wider text-foreground transition-colors hover:bg-sf-champagne/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5b4fd6] disabled:opacity-50";
+  "inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-[#bfa273]/60 bg-white px-6 text-xs font-semibold uppercase tracking-wider text-foreground transition-colors hover:bg-sf-champagne/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#bfa273] disabled:opacity-50";
 
 /**
  * Thumbnail of locked content: the (intentionally low-resolution) preview, blurred, with a
@@ -145,7 +145,7 @@ export function BlurThumb({
       {locked && (
         <span className="absolute inset-0 grid place-items-center bg-white/10">
           <span className="grid size-11 place-items-center rounded-full bg-white shadow-sm">
-            <Lock className="size-5 text-[#5b4fd6]" aria-label="Locked" />
+            <Lock className="size-5 text-[#9c8157]" aria-label="Locked" />
           </span>
         </span>
       )}
@@ -170,13 +170,13 @@ export function UnlockBanner({
   return (
     <div
       className={cn(
-        "flex flex-wrap items-center justify-between gap-4 rounded-xl border border-[#5b4fd6]/20 bg-sf-champagne/10 p-5",
+        "flex flex-wrap items-center justify-between gap-4 rounded-xl border border-[#bfa273]/30 bg-sf-champagne/10 p-5",
         className,
       )}
     >
       <div className="min-w-0">
         <p className="flex items-center gap-2 text-sm font-semibold text-foreground">
-          <Lock className="size-4 text-[#5b4fd6]" aria-hidden />
+          <Lock className="size-4 text-[#9c8157]" aria-hidden />
           {tx(LOCK.unlockedByFirst)}
         </p>
         <p className="mt-1 text-xs text-muted-foreground">{tx(rule)}</p>

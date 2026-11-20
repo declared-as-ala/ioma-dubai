@@ -69,8 +69,8 @@ function Tabs({
           className={cn(
             "min-h-11 rounded-lg border px-5 text-xs font-semibold uppercase tracking-wider transition-colors",
             value === t.key
-              ? "border-[#5b4fd6] bg-[#5b4fd6] text-white"
-              : "border-border bg-white hover:border-[#5b4fd6]/50",
+              ? "border-[#1a1a1d] bg-[#1a1a1d] text-white"
+              : "border-border bg-white hover:border-[#1a1a1d]/50",
           )}
         >
           {t.label}
@@ -110,7 +110,7 @@ export function ProVideos() {
         />
       )}
       {!customer && (
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#4a3f8f]/80">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#6f5a36]/80">
           {tx(VIDEOS.preview)}
         </p>
       )}
@@ -134,7 +134,7 @@ export function ProVideos() {
               >
                 <BlurThumb src={v.preview} locked={v.locked}>
                   <span className="absolute inset-0 grid place-items-center">
-                    <span className="grid size-12 place-items-center rounded-full bg-[#5b4fd6] text-white shadow">
+                    <span className="grid size-12 place-items-center rounded-full bg-[#1a1a1d] text-white shadow">
                       <Play
                         className="size-5 translate-x-0.5 rtl:-scale-x-100"
                         aria-hidden
@@ -287,7 +287,7 @@ export function ProBenefits() {
           const inner = (
             <>
               <div className="flex items-start justify-between gap-3">
-                <Icon className="size-6 text-[#5b4fd6]" aria-hidden />
+                <Icon className="size-6 text-[#9c8157]" aria-hidden />
                 {customer ? (
                   <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[0.62rem] font-semibold uppercase tracking-[0.14em] text-emerald-800">
                     {tx(BENEFITS.unlocked)}
@@ -325,7 +325,7 @@ export function ProBenefits() {
             <Link
               key={c.key}
               href={c.href}
-              className="rounded-xl border border-border bg-white p-6 transition-colors hover:border-[#5b4fd6]/50"
+              className="rounded-xl border border-border bg-white p-6 transition-colors hover:border-[#1a1a1d]/50"
             >
               {inner}
             </Link>
@@ -350,7 +350,7 @@ export function ProBenefits() {
             )}
           >
             <div className="flex items-start justify-between gap-3">
-              <Gift className="size-6 text-[#5b4fd6]" aria-hidden />
+              <Gift className="size-6 text-[#9c8157]" aria-hidden />
               {customer ? (
                 <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[0.62rem] font-semibold uppercase tracking-[0.14em] text-emerald-800">
                   {tx(BENEFITS.unlocked)}
@@ -398,7 +398,7 @@ export function ProDocuments() {
               <div className="flex min-w-0 items-center gap-4">
                 <FileText
                   className={cn(
-                    "size-5 shrink-0 text-[#5b4fd6]",
+                    "size-5 shrink-0 text-[#9c8157]",
                     d.locked && "opacity-50",
                   )}
                   aria-hidden
@@ -494,7 +494,7 @@ export function ProOrders() {
                     <td className="px-5 py-4 text-end">
                       <Link
                         href={`/portal/orders/${o.orderNumber}`}
-                        className="text-xs font-semibold uppercase tracking-wider text-[#5b4fd6] hover:underline"
+                        className="text-xs font-semibold uppercase tracking-wider text-[#9c8157] hover:underline"
                       >
                         {tx(OVERVIEW.view)}
                       </Link>

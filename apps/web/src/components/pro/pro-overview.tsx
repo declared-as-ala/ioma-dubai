@@ -148,9 +148,9 @@ export default function ProOverview() {
                       className={cn(
                         "grid size-7 place-items-center rounded-full border text-[0.7rem] font-semibold",
                         stepState[i]
-                          ? "border-[#5b4fd6] bg-[#5b4fd6] text-white"
+                          ? "border-[#1a1a1d] bg-[#1a1a1d] text-white"
                           : i === 1
-                            ? "border-[#5b4fd6] bg-[#5b4fd6] text-white"
+                            ? "border-[#1a1a1d] bg-[#1a1a1d] text-white"
                             : "border-border text-muted-foreground",
                       )}
                     >
@@ -179,13 +179,13 @@ export default function ProOverview() {
               key={c.key}
               href={c.href}
               className={cn(
-                "group rounded-xl border border-border bg-white p-6 transition-colors hover:border-[#5b4fd6]/50",
+                "group rounded-xl border border-border bg-white p-6 transition-colors hover:border-[#1a1a1d]/50",
                 locked && "bg-white/60",
               )}
             >
               <div className="flex items-start justify-between gap-3">
                 <c.icon
-                  className={cn("size-6 text-[#5b4fd6]", locked && "opacity-60")}
+                  className={cn("size-6 text-[#9c8157]", locked && "opacity-60")}
                   aria-hidden
                 />
                 {locked && <LockPill>{tx(OVERVIEW.cards.firstOrder)}</LockPill>}
@@ -228,7 +228,7 @@ export default function ProOverview() {
             >
               <BlurThumb src={v.preview} locked={v.locked}>
                 <span className="absolute inset-0 grid place-items-center">
-                  <span className="grid size-12 place-items-center rounded-full bg-[#5b4fd6] text-white shadow">
+                  <span className="grid size-12 place-items-center rounded-full bg-[#1a1a1d] text-white shadow">
                     <Play
                       className="size-5 translate-x-0.5 rtl:-scale-x-100"
                       aria-hidden
@@ -290,7 +290,7 @@ export default function ProOverview() {
                       <td className="px-5 py-4 text-end">
                         <Link
                           href={`/portal/orders/${o.orderNumber}`}
-                          className="text-xs font-semibold uppercase tracking-wider text-[#5b4fd6] hover:underline"
+                          className="text-xs font-semibold uppercase tracking-wider text-[#9c8157] hover:underline"
                         >
                           {tx(OVERVIEW.view)}
                         </Link>

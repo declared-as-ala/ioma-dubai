@@ -1,4 +1,13 @@
-import { Body, Controller, Get, Param, Post, Query, UseGuards } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+  UseGuards,
+} from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
 import { z } from "zod";
 import { BadRequestException } from "@nestjs/common";
@@ -61,6 +70,16 @@ export class ProfessionalHubController {
     return this.hub.unlink(user, b.profileId);
   }
 
+  @Post("pending-change")
+  pending(@CurrentUser() user: JwtPayload, @Body() body: unknown) {
+    requirePermission(user, "b2b.manage");
+    const b = parse(
+      z.object({ partnerId: id, action: z.enum(["approve", "reject"]) }).strict(),
+      body,
+    );
+    return this.hub.resolvePendingChange(user, b.partnerId, b.action);
+  }
+
   @Post("visibility")
   visibility(@CurrentUser() user: JwtPayload, @Body() body: unknown) {
     requirePermission(user, "b2b.manage");
@@ -86,5 +105,69 @@ export class ProfessionalHubController {
       body,
     );
     return this.hub.assignPriceList(user, b.profileId, b.priceListId);
+  }
+}
+
+const local = z
+  .object({
+    en: z.string().trim().max(3000),
+    fr: z.string().trim().max(3000).optional(),
+    ar: z.string().trim().max(3000),
+  })
+  .strict();
+const opt = (max: number) => z.union([z.literal(""), z.string().trim().max(max)]);
+
+/** A professional managing their own public profile (IOMA PRO portal). */
+@ApiTags("professional-business")
+@UseGuards(JwtAuthGuard)
+@Controller("professional/me/business")
+export class ProfessionalBusinessController {
+  constructor(private readonly hub: ProfessionalHubService) {}
+
+  @Get()
+  get(@CurrentUser() user: JwtPayload) {
+    return this.hub.getMyBusiness(user.sub, user.roles);
+  }
+
+  @Patch()
+  update(@CurrentUser() user: JwtPayload, @Body() body: unknown) {
+    const input = parse(
+      z
+        .object({
+          description: local.optional(),
+          openingHours: opt(300).nullable().optional(),
+          phone: z.string().trim().min(5).max(40).optional(),
+          whatsapp: opt(40).nullable().optional(),
+          email: z
+            .union([z.literal(""), z.string().trim().email()])
+            .nullable()
+            .optional(),
+          website: opt(200).nullable().optional(),
+          name: z.string().trim().min(1).max(120).optional(),
+          address: z.string().trim().min(1).max(250).optional(),
+          city: z.string().trim().min(1).max(80).optional(),
+          emirate: z.string().trim().min(1).max(40).optional(),
+          type: z
+            .enum([
+              "spa",
+              "clinic",
+              "beauty_institute",
+              "hotel",
+              "retail",
+              "diagnostic_center",
+              "distributor",
+            ])
+            .optional(),
+          coordinates: z
+            .object({
+              lat: z.number().min(-90).max(90),
+              lng: z.number().min(-180).max(180),
+            })
+            .optional(),
+        })
+        .strict(),
+      body,
+    );
+    return this.hub.updateMyBusiness(user.sub, user.roles, input);
   }
 }

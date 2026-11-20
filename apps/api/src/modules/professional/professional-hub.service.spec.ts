@@ -41,8 +41,15 @@ const id = () => new Types.ObjectId();
 
 function build(data: Record<string, Doc[]>) {
   const audit = { recordEvent: jest.fn().mockResolvedValue({}) };
-  const users = { addRole: jest.fn(), removeRole: jest.fn() };
-  const access = { getAccess: jest.fn().mockResolvedValue({ level: "validated" }) };
+  const users = {
+    addRole: jest.fn(),
+    removeRole: jest.fn(),
+    findById: jest.fn().mockResolvedValue({ email: "owner@example.com" }),
+  };
+  const access = {
+    getAccess: jest.fn().mockResolvedValue({ level: "validated" }),
+    assertLevel: jest.fn().mockResolvedValue({ level: "validated" }),
+  };
   const svc = new ProfessionalHubService(
     fakeDb(data) as never,
     users as never,
@@ -149,5 +156,53 @@ describe("ProfessionalHubService", () => {
     const { svc } = build({ professionalprofiles: [], partners: [] });
     await expect(svc.detail(`p:${id()}`)).rejects.toBeInstanceOf(NotFoundException);
     await expect(svc.detail("zz:123")).rejects.toBeInstanceOf(NotFoundException);
+  });
+
+  describe("partner self-service", () => {
+    const setup = () => {
+      const userId = id();
+      const partner: Doc = {
+        _id: id(),
+        name: "Old name",
+        city: "Dubai",
+        phone: "+971 1",
+        description: { en: "old" },
+        status: "active",
+        pendingChange: null,
+      };
+      const profile = { _id: id(), userId, status: "approved", partnerId: partner._id };
+      return {
+        userId,
+        partner,
+        profile,
+        ...build({ professionalprofiles: [profile], partners: [partner] }),
+      };
+    };
+
+    it("applies non-sensitive edits at once and queues sensitive ones for review", async () => {
+      const { svc, userId, partner } = setup();
+      const res = await svc.updateMyBusiness(String(userId), ["professional_approved"], {
+        phone: "+971 2",
+        name: "New name",
+      });
+      expect(res).toEqual({ applied: ["phone"], pendingReview: ["name"] });
+      expect(partner.phone).toBe("+971 2");
+      expect(partner.name).toBe("Old name"); // public name unchanged until approved
+      expect(partner.pendingChange.fields).toEqual({ name: "New name" });
+    });
+
+    it("admin approval applies the queued change; rejection discards it", async () => {
+      const { svc, userId, partner } = setup();
+      await svc.updateMyBusiness(String(userId), [], { name: "New name" });
+      await svc.resolvePendingChange(actor, String(partner._id), "reject");
+      expect(partner.name).toBe("Old name");
+      expect(partner.pendingChange).toBeNull();
+      await svc.updateMyBusiness(String(userId), [], { city: "Abu Dhabi" });
+      await svc.resolvePendingChange(actor, String(partner._id), "approve");
+      expect(partner.city).toBe("Abu Dhabi");
+      await expect(
+        svc.resolvePendingChange(actor, String(partner._id), "approve"),
+      ).rejects.toThrow("no pending change");
+    });
   });
 });

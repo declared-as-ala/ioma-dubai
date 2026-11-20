@@ -95,8 +95,8 @@ export default function ProShop() {
                   className={cn(
                     "min-h-11 rounded-lg border px-5 text-xs font-semibold uppercase tracking-wider transition-colors",
                     tab === key && !range
-                      ? "border-[#5b4fd6] bg-[#5b4fd6] text-white"
-                      : "border-border bg-white text-foreground hover:border-[#5b4fd6]/50",
+                      ? "border-[#1a1a1d] bg-[#1a1a1d] text-white"
+                      : "border-border bg-white text-foreground hover:border-[#1a1a1d]/50",
                   )}
                 >
                   {tx(label)}
@@ -113,7 +113,7 @@ export default function ProShop() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder={tx(SHOP.search)}
-                className="h-11 w-full rounded-lg border border-border bg-white ps-9 pe-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-[#5b4fd6]"
+                className="h-11 w-full rounded-lg border border-border bg-white ps-9 pe-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-[#1a1a1d]"
               />
             </label>
           </div>
@@ -122,7 +122,7 @@ export default function ProShop() {
             <button
               type="button"
               onClick={() => setRange(null)}
-              className="text-xs font-semibold uppercase tracking-wider text-[#5b4fd6] hover:underline"
+              className="text-xs font-semibold uppercase tracking-wider text-[#9c8157] hover:underline"
             >
               ← {tx(SHOP.tabs.ranges)}
             </button>
@@ -136,12 +136,12 @@ export default function ProShop() {
                     key={r.slug}
                     type="button"
                     onClick={() => setRange(r.slug)}
-                    className="flex min-h-24 items-center justify-between rounded-xl border border-border bg-white px-6 text-start transition-colors hover:border-[#5b4fd6]/50"
+                    className="flex min-h-24 items-center justify-between rounded-xl border border-border bg-white px-6 text-start transition-colors hover:border-[#1a1a1d]/50"
                   >
                     <span className="font-display text-xl">
                       {r.name[loc] || r.name.en}
                     </span>
-                    <span className="text-xs font-semibold uppercase tracking-wider text-[#5b4fd6]">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-[#9c8157]">
                       {tx(SHOP.browse)} →
                     </span>
                   </button>
