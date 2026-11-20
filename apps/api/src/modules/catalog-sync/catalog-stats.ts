@@ -17,6 +17,9 @@ export interface StatsProduct {
   seo?: { title?: { en?: string | null } | null } | null;
   categoryIds?: unknown[] | null;
   rangeId?: unknown;
+  concernIds?: unknown[] | null;
+  skinTypeIds?: unknown[] | null;
+  productType?: string | null;
   source?: { externalId?: string | null; status?: string | null } | null;
 }
 export interface StatsVariant extends HealthVariant {
@@ -42,6 +45,15 @@ export interface CatalogStats {
     noVariant: number;
   };
   integrity: { orphanVariants: number; duplicateSkus: number };
+  /** Gaps among products sold in the public shop (cabin-only products are not browsed by customers). */
+  classification: {
+    retailProducts: number;
+    noRange: number;
+    noCategory: number;
+    noProductType: number;
+    noSkinType: number;
+    noConcern: number;
+  };
   franceLinked: number;
   syncConflicts: number;
 }
@@ -81,6 +93,14 @@ export function computeCatalogStats(
       orphanVariants: variants.filter((v) => !ids.has(String(v.productId))).length,
       duplicateSkus: [...skuCount.values()].filter((n) => n > 1).length,
     },
+    classification: {
+      retailProducts: 0,
+      noRange: 0,
+      noCategory: 0,
+      noProductType: 0,
+      noSkinType: 0,
+      noConcern: 0,
+    },
     franceLinked: 0,
     syncConflicts: 0,
   };
@@ -94,6 +114,15 @@ export function computeCatalogStats(
     if (ch.retail) s.retailEnabled++;
     if (ch.b2b) s.b2bEnabled++;
     if (ch.cabin) s.cabinEnabled++;
+    if (ch.retail) {
+      const c = s.classification;
+      c.retailProducts++;
+      if (!p.rangeId) c.noRange++;
+      if (!p.categoryIds?.length) c.noCategory++;
+      if (!p.productType) c.noProductType++;
+      if (!p.skinTypeIds?.length) c.noSkinType++;
+      if (!p.concernIds?.length) c.noConcern++;
+    }
 
     const miss = missingPrices(p.visibility, vs);
     for (const c of miss) s.missingPrices[c]++;

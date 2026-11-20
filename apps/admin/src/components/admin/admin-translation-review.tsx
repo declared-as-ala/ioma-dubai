@@ -1,9 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiFetch } from "@/lib/api";
-import { useAdminQuery } from "@/hooks/use-admin";
 import { Badge, Button, Card, Checkbox, Textarea } from "./polaris";
 
 interface FieldRow {
@@ -47,7 +46,12 @@ export function TranslationReviewCard({
   readOnly: boolean;
   onApplied: () => void;
 }) {
-  const q = useAdminQuery<Review>(`catalog-sync/translations/${productId}`, !!productId);
+  const q = useQuery({
+    queryKey: ["catalog-sync", "translations", productId],
+    queryFn: () => apiFetch<Review>(`/catalog-sync/translations/${productId}`),
+    enabled: !!productId,
+    retry: false,
+  });
   const [edit, setEdit] = useState<Record<string, string>>({});
   const [chosen, setChosen] = useState<Set<string>>(new Set());
 

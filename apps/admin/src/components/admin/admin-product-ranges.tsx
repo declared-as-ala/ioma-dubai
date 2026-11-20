@@ -69,12 +69,10 @@ export function AdminProductRanges() {
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="pl-card-title !mb-0 !text-[15px]">
-            Product Ranges (Gammes 1 - 7)
-          </h2>
+          <h2 className="pl-card-title !mb-0 !text-[15px]">IOMA ranges</h2>
           <p className="pl-help !mt-0">
-            Manage the 7 official IOMA charter ranges, official range colors, hero
-            imagery, and clinical descriptions.
+            The IOMA collections (Hydra, Energize, Renew...). Open one to edit its text
+            and image.
           </p>
         </div>
       </div>

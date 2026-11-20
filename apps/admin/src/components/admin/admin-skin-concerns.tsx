@@ -103,9 +103,9 @@ export function AdminSkinConcerns() {
             <Sparkles className="size-3.5 text-ioma-violet" />
             <span>Clinical Taxonomy</span>
           </div>
-          <h1 className="mt-1 text-2xl font-semibold text-neutral-900">
+          <h2 className="mt-1 text-lg font-semibold text-neutral-900">
             Skin Concerns Management
-          </h1>
+          </h2>
           <p className="mt-1 text-xs text-neutral-600">
             Manage target clinical concerns used across Shop Filters, Mega Menus, and
             Personalized Skincare recommendations.

@@ -795,6 +795,9 @@ export class CatalogSyncService {
             "seo.title": 1,
             categoryIds: 1,
             rangeId: 1,
+            concernIds: 1,
+            skinTypeIds: 1,
+            productType: 1,
             source: 1,
           },
         )

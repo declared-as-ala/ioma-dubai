@@ -5,9 +5,7 @@ export default function Page() {
   return (
     <Suspense
       fallback={
-        <div className="p-8 text-center text-xs text-neutral-500">
-          Loading Product Organization Hub...
-        </div>
+        <div className="p-8 text-center text-xs text-neutral-500">Loading...</div>
       }
     >
       <AdminProductOrganization />

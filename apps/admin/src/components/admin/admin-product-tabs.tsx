@@ -4,7 +4,8 @@ import { Info } from "lucide-react";
 import { stockState, type StockState } from "@ioma/config";
 import { Card, Badge, Checkbox, Input } from "./polaris";
 import { DataTable } from "./polaris";
-import { useAdminQuery } from "@/hooks/use-admin";
+import { useQuery } from "@tanstack/react-query";
+import { apiFetch } from "@/lib/api";
 import { useAdminFormat } from "./admin-ui";
 import type { Variant } from "./admin-products";
 
@@ -54,8 +55,8 @@ export function RetailPricingTab({
     return (
       <Card title="Retail pricing">
         <Note>
-          This product is not sold at retail. Choose a sales channel that includes retail
-          (Sales channels, right) to set a public price.
+          This product is not sold at retail. Choose "Website only" or "Website and
+          professionals" under "Where to sell this product" (right) to set a public price.
         </Note>
       </Card>
     );
@@ -390,10 +391,12 @@ interface History {
 
 export function HistoryTab({ productId }: { productId?: string }) {
   const fmt = useAdminFormat();
-  const q = useAdminQuery<History>(
-    `catalog-sync/integrity/history/${productId}`,
-    !!productId,
-  );
+  const q = useQuery({
+    queryKey: ["catalog-sync", "history", productId],
+    queryFn: () => apiFetch<History>(`/catalog-sync/integrity/history/${productId}`),
+    enabled: !!productId,
+    retry: false,
+  });
   if (!productId)
     return (
       <Card title="History">

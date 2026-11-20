@@ -105,9 +105,9 @@ export function AdminSkinTypes() {
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-border pb-5">
         <div>
-          <h1 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
+          <h2 className="text-lg font-semibold tracking-tight text-foreground sm:text-2xl">
             Skin Types Taxonomy
-          </h1>
+          </h2>
           <p className="mt-1 text-sm text-muted-foreground">
             Official skin type suitability profiles imported from IOMA Paris Shopify
             catalog

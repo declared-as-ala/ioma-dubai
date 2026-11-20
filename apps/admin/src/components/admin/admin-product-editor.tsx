@@ -76,27 +76,23 @@ const blank: Local = { en: "", fr: "", ar: "" };
 const productResource = adminResource("products")!;
 const fieldOf = (key: string) => productResource.fields.find((f) => f.key === key)!;
 
-type TabId =
-  | "general"
-  | "media"
-  | "classification"
-  | "retail"
-  | "b2b"
-  | "cabin"
-  | "inventory"
-  | "seo"
-  | "history";
+type TabId = "general" | "media" | "pricing" | "more";
 const TABS: { id: TabId; label: string }[] = [
-  { id: "general", label: "General" },
-  { id: "media", label: "Images & media" },
-  { id: "classification", label: "Categories & classification" },
-  { id: "retail", label: "Retail pricing" },
-  { id: "b2b", label: "Professional / B2B" },
-  { id: "cabin", label: "Cabin" },
-  { id: "inventory", label: "Inventory" },
-  { id: "seo", label: "SEO & translations" },
-  { id: "history", label: "History & audit" },
+  { id: "general", label: "Product" },
+  { id: "media", label: "Photos" },
+  { id: "pricing", label: "Price & stock" },
+  { id: "more", label: "More options" },
 ];
+// Old links (?tab=retail, ?tab=seo...) still land on the right screen.
+const LEGACY_TAB: Record<string, TabId> = {
+  retail: "pricing",
+  b2b: "pricing",
+  cabin: "pricing",
+  inventory: "pricing",
+  classification: "more",
+  seo: "more",
+  history: "more",
+};
 
 const STATUS: { value: string; label: string; tone: "success" | "neutral" }[] = [
   { value: "published", label: "Active", tone: "success" },
@@ -174,8 +170,10 @@ function Editor({ detail, manage }: { detail?: Detail; manage: boolean }) {
   const [tab, setTab] = useState<TabId>(
     () =>
       (typeof window !== "undefined" &&
-        (TABS.find((t) => t.id === new URLSearchParams(window.location.search).get("tab"))
-          ?.id as TabId)) ||
+        (() => {
+          const q = new URLSearchParams(window.location.search).get("tab") ?? "";
+          return TABS.find((t) => t.id === q)?.id ?? LEGACY_TAB[q];
+        })()) ||
       "general",
   );
 
@@ -622,6 +620,26 @@ function Editor({ detail, manage }: { detail?: Detail; manage: boolean }) {
               </Card>
 
               <div>
+                <SectionTitle>Category &amp; range</SectionTitle>
+                <Card>
+                  <div className="space-y-3">
+                    <WorkspaceField
+                      field={fieldOf("rangeId")}
+                      value={values.rangeId}
+                      editing={!readOnly}
+                      disabled={readOnly}
+                      onChange={(v) => set("rangeId", v)}
+                      error={fieldErrors.rangeId}
+                    />
+                    <WorkspaceField
+                      field={fieldOf("categoryIds")}
+                      value={values.categoryIds}
+                      editing={!readOnly}
+                      disabled={readOnly}
+                      onChange={(v) => set("categoryIds", v)}
+                    />
+                  </div>
+                </Card>
                 <SectionTitle>Variants (SKU, size, barcode)</SectionTitle>
                 <Card>
                   {variants.length === 0 ? (
@@ -864,9 +882,9 @@ function Editor({ detail, manage }: { detail?: Detail; manage: boolean }) {
             </>
           )}
 
-          {tab === "classification" && (
+          {tab === "more" && (
             <>
-              <Card title="Product organization">
+              <Card title="Optional details">
                 <div className="space-y-3">
                   <Field label="Product type" htmlFor="p-type">
                     <Input
@@ -884,21 +902,6 @@ function Editor({ detail, manage }: { detail?: Detail; manage: boolean }) {
                       onChange={(e) => set("vendor", e.target.value)}
                     />
                   </Field>
-                  <WorkspaceField
-                    field={fieldOf("rangeId")}
-                    value={values.rangeId}
-                    editing={!readOnly}
-                    disabled={readOnly}
-                    onChange={(v) => set("rangeId", v)}
-                    error={fieldErrors.rangeId}
-                  />
-                  <WorkspaceField
-                    field={fieldOf("categoryIds")}
-                    value={values.categoryIds}
-                    editing={!readOnly}
-                    disabled={readOnly}
-                    onChange={(v) => set("categoryIds", v)}
-                  />
                   <Field label="Tags" htmlFor="p-tags" help="Comma separated">
                     <Input
                       id="p-tags"
@@ -918,7 +921,7 @@ function Editor({ detail, manage }: { detail?: Detail; manage: boolean }) {
                 </div>
               </Card>
 
-              <Card title="Skin intelligence">
+              <Card title="Skin suitability (optional)">
                 <div className="space-y-3">
                   <WorkspaceField
                     field={fieldOf("concernIds")}
@@ -951,7 +954,7 @@ function Editor({ detail, manage }: { detail?: Detail; manage: boolean }) {
             </>
           )}
 
-          {tab === "retail" && (
+          {tab === "pricing" && onlineStore && (
             <RetailPricingTab
               variants={variants}
               update={updateVariant}
@@ -964,33 +967,29 @@ function Editor({ detail, manage }: { detail?: Detail; manage: boolean }) {
             />
           )}
 
-          {tab === "b2b" && (
+          {tab === "pricing" && visibility === "both" && (
             <TradePricingTab
               mode="b2b"
               variants={variants}
               update={updateVariant}
               readOnly={readOnly}
-              enabled={visibility === "both"}
-              elsewhere={
-                visibility === "b2b_cabin"
-                  ? "This is a cabin product. Its professional price is set in the Cabin tab."
-                  : "Professional resale is off. Choose “Retail + professional resale” in Sales channels to set a trade price."
-              }
+              enabled
+              elsewhere=""
             />
           )}
 
-          {tab === "cabin" && (
+          {tab === "pricing" && visibility === "b2b_cabin" && (
             <TradePricingTab
               mode="cabin"
               variants={variants}
               update={updateVariant}
               readOnly={readOnly}
-              enabled={visibility === "b2b_cabin"}
-              elsewhere="This product is not a cabin product. Choose “Professional cabin only” in Sales channels to configure it as one."
+              enabled
+              elsewhere=""
             />
           )}
 
-          {tab === "inventory" && (
+          {tab === "pricing" && (
             <>
               <InventoryTab
                 variants={variants}
@@ -1017,83 +1016,89 @@ function Editor({ detail, manage }: { detail?: Detail; manage: boolean }) {
             </>
           )}
 
-          {tab === "seo" && (
+          {tab === "more" && (
             <>
-              <div>
-                <SectionTitle>Search engine listing</SectionTitle>
-                <Card
-                  footer={
-                    <CardFooterButton
-                      aria-expanded={seoOpen}
-                      onClick={() => setSeoOpen((o) => !o)}
-                    >
-                      {seoOpen ? "Hide SEO fields" : "Edit SEO"}
-                      <ChevronDown
-                        className={seoOpen ? "rotate-180" : undefined}
-                        size={16}
-                      />
-                    </CardFooterButton>
-                  }
-                >
-                  <div className="min-w-0">
-                    <p className="truncate">IOMA Paris</p>
-                    <p className="pl-help !mt-0 truncate">{`ioma-paris.com › shop › ${slug || "…"}`}</p>
-                    <p
-                      className="truncate text-[20px] leading-7"
-                      style={{ color: "var(--pl-accent)" }}
-                    >
-                      {loc("seo.title", lang) || title}
-                    </p>
-                    <p className="pl-help !mt-0 line-clamp-2">
-                      {loc("seo.description", lang) ||
-                        loc("shortBenefit", lang) ||
-                        loc("description", lang).slice(0, 160)}
-                    </p>
-                  </div>
-                  {seoOpen && (
-                    <div className="mt-4 space-y-3">
-                      <Field
-                        label={`SEO title (${lang.toUpperCase()})`}
-                        htmlFor="s-title"
-                        help={`${loc("seo.title", lang).length} of 70 characters used`}
+              {onlineStore && (
+                <div>
+                  <SectionTitle>Search engine listing</SectionTitle>
+                  <Card
+                    footer={
+                      <CardFooterButton
+                        aria-expanded={seoOpen}
+                        onClick={() => setSeoOpen((o) => !o)}
                       >
-                        <Input
-                          id="s-title"
-                          dir={lang === "ar" ? "rtl" : "ltr"}
-                          disabled={readOnly}
-                          value={loc("seo.title", lang)}
-                          onChange={(e) => setLocal("seo.title", lang, e.target.value)}
+                        {seoOpen ? "Hide SEO fields" : "Edit SEO"}
+                        <ChevronDown
+                          className={seoOpen ? "rotate-180" : undefined}
+                          size={16}
                         />
-                      </Field>
-                      <Field
-                        label={`Meta description (${lang.toUpperCase()})`}
-                        htmlFor="s-desc"
-                        help={`${loc("seo.description", lang).length} of 320 characters used`}
+                      </CardFooterButton>
+                    }
+                  >
+                    <div className="min-w-0">
+                      <p className="truncate">IOMA Paris</p>
+                      <p className="pl-help !mt-0 truncate">{`iomaparis.ae › shop › ${slug || "…"}`}</p>
+                      <p
+                        className="truncate text-[20px] leading-7"
+                        style={{ color: "var(--pl-accent)" }}
                       >
-                        <Textarea
-                          id="s-desc"
-                          rows={3}
-                          dir={lang === "ar" ? "rtl" : "ltr"}
-                          disabled={readOnly}
-                          value={loc("seo.description", lang)}
-                          onChange={(e) =>
-                            setLocal("seo.description", lang, e.target.value)
-                          }
-                        />
-                      </Field>
-                      <Field label="URL handle" htmlFor="s-slug" error={fieldErrors.slug}>
-                        <Input
-                          id="s-slug"
-                          disabled={readOnly}
-                          value={slug}
-                          onChange={(e) => set("slug", e.target.value)}
-                          invalid={!!fieldErrors.slug}
-                        />
-                      </Field>
+                        {loc("seo.title", lang) || title}
+                      </p>
+                      <p className="pl-help !mt-0 line-clamp-2">
+                        {loc("seo.description", lang) ||
+                          loc("shortBenefit", lang) ||
+                          loc("description", lang).slice(0, 160)}
+                      </p>
                     </div>
-                  )}
-                </Card>
-              </div>
+                    {seoOpen && (
+                      <div className="mt-4 space-y-3">
+                        <Field
+                          label={`SEO title (${lang.toUpperCase()})`}
+                          htmlFor="s-title"
+                          help={`${loc("seo.title", lang).length} of 70 characters used`}
+                        >
+                          <Input
+                            id="s-title"
+                            dir={lang === "ar" ? "rtl" : "ltr"}
+                            disabled={readOnly}
+                            value={loc("seo.title", lang)}
+                            onChange={(e) => setLocal("seo.title", lang, e.target.value)}
+                          />
+                        </Field>
+                        <Field
+                          label={`Meta description (${lang.toUpperCase()})`}
+                          htmlFor="s-desc"
+                          help={`${loc("seo.description", lang).length} of 320 characters used`}
+                        >
+                          <Textarea
+                            id="s-desc"
+                            rows={3}
+                            dir={lang === "ar" ? "rtl" : "ltr"}
+                            disabled={readOnly}
+                            value={loc("seo.description", lang)}
+                            onChange={(e) =>
+                              setLocal("seo.description", lang, e.target.value)
+                            }
+                          />
+                        </Field>
+                        <Field
+                          label="URL handle"
+                          htmlFor="s-slug"
+                          error={fieldErrors.slug}
+                        >
+                          <Input
+                            id="s-slug"
+                            disabled={readOnly}
+                            value={slug}
+                            onChange={(e) => set("slug", e.target.value)}
+                            invalid={!!fieldErrors.slug}
+                          />
+                        </Field>
+                      </div>
+                    )}
+                  </Card>
+                </div>
+              )}
 
               <TranslationReviewCard
                 productId={productId}
@@ -1104,7 +1109,7 @@ function Editor({ detail, manage }: { detail?: Detail; manage: boolean }) {
             </>
           )}
 
-          {tab === "history" && (
+          {tab === "more" && (
             <>
               <HistoryTab productId={productId} />
               <Card
@@ -1252,20 +1257,20 @@ function Editor({ detail, manage }: { detail?: Detail; manage: boolean }) {
             </Field>
           </Card>
 
-          <Card title="Sales channels">
+          <Card title="Where to sell this product">
             <fieldset className="space-y-2" disabled={readOnly}>
-              <legend className="sr-only">Sales channels</legend>
+              <legend className="sr-only">Where to sell this product</legend>
               {[
-                ["b2c", "Retail only", "Public shop at the retail price."],
+                ["b2c", "Website only", "Customers buy on the website."],
                 [
                   "both",
-                  "Retail + professional resale",
-                  "Public shop, and approved professionals see the trade price.",
+                  "Website and professionals",
+                  "On the website, and approved professionals buy it at their trade price.",
                 ],
                 [
                   "b2b_cabin",
-                  "Professional cabin only",
-                  "Partners only. Never in the public shop or a retail cart.",
+                  "Professional use only",
+                  "Only approved professionals see it. Not on the public website.",
                 ],
               ].map(([value, label, help]) => (
                 <label

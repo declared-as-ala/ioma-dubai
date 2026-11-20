@@ -540,7 +540,7 @@ function CategoryTreeNode({
 }
 
 // Category Workspace Drawer Component
-function CategoryWorkspaceDrawer({
+export function CategoryWorkspaceDrawer({
   category,
   isCreating,
   isOpen,
