@@ -39,6 +39,8 @@ export default function LoginPage() {
   const redirectUrl =
     rawRedirect?.startsWith("/") &&
     !rawRedirect.startsWith("//") &&
+    // Back-office paths live on the admin site only; they would 404 here.
+    !/^\/(en|fr|ar)?\/?admin(\/|$)/.test(rawRedirect) &&
     !rawRedirect.includes("\\")
       ? rawRedirect
       : null;
