@@ -7,3 +7,4 @@ export * from "./admin-resources";
 
 export const CURRENCY = "AED" as const;
 export const CURRENCY_MINOR_UNIT = 100; // fils
+export * from "./catalog-health";

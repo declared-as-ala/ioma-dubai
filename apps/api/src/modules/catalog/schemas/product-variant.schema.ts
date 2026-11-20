@@ -33,6 +33,13 @@ export class ProductVariant {
   @Prop({ type: Number, default: null })
   suggestedRetailMinor?: number | null;
 
+  /** Explicit tax treatment of the stored prices: retail prices are AED TTC, trade/cabin prices AED HT. */
+  @Prop({ type: String, enum: ["TTC", "HT"], default: undefined })
+  retailTaxTreatment?: "TTC" | "HT";
+
+  @Prop({ type: String, enum: ["TTC", "HT"], default: undefined })
+  tradeTaxTreatment?: "TTC" | "HT";
+
   @Prop({ type: Number, default: null })
   moq!: number | null;
 

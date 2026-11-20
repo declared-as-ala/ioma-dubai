@@ -26,6 +26,7 @@ import { PartnersModule } from "./modules/partners/partners.module";
 // Schemas and historical data are preserved in database without dropping.
 import { ProfessionalModule } from "./modules/professional/professional.module";
 import { ProContentModule } from "./modules/pro-content/pro-content.module";
+import { PriceImportModule } from "./modules/price-import/price-import.module";
 import { HeroModule } from "./modules/hero/hero.module";
 import { TrainingsModule } from "./modules/trainings/trainings.module";
 import { ProtocolsModule } from "./modules/protocols/protocols.module";
@@ -89,6 +90,7 @@ import { MediaModule } from "./modules/media/media.module";
     PartnersModule,
     ProfessionalModule,
     ProContentModule,
+    PriceImportModule,
     HeroModule,
     TrainingsModule,
     ProtocolsModule,

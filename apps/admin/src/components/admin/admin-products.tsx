@@ -1,6 +1,13 @@
 "use client";
 
-import { AdminProductStats } from "./admin-product-stats";
+import { AdminProductAnalytics, type ProductView } from "./admin-product-analytics";
+import {
+  channelsOf,
+  missingPrices,
+  qualityIssues,
+  stockState,
+  type QualityIssue,
+} from "@ioma/config";
 import { useEffect, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -71,6 +78,26 @@ import {
 } from "lucide-react";
 
 export type Local = { en: string; fr: string; ar: string };
+
+/** Same rules as the server statistics, so the header numbers and the filtered list always agree. */
+export function healthOf(p: ProductRecord) {
+  const variants = (p.variants ?? []) as Variant[];
+  return {
+    channels: channelsOf(p.visibility),
+    stock: stockState(variants),
+    missing: missingPrices(p.visibility, variants),
+    issues: qualityIssues({
+      visibility: p.visibility,
+      name: p.name,
+      imageCount: Math.max(p.images?.length ?? 0, p.media?.length ?? 0),
+      seoTitleEn:
+        (p as unknown as { seo?: { title?: { en?: string } } }).seo?.title?.en ?? null,
+      categoryCount: p.categories?.length ?? p.categoryIds?.length ?? 0,
+      hasRange: !!(p.range?._id || p.rangeId || p.range),
+      variants,
+    }),
+  };
+}
 
 export interface Variant {
   _id: string;
@@ -180,7 +207,11 @@ export function AdminProducts() {
   const { label, money, date } = useAdminFormat();
 
   // Status Tab: all | published (Active) | draft | archived
-  const [activeTab, setActiveTab] = useState<string>(params.get("status") ?? "all");
+  const [activeTab, setActiveTab] = useState<string>(
+    ["published", "draft", "archived"].includes(params.get("status") ?? "")
+      ? (params.get("status") as string)
+      : "all",
+  );
 
   // Filters state
   const [q, setQ] = useState("");
@@ -192,8 +223,14 @@ export function AdminProducts() {
   const [productTypeFilter, setProductTypeFilter] = useState("");
   const [concernFilter, setConcernFilter] = useState("");
   const [skinTypeFilter, setSkinTypeFilter] = useState("");
-  const [stockFilter, setStockFilter] = useState(params.get("stock") ?? "");
+  const [stockFilter, setStockFilter] = useState(
+    { low_stock: "low", out_of_stock: "out" }[params.get("stock") ?? ""] ??
+      params.get("stock") ??
+      "",
+  );
   const [priceFilter, setPriceFilter] = useState(params.get("price") ?? "");
+  const [channelFilter, setChannelFilter] = useState("");
+  const [qualityFilter, setQualityFilter] = useState("");
   const [actionMenuOpen, setActionMenuOpen] = useState<string | null>(null);
   const [importModalOpen, setImportModalOpen] = useState(false);
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
@@ -259,7 +296,7 @@ export function AdminProducts() {
   });
 
   const queryParams = new URLSearchParams();
-  queryParams.set("limit", "100");
+  queryParams.set("limit", "250");
   if (term) queryParams.set("q", term);
   if (page > 1) queryParams.set("page", String(page));
   if (activeTab === "published" || activeTab === "draft" || activeTab === "archived") {
@@ -298,51 +335,20 @@ export function AdminProducts() {
     skinTypeFilter,
     stockFilter,
     priceFilter,
+    channelFilter,
+    qualityFilter,
   ]);
 
   const items = query.data?.items ?? [];
   const total = query.data?.total ?? 0;
 
-  // Filter client-side for richer multi-attribute filters and operational saved views
+  // Filter client-side with the shared catalog-health rules (identical to the header statistics).
   const filteredItems = items.filter((p) => {
-    // Operational Saved View Tab Filtering
-    if (activeTab === "pending_price") {
-      const hasPrice = p.variants?.some((v) => v.b2cPriceMinor > 0);
-      if (hasPrice && p.uaeAvailability !== "PENDING") return false;
-    } else if (activeTab === "sur_mesure") {
-      const rName = (p.range?.name?.en || p.range?.name?.fr || "").toLowerCase();
-      const pName = (p.name?.fr || p.name?.en || "").toLowerCase();
-      const isSurMesure =
-        rName.includes("inlab") ||
-        rName.includes("mesure") ||
-        pName.includes("ma crème") ||
-        pName.includes("mon sérum") ||
-        pName.includes("mon soin yeux") ||
-        p.productType === "Soin sur mesure";
-      if (!isSurMesure) return false;
-    } else if (activeTab === "haircare") {
-      const rName = (p.range?.name?.en || p.range?.name?.fr || "").toLowerCase();
-      const pCat = p.categories?.some(
-        (c) =>
-          (c.name?.en || "").toLowerCase().includes("hair") ||
-          (c.name?.fr || "").toLowerCase().includes("cheveux"),
-      );
-      if (!rName.includes("hair") && !pCat) return false;
-    } else if (activeTab === "low_stock") {
-      const avail =
-        p.variants?.reduce((n, v) => n + v.quantityOnHand - v.quantityReserved, 0) ?? 0;
-      const threshold = p.variants?.[0]?.lowStockThreshold ?? 5;
-      if (avail > threshold) return false;
-    } else if (
-      activeTab !== "all" &&
-      activeTab !== "published" &&
-      activeTab !== "draft" &&
-      activeTab !== "archived"
-    ) {
-      // Fallback
-    }
+    const h = healthOf(p);
+    if (channelFilter === "retail" && !h.channels.retail) return false;
+    if (channelFilter === "b2b" && !h.channels.b2b) return false;
+    if (channelFilter === "cabin" && !h.channels.cabin) return false;
 
-    // Explicit Filter Controls
     if (rangeFilter) {
       const pRangeId = p.range?._id || p.rangeId;
       if (pRangeId !== rangeFilter) return false;
@@ -369,67 +375,25 @@ export function AdminProducts() {
       if (!pSkinIds.includes(skinTypeFilter)) return false;
     }
 
-    if (stockFilter === "in_stock") {
-      const avail =
-        p.variants?.reduce((n, v) => n + v.quantityOnHand - v.quantityReserved, 0) ?? 0;
-      if (avail <= 0) return false;
-    } else if (stockFilter === "low_stock") {
-      const avail =
-        p.variants?.reduce((n, v) => n + v.quantityOnHand - v.quantityReserved, 0) ?? 0;
-      const threshold = p.variants?.[0]?.lowStockThreshold ?? 5;
-      if (avail <= 0 || avail > threshold) return false;
-    } else if (stockFilter === "out_of_stock") {
-      const avail =
-        p.variants?.reduce((n, v) => n + v.quantityOnHand - v.quantityReserved, 0) ?? 0;
-      if (avail > 0) return false;
-    }
+    if (stockFilter && h.stock !== stockFilter) return false;
 
-    if (priceFilter === "missing") {
-      const hasPrice = p.variants?.some((v) => v.b2cPriceMinor > 0);
-      if (hasPrice && p.uaeAvailability !== "PENDING") return false;
-    } else if (priceFilter === "configured") {
-      const hasPrice = p.variants?.some((v) => v.b2cPriceMinor > 0);
-      if (!hasPrice || p.uaeAvailability === "PENDING") return false;
-    }
+    if (priceFilter === "missing" && h.missing.length === 0) return false;
+    if (priceFilter === "configured" && h.missing.length > 0) return false;
+
+    if (qualityFilter === "issues" && h.issues.length === 0) return false;
+    if (qualityFilter === "clean" && h.issues.length > 0) return false;
+    if (
+      ["images", "translations", "seo", "classification"].includes(qualityFilter) &&
+      !h.issues.includes(qualityFilter as QualityIssue)
+    )
+      return false;
 
     return true;
   });
 
-  // Calculate Operational Metrics across full loaded dataset
+  const loadedAll = items.length >= total;
   const publishedCount = items.filter((i) => i.status === "published").length;
-  const draftCount = items.filter((i) => i.status === "draft").length;
-  const archivedCount = items.filter((i) => i.status === "archived").length;
-  const missingPriceCount = items.filter(
-    (i) =>
-      i.uaeAvailability === "PENDING" || !i.variants?.some((v) => v.b2cPriceMinor > 0),
-  ).length;
-  const surMesureCount = items.filter((i) => {
-    const rName = (i.range?.name?.en || i.range?.name?.fr || "").toLowerCase();
-    const pName = (i.name?.fr || i.name?.en || "").toLowerCase();
-    return (
-      rName.includes("inlab") ||
-      rName.includes("mesure") ||
-      pName.includes("ma crème") ||
-      pName.includes("mon sérum") ||
-      pName.includes("mon soin yeux") ||
-      i.productType === "Soin sur mesure"
-    );
-  }).length;
-  const haircareCount = items.filter((i) => {
-    const rName = (i.range?.name?.en || i.range?.name?.fr || "").toLowerCase();
-    const pCat = i.categories?.some(
-      (c) =>
-        (c.name?.en || "").toLowerCase().includes("hair") ||
-        (c.name?.fr || "").toLowerCase().includes("cheveux"),
-    );
-    return rName.includes("hair") || pCat;
-  }).length;
-  const lowStockCount = items.filter((i) => {
-    const avail =
-      i.variants?.reduce((n, v) => n + v.quantityOnHand - v.quantityReserved, 0) ?? 0;
-    const threshold = i.variants?.[0]?.lowStockThreshold ?? 5;
-    return avail <= threshold;
-  }).length;
+  void publishedCount;
 
   const visibleIds = filteredItems.map((p) => p._id);
   const allSelected =
@@ -447,6 +411,8 @@ export function AdminProducts() {
     setSkinTypeFilter("");
     setStockFilter("");
     setPriceFilter("");
+    setChannelFilter("");
+    setQualityFilter("");
     setPage(1);
   };
 
@@ -460,7 +426,9 @@ export function AdminProducts() {
     concernFilter ||
     skinTypeFilter ||
     stockFilter ||
-    priceFilter;
+    priceFilter ||
+    channelFilter ||
+    qualityFilter;
 
   const activeFilterCount = [
     rangeFilter,
@@ -471,6 +439,8 @@ export function AdminProducts() {
     stockFilter,
     priceFilter,
     visibility,
+    channelFilter,
+    qualityFilter,
   ].filter(Boolean).length;
 
   // Export to CSV Function
@@ -574,45 +544,24 @@ export function AdminProducts() {
         </div>
       </div>
 
-      <AdminProductStats />
-
-      {/* Status cards: one connected card, each tile is a saved view */}
       <div className="pl-card pl-card--flush">
-        <div className="pl-stats" role="tablist" aria-label="Product views">
-          {[
-            { id: "all", label: "All products", value: total, tone: "" },
-            { id: "published", label: "Active", value: publishedCount, tone: "success" },
-            { id: "draft", label: "Draft", value: draftCount, tone: "" },
-            { id: "archived", label: "Archived", value: archivedCount, tone: "" },
-            {
-              id: "pending_price",
-              label: "Price missing",
-              value: missingPriceCount,
-              tone: "critical",
-            },
-            {
-              id: "low_stock",
-              label: "Low stock",
-              value: lowStockCount,
-              tone: "warning",
-            },
-          ].map((tile) => (
-            <button
-              key={tile.id}
-              type="button"
-              role="tab"
-              aria-selected={activeTab === tile.id}
-              onClick={() => {
-                setActiveTab(tile.id);
-                setPage(1);
-              }}
-              className={cn("pl-stat", tile.tone && `pl-stat--${tile.tone}`)}
-            >
-              <span className="pl-stat-label">{tile.label}</span>
-              <span className="pl-stat-value">{tile.value}</span>
-            </button>
-          ))}
-        </div>
+        <AdminProductAnalytics
+          view={{
+            status: activeTab,
+            channel: channelFilter,
+            price: priceFilter,
+            quality: qualityFilter,
+            stock: stockFilter,
+          }}
+          onView={(v: Partial<ProductView>) => {
+            setPage(1);
+            setActiveTab(v.status ?? "all");
+            setChannelFilter(v.channel ?? "");
+            setPriceFilter(v.price ?? "");
+            setQualityFilter(v.quality ?? "");
+            setStockFilter(v.stock ?? "");
+          }}
+        />
 
         {/* Search & filters */}
         <div className="pl-toolbar">
@@ -777,29 +726,64 @@ export function AdminProducts() {
               <h4 className="pl-card-title !mb-0">3. Commerce & Availability</h4>
               <div className="space-y-3">
                 <div>
-                  <label className="pl-label">Stock Level</label>
+                  <label className="pl-label">Stock</label>
                   <select
                     className="pl-input"
                     value={stockFilter}
                     onChange={(e) => setStockFilter(e.target.value)}
                   >
-                    <option value="">All Inventory Levels</option>
-                    <option value="in_stock">In Stock (Available)</option>
-                    <option value="low_stock">Low Stock (≤ Threshold)</option>
-                    <option value="out_of_stock">Out of Stock</option>
+                    <option value="">All</option>
+                    <option value="in_stock">In stock</option>
+                    <option value="low">Low stock</option>
+                    <option value="out">Out of stock</option>
+                    <option value="not_tracked">Inventory not tracked</option>
+                    <option value="no_variant">No sellable variant</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="pl-label">Price Status</label>
+                  <label className="pl-label">Prices</label>
                   <select
                     className="pl-input"
                     value={priceFilter}
                     onChange={(e) => setPriceFilter(e.target.value)}
                   >
-                    <option value="">All Price Statuses</option>
-                    <option value="configured">AED Price Configured</option>
-                    <option value="missing">Pending UAE Price</option>
+                    <option value="">All</option>
+                    <option value="configured">Every price needed is set</option>
+                    <option value="missing">A required price is missing</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="pl-label">Data quality</label>
+                  <select
+                    className="pl-input"
+                    value={qualityFilter}
+                    onChange={(e) => setQualityFilter(e.target.value)}
+                  >
+                    <option value="">All</option>
+                    <option value="issues">Has issues</option>
+                    <option value="clean">No issues</option>
+                    <option value="images">Missing images</option>
+                    <option value="translations">Translations incomplete</option>
+                    <option value="seo">Missing SEO (retail)</option>
+                    <option value="classification">
+                      Missing range or category (retail)
+                    </option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="pl-label">Channel</label>
+                  <select
+                    className="pl-input"
+                    value={channelFilter}
+                    onChange={(e) => setChannelFilter(e.target.value)}
+                  >
+                    <option value="">All channels</option>
+                    <option value="retail">Retail enabled</option>
+                    <option value="b2b">Professional resale (B2B)</option>
+                    <option value="cabin">Professional cabin</option>
                   </select>
                 </div>
 
@@ -1037,8 +1021,9 @@ export function AdminProducts() {
                   <th>Category / Type</th>
                   <th>Visibility</th>
                   <th>Status</th>
-                  <th>Price (AED)</th>
+                  <th>Prices (AED)</th>
                   <th>Stock</th>
+                  <th>Quality</th>
                   <th>Updated</th>
                   <th className="!text-end">
                     <span className="sr-only">Actions</span>
@@ -1067,7 +1052,13 @@ export function AdminProducts() {
                       (n, v) => n + v.quantityOnHand - v.quantityReserved,
                       0,
                     ) ?? 0;
-                  const lowStockThresh = p.variants?.[0]?.lowStockThreshold ?? 5;
+                  const h = healthOf(p);
+                  const minOf = (pick: (v: Variant) => number | null | undefined) => {
+                    const xs = (p.variants ?? [])
+                      .map(pick)
+                      .filter((n): n is number => (n ?? 0) > 0);
+                    return xs.length ? Math.min(...xs) : null;
+                  };
                   const isSelected = selected.includes(p._id);
 
                   return (
@@ -1170,27 +1161,85 @@ export function AdminProducts() {
                         )}
                       </td>
 
-                      {/* Price Cell */}
+                      {/* Prices by channel: only the channels this product is sold in */}
                       <td>
-                        {hasPrice && p.uaeAvailability !== "PENDING" ? (
-                          <span className="font-medium tabular-nums">
-                            {money(minPrice)}
-                          </span>
-                        ) : (
-                          <Badge tone="warning" icon={<AlertTriangle />}>
-                            AED pending
-                          </Badge>
-                        )}
+                        <div className="flex flex-col gap-0.5 text-[12px]">
+                          {h.channels.retail &&
+                            (h.missing.includes("retail") ? (
+                              <Badge tone="warning" icon={<AlertTriangle />}>
+                                Retail price missing
+                              </Badge>
+                            ) : (
+                              <span className="tabular-nums">
+                                Retail{" "}
+                                <strong>
+                                  {money(minOf((v) => v.b2cPriceMinor) ?? 0)}
+                                </strong>
+                              </span>
+                            ))}
+                          {h.channels.b2b &&
+                            (h.missing.includes("b2b") ? (
+                              <Badge tone="warning" icon={<AlertTriangle />}>
+                                B2B price missing
+                              </Badge>
+                            ) : (
+                              <span className="tabular-nums">
+                                B2B{" "}
+                                <strong>
+                                  {money(minOf((v) => v.b2bPriceMinor) ?? 0)}
+                                </strong>
+                              </span>
+                            ))}
+                          {h.channels.cabin &&
+                            (h.missing.includes("cabin") ? (
+                              <Badge tone="warning" icon={<AlertTriangle />}>
+                                Cabin price missing
+                              </Badge>
+                            ) : (
+                              <span className="tabular-nums">
+                                Cabin{" "}
+                                <strong>
+                                  {money(minOf((v) => v.b2bPriceMinor) ?? 0)}
+                                </strong>
+                              </span>
+                            ))}
+                        </div>
                       </td>
 
                       {/* Stock Cell */}
                       <td>
-                        {totalStock <= 0 ? (
+                        {h.stock === "no_variant" ? (
+                          <Badge tone="warning">No sellable variant</Badge>
+                        ) : h.stock === "not_tracked" ? (
+                          <span className="pl-help !mt-0">Not tracked</span>
+                        ) : h.stock === "out" ? (
                           <Badge tone="critical">Out of stock</Badge>
-                        ) : totalStock <= lowStockThresh ? (
+                        ) : h.stock === "low" ? (
                           <Badge tone="warning">{totalStock} in stock (low)</Badge>
                         ) : (
                           <span className="tabular-nums">{totalStock} in stock</span>
+                        )}
+                      </td>
+
+                      {/* Data quality */}
+                      <td>
+                        {h.issues.length === 0 ? (
+                          <Badge tone="success">OK</Badge>
+                        ) : (
+                          <div className="flex flex-wrap gap-1">
+                            {h.issues.map((i) => (
+                              <Badge key={i} tone="warning">
+                                {
+                                  {
+                                    images: "No image",
+                                    translations: "Translations",
+                                    seo: "SEO",
+                                    classification: "Category/range",
+                                  }[i]
+                                }
+                              </Badge>
+                            ))}
+                          </div>
                         )}
                       </td>
 
@@ -1279,6 +1328,9 @@ export function AdminProducts() {
       <div className="pl-help flex flex-wrap items-center justify-between gap-3 !mt-0">
         <span>
           Showing {filteredItems.length} of {total} products
+          {loadedAll
+            ? ""
+            : " (only the first " + items.length + " are loaded: narrow the search)"}
         </span>
         <div className="flex items-center gap-2">
           <button

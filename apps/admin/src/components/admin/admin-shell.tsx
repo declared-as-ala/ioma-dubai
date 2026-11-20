@@ -78,6 +78,7 @@ const NAV: NavGroup[] = [
     icon: Package,
     items: [
       { label: "Products", href: "/admin/products", also: ["/admin/products/new"] },
+      { label: "Price list import", href: "/admin/price-import" },
       {
         label: "Product Organization",
         href: "/admin/catalogue/organization",
@@ -356,7 +357,7 @@ function NotificationsMenu() {
     {
       label: "Low or out of stock",
       value: (inv?.lowStock ?? 0) + (inv?.outOfStock ?? 0),
-      href: "/admin/products?status=low_stock",
+      href: "/admin/products?stock=low",
     },
   ].filter((e) => e.value > 0);
   const total = entries.reduce((n, e) => n + e.value, 0);

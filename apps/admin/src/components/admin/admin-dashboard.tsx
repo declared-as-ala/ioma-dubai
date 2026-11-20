@@ -75,7 +75,7 @@ export function ActionCenter({ data }: { data: Dashboard }) {
     {
       label: t("lowStock"),
       value: (inventory?.lowStock ?? 0) + (inventory?.outOfStock ?? 0),
-      href: "/admin/products?status=low_stock",
+      href: "/admin/products?stock=low",
     },
     {
       label: t("values.failed") + " · " + t("fields.paymentStatus"),
@@ -307,7 +307,7 @@ export default function AdminDashboard() {
                     (data.inventory.health[0]?.lowStock ?? 0) +
                       (data.inventory.health[0]?.outOfStock ?? 0),
                   )}
-                  href="/admin/products?status=low_stock"
+                  href="/admin/products?stock=low"
                   context={t("currentSnapshot")}
                 />
               )}
@@ -427,10 +427,7 @@ export default function AdminDashboard() {
                 </AdminPanel>
               )}
               {data.inventory && (
-                <AdminPanel
-                  title={t("inventoryHealth")}
-                  href="/admin/products?status=low_stock"
-                >
+                <AdminPanel title={t("inventoryHealth")} href="/admin/products?stock=low">
                   <Metrics
                     rows={[
                       [t("inStock"), f.number(data.inventory.health[0]?.inStock ?? 0)],
@@ -455,7 +452,7 @@ export default function AdminDashboard() {
                           href={
                             v.productId
                               ? `/admin/products/${v.productId}`
-                              : "/admin/products?status=low_stock"
+                              : "/admin/products?stock=low"
                           }
                           className="pl-link inline-flex items-center"
                         >
@@ -686,10 +683,7 @@ export default function AdminDashboard() {
                 </AdminPanel>
               )}
               {data.inventory && (
-                <AdminPanel
-                  title={t("inventoryHealth")}
-                  href="/admin/products?status=low_stock"
-                >
+                <AdminPanel title={t("inventoryHealth")} href="/admin/products?stock=low">
                   <Metrics
                     rows={[
                       [t("inStock"), f.number(data.inventory.health[0]?.inStock ?? 0)],
@@ -714,7 +708,7 @@ export default function AdminDashboard() {
                           href={
                             v.productId
                               ? `/admin/products/${v.productId}`
-                              : "/admin/products?status=low_stock"
+                              : "/admin/products?stock=low"
                           }
                           className="pl-link inline-flex items-center"
                         >

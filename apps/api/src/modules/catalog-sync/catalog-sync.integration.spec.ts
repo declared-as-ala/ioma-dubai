@@ -392,12 +392,8 @@ describe("catalogue sync against a real database", () => {
   itIfDb("11. dashboard statistics come from real queries", async () => {
     const s = await service.stats();
     expect(s.total).toBeGreaterThanOrEqual(1);
-    expect(s.imported).toBeGreaterThanOrEqual(1);
-    expect(s.total).toBe(
-      s.active +
-        s.draft +
-        (await products.countDocuments({ deletedAt: null, status: "archived" })),
-    );
-    expect(typeof s.outOfStock).toBe("number");
+    expect(s.franceLinked).toBeGreaterThanOrEqual(1);
+    expect(s.total).toBe(s.published + s.draft + s.archived);
+    expect(typeof s.stock.out).toBe("number");
   });
 });

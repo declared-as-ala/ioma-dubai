@@ -13,6 +13,7 @@ import { ProductRange } from "../catalog/schemas/product-range.schema";
 import { AuditService } from "../audit/audit.service";
 import { ProductMediaService } from "../media/product-media.service";
 import { ImportRun } from "./import-run.schema";
+import { computeCatalogStats } from "./catalog-stats";
 import {
   FIELD_OWNERSHIP,
   SOURCE_ORIGIN,
@@ -781,98 +782,40 @@ export class CatalogSyncService {
 
   /** Real counts for the product dashboard, computed by the database. */
   async stats() {
-    const live = { deletedAt: null };
-    const [
-      total,
-      active,
-      draft,
-      imageless,
-      b2bOnly,
-      imported,
-      conflicts,
-      untranslated,
-      noSeo,
-    ] = await Promise.all([
-      this.products.countDocuments(live),
-      this.products.countDocuments({ ...live, status: "published" }),
-      this.products.countDocuments({ ...live, status: "draft" }),
-      this.products.countDocuments({
-        ...live,
-        $or: [{ images: { $size: 0 } }, { images: { $exists: false } }],
-      }),
-      this.products.countDocuments({ ...live, visibility: "b2b_cabin" }),
-      this.products.countDocuments({ ...live, "source.externalId": { $exists: true } }),
-      this.products.countDocuments({ ...live, "source.status": "conflict" }),
-      this.products.countDocuments({
-        ...live,
-        $expr: {
-          $or: [
-            { $in: [{ $ifNull: ["$name.en", ""] }, ["", null]] },
-            { $in: [{ $ifNull: ["$name.ar", ""] }, ["", null]] },
-            { $eq: ["$name.en", "$name.fr"] },
-            { $eq: ["$name.ar", "$name.fr"] },
-          ],
-        },
-      }),
-      this.products.countDocuments({
-        ...live,
-        $or: [{ seo: null }, { "seo.title.en": { $in: ["", null] } }],
-      }),
-    ]);
-
-    // Stock is per variant: a product is out of stock when every variant has nothing available, low when any variant is at or under its threshold.
-    const stock = await this.variants.aggregate<{ out: number; low: number }>([
-      {
-        $project: {
-          productId: 1,
-          available: { $subtract: ["$quantityOnHand", "$quantityReserved"] },
-          low: {
-            $lte: [
-              { $subtract: ["$quantityOnHand", "$quantityReserved"] },
-              "$lowStockThreshold",
-            ],
+    const [products, variants] = await Promise.all([
+      this.products
+        .find(
+          { deletedAt: null },
+          {
+            status: 1,
+            visibility: 1,
+            name: 1,
+            images: 1,
+            media: 1,
+            "seo.title": 1,
+            categoryIds: 1,
+            rangeId: 1,
+            source: 1,
           },
-          backorderAllowed: 1,
-        },
-      },
-      {
-        $group: {
-          _id: "$productId",
-          maxAvailable: { $max: "$available" },
-          anyLow: { $max: { $cond: ["$low", 1, 0] } },
-        },
-      },
-      {
-        $group: {
-          _id: null,
-          out: { $sum: { $cond: [{ $lte: ["$maxAvailable", 0] }, 1, 0] } },
-          low: {
-            $sum: {
-              $cond: [
-                { $and: [{ $gt: ["$maxAvailable", 0] }, { $eq: ["$anyLow", 1] }] },
-                1,
-                0,
-              ],
-            },
+        )
+        .lean(),
+      this.variants
+        .find(
+          {},
+          {
+            productId: 1,
+            sku: 1,
+            b2cPriceMinor: 1,
+            b2bPriceMinor: 1,
+            quantityOnHand: 1,
+            quantityReserved: 1,
+            lowStockThreshold: 1,
+            backorderAllowed: 1,
           },
-        },
-      },
+        )
+        .lean(),
     ]);
-
-    return {
-      total,
-      active,
-      draft,
-      outOfStock: stock[0]?.out ?? 0,
-      lowStock: stock[0]?.low ?? 0,
-      missingImages: imageless,
-      missingTranslations: untranslated,
-      missingSeo: noSeo,
-      b2bOnly,
-      syncConflicts: conflicts,
-      imported,
-      manual: total - imported,
-    };
+    return computeCatalogStats(products as never, variants as never);
   }
 
   async reportCsv(id: string) {
