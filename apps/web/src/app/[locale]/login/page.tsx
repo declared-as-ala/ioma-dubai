@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Controller, useForm } from "react-hook-form";
@@ -11,6 +11,8 @@ import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useLoginMutation } from "@/hooks/use-auth";
+import { useAuthStore } from "@/stores/auth-store";
+import { useAuthHydrated } from "@/hooks/use-auth-hydrated";
 import { motion } from "motion/react";
 import {
   Eye,
@@ -45,6 +47,21 @@ export default function LoginPage() {
       ? rawRedirect
       : null;
   const mutation = useLoginMutation();
+  const sessionUser = useAuthStore((st) => st.user);
+  const hydrated = useAuthHydrated();
+  // Already signed in: the login form has nothing to offer, go to the account (or the requested page).
+  useEffect(() => {
+    if (!hydrated || !sessionUser || mutation.isPending || mutation.isSuccess) return;
+    const isPro = sessionUser.roles?.includes("professional_approved");
+    router.replace(redirectUrl ?? (isPro ? "/portal" : "/account"));
+  }, [
+    hydrated,
+    sessionUser,
+    redirectUrl,
+    router,
+    mutation.isPending,
+    mutation.isSuccess,
+  ]);
   const [showPassword, setShowPassword] = useState(false);
   const [accountType, setAccountType] = useState<"client" | "pro">("client");
 

@@ -7,6 +7,7 @@ import { useRouter } from "@/i18n/navigation";
 import { apiFetch, ApiError } from "@/lib/api";
 import { useAuthStore } from "@/stores/auth-store";
 import { useLoginMutation } from "@/hooks/use-auth";
+import { useAuthHydrated } from "@/hooks/use-auth-hydrated";
 import type { AdminAccess } from "@/hooks/use-admin";
 import { Button, Card, Field, Input } from "@/components/admin/polaris";
 
@@ -18,6 +19,10 @@ export default function AdminLoginPage() {
   const params = useSearchParams();
   const login = useLoginMutation();
   const clearSession = useAuthStore((s) => s.clearSession);
+  const sessionUser = useAuthStore((s) => s.user);
+  const hydrated = useAuthHydrated();
+  // true while an existing session is being checked, so the form does not flash for a signed-in admin
+  const [verifying, setVerifying] = useState(true);
   const [ready, setReady] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -34,6 +39,28 @@ export default function AdminLoginPage() {
     rawRedirect && rawRedirect.startsWith("/admin") && !rawRedirect.startsWith("//")
       ? rawRedirect
       : "/admin";
+
+  // Already signed in as an administrator: skip the form and go to the dashboard.
+  useEffect(() => {
+    if (!hydrated) return;
+    if (!sessionUser) {
+      setVerifying(false);
+      return;
+    }
+    let cancelled = false;
+    apiFetch<AdminAccess>("/admin/access")
+      .then((access) => {
+        if (cancelled) return;
+        if (access.canAccess) router.replace(redirect);
+        else setVerifying(false);
+      })
+      .catch(() => {
+        if (!cancelled) setVerifying(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [hydrated, sessionUser]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -65,6 +92,16 @@ export default function AdminLoginPage() {
   }
 
   const busy = login.isPending || checking;
+  if (verifying)
+    return (
+      <main
+        className="grid min-h-screen place-items-center"
+        style={{ background: "var(--pl-bg)" }}
+        aria-busy="true"
+      >
+        <p className="pl-help">Checking your session…</p>
+      </main>
+    );
   return (
     <main
       className="grid min-h-screen place-items-center px-4 py-10"
