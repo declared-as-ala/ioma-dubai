@@ -10,6 +10,7 @@ import { Connection, Types } from "mongoose";
 import * as XLSX from "xlsx";
 import { AuditService } from "../audit/audit.service";
 import {
+  matrixToRecords,
   normSize,
   parsePriceSheet,
   type ParsedPriceRow,
@@ -70,10 +71,9 @@ export class PriceImportService {
       const wb = XLSX.read(file.buffer, { type: "buffer", cellDates: false });
       const sheet = wb.Sheets[wb.SheetNames[0]!];
       if (!sheet) throw new Error("empty");
-      rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, {
-        defval: "",
-        raw: true,
-      });
+      rows = matrixToRecords(
+        XLSX.utils.sheet_to_json<unknown[]>(sheet, { header: 1, defval: "", raw: true }),
+      );
     } catch {
       throw new BadRequestException(
         "The file could not be read. Use an XLSX or CSV price list.",

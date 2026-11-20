@@ -102,3 +102,26 @@ export const normSize = (s: unknown) =>
   String(s ?? "")
     .toLowerCase()
     .replace(/\s+/g, "");
+
+/**
+ * Owner sheets start with title lines above the header, so the header row is detected: the first row
+ * (within the first 20) that has a reference column and a price column.
+ */
+export function matrixToRecords(matrix: unknown[][]): Record<string, unknown>[] {
+  const isHeader = (row: unknown[]) => {
+    const cells = row.map((c) => norm(c));
+    return (
+      cells.some((c) => c.startsWith("ref")) && cells.some((c) => c.startsWith("prix"))
+    );
+  };
+  const at = matrix.slice(0, 20).findIndex(isHeader);
+  if (at < 0) return [];
+  const header = (matrix[at] ?? []).map((c) => String(c ?? "").trim());
+  return matrix.slice(at + 1).map((row) => {
+    const rec: Record<string, unknown> = {};
+    header.forEach((h, i) => {
+      if (h) rec[h] = row[i] ?? "";
+    });
+    return rec;
+  });
+}

@@ -100,9 +100,18 @@ function fakeDb(variants: Doc[], products: Doc[]) {
 const audit = { recordEvent: jest.fn().mockResolvedValue({}) };
 const actor = { sub: "507f1f77bcf86cd799439011", email: "admin@example.test" };
 
+/** Like the owner files: three title lines, then the header row, then the data. */
 function sheet(rows: Doc[]) {
   const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), "S");
+  const header = Object.keys(rows[0] ?? {});
+  const aoa = [
+    ["IOMA Paris — Prix publics Émirats arabes unis"],
+    ["Produits de vente uniquement · novembre 2026"],
+    [],
+    header,
+    ...rows.map((r) => header.map((h) => r[h])),
+  ];
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(aoa), "S");
   return {
     originalname: "retail.xlsx",
     buffer: XLSX.write(wb, { type: "buffer", bookType: "xlsx" }) as Buffer,
