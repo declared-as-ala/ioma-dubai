@@ -11,6 +11,7 @@ import * as argon2 from "argon2";
 import { randomBytes } from "crypto";
 import { adminPermissions } from "@ioma/config";
 import { MailService } from "../../common/mail/mail.service";
+import { MailOutboxService } from "../../common/mail/mail-outbox.service";
 import { AuthService } from "../auth/auth.service";
 import { UsersService } from "../users/users.service";
 import { DocumentsService } from "../documents/documents.service";
@@ -97,6 +98,7 @@ export class ProAccessService {
     private readonly users: UsersService,
     private readonly auth: AuthService,
     private readonly mail: MailService,
+    private readonly outbox: MailOutboxService,
     private readonly documents: DocumentsService,
     private readonly config: ConfigService,
   ) {}
@@ -167,17 +169,33 @@ export class ProAccessService {
     });
 
     const settings = await this.getSettings();
+    // Team address: the admin setting, then B2B_TEAM_EMAIL, then the real IOMA contact mailbox
+    // (never EMAIL_FROM: that is a no-reply sender with no mailbox to receive mail).
     const team =
       settings.teamEmail ||
       this.config.get<string>("B2B_TEAM_EMAIL") ||
-      this.config.get<string>("EMAIL_FROM");
+      this.config.get<string>("CONTACT_EMAIL") ||
+      this.config.get<string>("CONTACT_NOTIFY_EMAIL");
     const adminUrl = `${this.config.get<string>("ADMIN_APP_URL") ?? ""}/en/admin/b2b-leads`;
+    // The lead is already saved. Mails go through the durable outbox: retried on SMTP failure,
+    // and one per lead even if this runs twice.
     if (team) {
       const mail = emails.teamNotification(lead, adminUrl);
-      void this.mail.sendHtml(team, mail.subject, mail.html);
+      void this.outbox.enqueue({
+        key: `lead-team:${lead.id}`,
+        identity: "contact",
+        to: team,
+        replyTo: email,
+        ...mail,
+      });
     }
     const confirmation = emails.leadConfirmation(input.locale, input.firstName);
-    void this.mail.sendHtml(email, confirmation.subject, confirmation.html);
+    void this.outbox.enqueue({
+      key: `lead-confirm:${lead.id}`,
+      identity: "contact",
+      to: email,
+      ...confirmation,
+    });
     return { received: true };
   }
 
