@@ -627,7 +627,7 @@ export class AdminActionsService {
     const input = parse(
       z
         .object({
-          ownerType: z.enum(["training", "protocol", "cms"]),
+          ownerType: z.enum(["training", "protocol", "cms", "b2b_content"]),
           ownerId: z
             .string()
             .regex(/^[a-f\d]{24}$/i)
@@ -638,7 +638,11 @@ export class AdminActionsService {
     );
     requirePermission(
       user,
-      input.ownerType === "cms" ? "content.manage" : "training.manage",
+      input.ownerType === "cms"
+        ? "content.manage"
+        : input.ownerType === "b2b_content"
+          ? "b2b.manage"
+          : "training.manage",
     );
     if (file?.mimetype === "video/mp4") {
       if (
@@ -648,9 +652,9 @@ export class AdminActionsService {
       )
         throw new BadRequestException("Upload a valid MP4 up to 10 MB.");
     } else validateApplicationFile(file);
-    if (input.ownerType !== "cms" && !input.ownerId)
+    if (input.ownerType !== "cms" && input.ownerType !== "b2b_content" && !input.ownerId)
       throw new BadRequestException("Choose the owning training, booking or protocol.");
-    if (input.ownerId && input.ownerType !== "cms") {
+    if (input.ownerId && input.ownerType !== "cms" && input.ownerType !== "b2b_content") {
       const names =
         input.ownerType === "protocol"
           ? ["protocols"]
@@ -675,6 +679,7 @@ export class AdminActionsService {
       } as Record<string, string>
     )[file!.mimetype]!;
     const doc = await this.documents.create({
+      // Professional documents are restricted: private bucket, served only through a signed link after an access check.
       bucket: input.ownerType === "cms" ? "ioma-public" : "ioma-private",
       data: file!.buffer,
       mimeType: file!.mimetype,
@@ -712,6 +717,7 @@ export class AdminActionsService {
       {
         cms: "content",
         professional_application: "b2b",
+        b2b_content: "b2b",
         ai_analysis: "ai",
         order: "commerce",
         training: "training",

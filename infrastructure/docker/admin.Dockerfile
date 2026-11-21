@@ -23,6 +23,9 @@ COPY --from=pruner /repo/out/full/ .
 # has no reverse proxy in front of these two containers.
 ARG NEXT_PUBLIC_API_URL=""
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+# Public storefront address used by "View website" and product previews (build-time).
+ARG NEXT_PUBLIC_WEB_URL="https://iomaparis.ae"
+ENV NEXT_PUBLIC_WEB_URL=$NEXT_PUBLIC_WEB_URL
 ARG INTERNAL_API_URL="http://api:4000"
 ENV INTERNAL_API_URL=$INTERNAL_API_URL
 RUN turbo run build --filter=@ioma/admin...

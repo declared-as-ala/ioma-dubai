@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import type { AdminField, AdminResource } from "@ioma/config";
 import { normalizeShopifyRichText } from "@ioma/validation";
 import { useAdminQuery } from "@/hooks/use-admin";
-import { apiFetch } from "@/lib/api";
+import { apiFetch, apiUpload } from "@/lib/api";
 import { useAdminFormat } from "./admin-ui";
 import { MediaField } from "./admin-media-field";
 
@@ -27,33 +27,85 @@ function ReferenceField({
 }) {
   const q = useAdminQuery<Record<string, any>[]>(`references/${field.resource}`);
   const { label } = useAdminFormat();
+  const qc = useQueryClient();
+  const [uploadError, setUploadError] = useState(false);
+  // A professional document points at an uploaded file: let the administrator upload it right here.
+  const upload = useMutation({
+    mutationFn: (file: File) => {
+      const form = new FormData();
+      form.append("file", file);
+      form.append("ownerType", "b2b_content");
+      return apiUpload<{ id: string }>("/admin/documents/upload", form);
+    },
+    onSuccess: async (result) => {
+      setUploadError(false);
+      await qc.invalidateQueries({ queryKey: ["admin", `references/${field.resource}`] });
+      onChange(result.id);
+    },
+    onError: () => setUploadError(true),
+  });
+  const canUpload = field.key === "fileDocumentId" && !disabled;
   return (
-    <select
-      className={inputClass}
-      required={field.required}
-      disabled={disabled}
-      multiple={field.type === "references"}
-      value={value ?? (field.type === "references" ? [] : "")}
-      onChange={(e) =>
-        onChange(
-          field.type === "references"
-            ? Array.from(e.target.selectedOptions, (o) => o.value)
-            : e.target.value || null,
-        )
-      }
-    >
-      <option value="">—</option>
-      {q.data?.map((r) => (
-        <option key={r._id} value={r._id}>
-          {label(
-            r.name ??
-              r.title ??
-              r.originalName ??
-              ([r.firstName, r.lastName].filter(Boolean).join(" ") || r.slug || r._id),
+    <>
+      <select
+        className={inputClass}
+        required={field.required}
+        disabled={disabled}
+        multiple={field.type === "references"}
+        value={value ?? (field.type === "references" ? [] : "")}
+        onChange={(e) =>
+          onChange(
+            field.type === "references"
+              ? Array.from(e.target.selectedOptions, (o) => o.value)
+              : e.target.value || null,
+          )
+        }
+      >
+        <option value="">—</option>
+        {q.data?.map((r) => (
+          <option key={r._id} value={r._id}>
+            {label(
+              r.name ??
+                r.title ??
+                r.originalName ??
+                ([r.firstName, r.lastName].filter(Boolean).join(" ") || r.slug || r._id),
+            )}
+          </option>
+        ))}
+      </select>
+      {canUpload && (
+        <div className="mt-1 grid gap-1">
+          <input
+            type="file"
+            accept="application/pdf,image/png,image/jpeg,image/webp"
+            className={`${inputClass} max-w-full`}
+            disabled={upload.isPending}
+            aria-label="Upload a file"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) upload.mutate(f);
+            }}
+          />
+          <span className="pl-help !mt-0">
+            {upload.isPending
+              ? "Uploading\u2026"
+              : upload.isSuccess
+                ? "File uploaded and selected. Save to apply it."
+                : "Upload a PDF or image: it is selected automatically. Choosing a new file replaces the current one."}
+          </span>
+          {uploadError && (
+            <span
+              role="alert"
+              className="text-[12px]"
+              style={{ color: "var(--pl-critical)" }}
+            >
+              The file could not be uploaded (PDF, PNG, JPG or WebP, within the size
+              limit).
+            </span>
           )}
-        </option>
-      ))}
-    </select>
+        </div>
+      )}
+    </>
   );
 }
 export function FieldEditor({
