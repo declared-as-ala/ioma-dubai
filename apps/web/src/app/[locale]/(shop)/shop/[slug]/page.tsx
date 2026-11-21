@@ -281,7 +281,11 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
             {/* Merchandising Badges (e.g. MEILLEURE VENTE) */}
             {(product.isBestSeller || product.badges?.includes("Meilleure vente")) && (
               <span className="inline-flex items-center rounded-sm bg-neutral-900 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-white">
-                MEILLEURE VENTE
+                {tr(toLoc(locale), {
+                  en: "Best seller",
+                  fr: "Meilleure vente",
+                  ar: "الأكثر مبيعاً",
+                })}
               </span>
             )}
           </div>
@@ -362,7 +366,14 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
           {/* Capacity / Contenance Badge */}
           {product.contenance && (
             <div className="text-xs text-muted-foreground font-mono">
-              <span>{product.contenance}</span>
+              <span>
+                {locale === "fr"
+                  ? product.contenance
+                  : product.contenance.replace(
+                      /\s+à\s+/g,
+                      locale === "ar" ? " إلى " : " to ",
+                    )}
+              </span>
             </div>
           )}
 
@@ -398,11 +409,19 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
             <div className="space-y-2 rounded border border-sf-champagne/50 bg-sf-ivory p-3.5 text-xs">
               <div className="flex items-center justify-between">
                 <span className="font-semibold text-foreground uppercase tracking-wider">
-                  Sélection Formule Personnalisée
+                  {tr(toLoc(locale), {
+                    en: "Personalised formula",
+                    fr: "Sélection formule personnalisée",
+                    ar: "اختيار التركيبة المخصّصة",
+                  })}
                 </span>
               </div>
               <p className="text-muted-foreground">
-                Choisissez votre formule In.Lab ou commandez votre formule initiale :
+                {tr(toLoc(locale), {
+                  en: "Choose your In.Lab formula or order your starting formula:",
+                  fr: "Choisissez votre formule In.Lab ou commandez votre formule initiale :",
+                  ar: "اختاري تركيبة In.Lab الخاصة بك أو اطلبي تركيبتك الأولية:",
+                })}
               </p>
               <select
                 className="w-full rounded border border-border bg-white px-3 py-2 text-xs font-semibold focus:outline-primary"
@@ -410,10 +429,18 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                 onChange={(e) => setBespokeFormula(e.target.value)}
               >
                 <option value="FORMULE_01">
-                  Formule Expert Standard (Base Régénérante + Actifs Ciblés)
+                  {tr(toLoc(locale), {
+                    en: "Standard Expert formula (regenerating base + targeted actives)",
+                    fr: "Formule Expert Standard (Base Régénérante + Actifs Ciblés)",
+                    ar: "التركيبة الخبيرة القياسية (قاعدة مجدِّدة + مكوّنات نشطة مستهدفة)",
+                  })}
                 </option>
                 <option value="FORMULE_HYDRA">
-                  Formule Confort & Hydratation Intensive
+                  {tr(toLoc(locale), {
+                    en: "Comfort & intensive hydration formula",
+                    fr: "Formule Confort & Hydratation Intensive",
+                    ar: "تركيبة الراحة والترطيب المكثّف",
+                  })}
                 </option>
               </select>
             </div>
@@ -469,11 +496,18 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
             <Truck className="size-4 text-foreground/70 shrink-0 mt-0.5" />
             <div>
               <span className="font-semibold block uppercase tracking-wider text-[10px]">
-                Livraison Standard Offerte dès 300 AED
+                {tr(toLoc(locale), {
+                  en: "Free standard delivery over AED 300",
+                  fr: "Livraison standard offerte dès 300 AED",
+                  ar: "توصيل قياسي مجاني للطلبات فوق 300 درهم",
+                })}
               </span>
               <p className="text-muted-foreground mt-0.5">
-                Votre livraison estimée sous 24h à 48h à Dubaï & aux Émirats Arabes Unis.
-                Écrin haute protection et échantillons offerts.
+                {tr(toLoc(locale), {
+                  en: "Estimated delivery within 24 to 48 hours in Dubai and across the UAE. Protective packaging and samples included.",
+                  fr: "Livraison estimée sous 24h à 48h à Dubaï et dans les Émirats Arabes Unis. Écrin haute protection et échantillons offerts.",
+                  ar: "التوصيل المتوقع خلال 24 إلى 48 ساعة في دبي وجميع أنحاء الإمارات. تغليف واقٍ وعيّنات مجانية.",
+                })}
               </p>
             </div>
           </div>
