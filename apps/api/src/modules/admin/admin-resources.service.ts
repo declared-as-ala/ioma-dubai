@@ -1380,10 +1380,26 @@ export class AdminResourcesService implements OnModuleInit {
     const references = uniqueIds.map(objectId);
     const records = await this.db
       .collection(resource)
-      .find({ _id: { $in: references } }, { projection: { _id: 1 } })
+      .find(
+        { _id: { $in: references } },
+        { projection: { _id: 1, paymentStatus: 1, fulfillmentStatus: 1 } },
+      )
       .toArray();
     if (records.length !== references.length)
       throw new NotFoundException("One or more records were not found.");
+    // Order history is financial record: an order that was paid (or authorised) and not cancelled
+    // can never be hidden. Only cancelled, refunded, failed or unpaid orders can be removed from the list.
+    if (
+      resource === "orders" &&
+      records.some(
+        (r: any) =>
+          ["paid", "authorized"].includes(r.paymentStatus) &&
+          r.fulfillmentStatus !== "cancelled",
+      )
+    )
+      throw new BadRequestException(
+        "A paid order is part of the financial history and cannot be removed. Cancel or refund it first.",
+      );
     const now = new Date();
     const result = await this.db.collection(resource).updateMany(
       { _id: { $in: references } },

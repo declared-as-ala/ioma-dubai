@@ -76,4 +76,29 @@ describe("admin bulk deletion", () => {
       expect.objectContaining({ action: "admin.orders.deleted" }),
     );
   });
+  it("refuses to remove a paid order that is not cancelled", async () => {
+    collection.find.mockReturnValue({
+      toArray: jest
+        .fn()
+        .mockResolvedValue([
+          { _id: id, paymentStatus: "paid", fulfillmentStatus: "processing" },
+        ]),
+    });
+    await expect(service.deleteProducts(user, { ids: [id] }, "orders")).rejects.toThrow(
+      BadRequestException,
+    );
+    expect(collection.updateMany).not.toHaveBeenCalled();
+  });
+  it("still allows removing a cancelled order", async () => {
+    collection.find.mockReturnValue({
+      toArray: jest
+        .fn()
+        .mockResolvedValue([
+          { _id: id, paymentStatus: "paid", fulfillmentStatus: "cancelled" },
+        ]),
+    });
+    await expect(service.deleteProducts(user, { ids: [id] }, "orders")).resolves.toEqual({
+      deletedCount: 1,
+    });
+  });
 });

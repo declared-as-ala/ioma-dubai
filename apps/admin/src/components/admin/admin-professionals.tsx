@@ -1,6 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Eye, EyeOff, MoreHorizontal, ExternalLink, ShieldAlert } from "lucide-react";
+import { apiFetch } from "@/lib/api";
 import { Link } from "@/i18n/navigation";
 import { useAdminAccess, useAdminQuery } from "@/hooks/use-admin";
 import { Badge, Button, Card, Input, Select } from "./polaris";
@@ -56,6 +59,111 @@ const TYPES = [
   "diagnostic_center",
   "distributor",
 ];
+
+/** Per-row management: open the business, show or hide its public listing, jump to B2B suspension. */
+function BusinessActions({ row, manage }: { row: HubRow; manage: boolean }) {
+  const qc = useQueryClient();
+  const [open, setOpen] = useState(false);
+  const [note, setNote] = useState<string | null>(null);
+  const box = useRef<HTMLSpanElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const away = (e: MouseEvent) => {
+      if (!box.current?.contains(e.target as Node)) setOpen(false);
+    };
+    const esc = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    document.addEventListener("mousedown", away);
+    document.addEventListener("keydown", esc);
+    return () => {
+      document.removeEventListener("mousedown", away);
+      document.removeEventListener("keydown", esc);
+    };
+  }, [open]);
+  const toggle = useMutation({
+    mutationFn: (status: "active" | "inactive") =>
+      apiFetch(`/admin/resources/partners/${row.partnerId}`, {
+        method: "PATCH",
+        body: JSON.stringify({ status }),
+      }),
+    onSuccess: async (_d, status) => {
+      await qc.invalidateQueries({ queryKey: ["admin"] });
+      setNote(
+        status === "active"
+          ? "Public listing is now visible."
+          : "Public listing is now hidden.",
+      );
+    },
+    onError: () => setNote("Could not update. Nothing was changed."),
+  });
+  const href = `/admin/professional-accounts/${encodeURIComponent(row.key)}`;
+  const item =
+    "flex w-full items-center gap-2 px-3 py-2 text-[13px] hover:bg-neutral-100";
+  return (
+    <span ref={box} className="relative inline-flex">
+      <button
+        type="button"
+        className="pl-btn pl-btn--plain pl-btn--sm"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        aria-label={`Actions for ${row.name}`}
+        onClick={() => setOpen((o) => !o)}
+      >
+        <MoreHorizontal className="size-4" aria-hidden />
+      </button>
+      {open && (
+        <ul
+          role="menu"
+          className="absolute end-0 top-full z-30 mt-1 min-w-52 rounded-lg border bg-white py-1 text-start shadow-lg"
+        >
+          <li role="none">
+            <Link role="menuitem" href={href} className={item}>
+              <ExternalLink className="size-4" aria-hidden /> Open &amp; edit business
+            </Link>
+          </li>
+          {manage && row.partnerId && row.visibility !== "none" && (
+            <li role="none">
+              <button
+                type="button"
+                role="menuitem"
+                className={item}
+                disabled={toggle.isPending}
+                onClick={() => {
+                  setOpen(false);
+                  toggle.mutate(row.visibility === "active" ? "inactive" : "active");
+                }}
+              >
+                {row.visibility === "active" ? (
+                  <>
+                    <EyeOff className="size-4" aria-hidden /> Hide public listing
+                  </>
+                ) : (
+                  <>
+                    <Eye className="size-4" aria-hidden /> Show public listing
+                  </>
+                )}
+              </button>
+            </li>
+          )}
+          {manage && row.b2bStatus !== "none" && (
+            <li role="none">
+              <Link role="menuitem" href={href} className={item}>
+                <ShieldAlert className="size-4" aria-hidden />
+                {row.b2bStatus === "approved"
+                  ? "Suspend B2B access\u2026"
+                  : "Reactivate B2B access\u2026"}
+              </Link>
+            </li>
+          )}
+        </ul>
+      )}
+      {note && (
+        <span role="status" className="sr-only">
+          {note}
+        </span>
+      )}
+    </span>
+  );
+}
 
 /** One list for every IOMA business: professionals (B2B) and their public partner profiles. */
 export function AdminProfessionals() {
@@ -170,6 +278,9 @@ export function AdminProfessionals() {
                       <th>B2B account</th>
                       <th>Public profile</th>
                       <th>Contact</th>
+                      <th>
+                        <span className="sr-only">Actions</span>
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
@@ -194,6 +305,12 @@ export function AdminProfessionals() {
                         <td className="text-[13px]">
                           <span className="block break-all">{r.email || "—"}</span>
                           <span dir="ltr">{r.phone}</span>
+                        </td>
+                        <td className="!text-end">
+                          <BusinessActions
+                            row={r}
+                            manage={!!access.data?.permissions.includes("b2b.manage")}
+                          />
                         </td>
                       </tr>
                     ))}
