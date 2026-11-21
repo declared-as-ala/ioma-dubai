@@ -55,7 +55,7 @@ export function SocialShare({ title, url, locale }: SocialShareProps) {
         {locale === "fr" ? "Partager :" : locale === "ar" ? "مشاركة :" : "Share :"}
       </span>
 
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         {shareLinks.map((item) => (
           <a
             key={item.name}

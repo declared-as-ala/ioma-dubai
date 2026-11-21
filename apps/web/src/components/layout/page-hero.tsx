@@ -46,7 +46,7 @@ export function PageHero({
           immediate
           text={title}
           className={cn(
-            "mt-6 max-w-5xl font-display text-[clamp(2.6rem,7vw,6.2rem)] font-medium uppercase leading-[0.96] tracking-[-0.03em] text-foreground rtl:normal-case rtl:leading-[1.2] rtl:tracking-normal",
+            "mt-6 max-w-5xl font-display text-[clamp(2.2rem,7vw,6.2rem)] [overflow-wrap:anywhere] font-medium uppercase leading-[0.96] tracking-[-0.03em] text-foreground rtl:normal-case rtl:leading-[1.2] rtl:tracking-normal",
             center && "mx-auto",
           )}
         />
