@@ -5,6 +5,10 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
+import {
+  OrderNotificationsService,
+  resolveOrderEvent,
+} from "../orders/notifications/order-notifications.service";
 import { InjectConnection } from "@nestjs/mongoose";
 import { Connection, Types } from "mongoose";
 import { z } from "zod";
@@ -32,6 +36,7 @@ export class AdminActionsService {
     private readonly availability: AvailabilityService,
     private readonly trainings: TrainingsService,
     private readonly documents: DocumentsService,
+    private readonly notifications: OrderNotificationsService,
   ) {}
   async stock(user: JwtPayload, id: string, body: unknown) {
     requirePermission(user, "commerce.manage");
@@ -284,6 +289,18 @@ export class AdminActionsService {
     if (!changed.matchedCount)
       throw new ConflictException("The order changed. Reload it.");
     await this.resources.event(user, "order.updated", "orders", id, input);
+    // Tell the customer only about a real transition (never about an edit that changed nothing).
+    const kind = resolveOrderEvent(
+      {
+        fulfillmentStatus: order.fulfillmentStatus,
+        paymentStatus: order.paymentStatus,
+      },
+      {
+        fulfillmentStatus: input.fulfillmentStatus ?? order.fulfillmentStatus,
+        paymentStatus: input.paymentStatus ?? order.paymentStatus,
+      },
+    );
+    if (kind) await this.notifications.statusChanged(id, kind);
     return { id };
   }
   async createOrder(user: JwtPayload, body: unknown) {

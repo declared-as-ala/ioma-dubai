@@ -48,6 +48,13 @@ export class CartService {
     return cart;
   }
 
+  /** Identifies the exact state of the cart (changes whenever it is edited or emptied). */
+  async version(owner: CartOwner): Promise<string> {
+    const cart = await this.getOrCreateCart(owner);
+    const at = (cart.get("updatedAt") as Date | undefined)?.getTime() ?? 0;
+    return `${cart.id}:${at}`;
+  }
+
   async getCart(owner: CartOwner) {
     const cart = await this.getOrCreateCart(owner);
     return this.toResponse(cart);

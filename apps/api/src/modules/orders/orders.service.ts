@@ -4,8 +4,9 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
-import { InjectModel } from "@nestjs/mongoose";
-import { Model, Types } from "mongoose";
+import { createHash } from "node:crypto";
+import { InjectConnection, InjectModel } from "@nestjs/mongoose";
+import { Connection, Model, Types } from "mongoose";
 import { nanoid } from "nanoid";
 import { Order, OrderDocument } from "./schemas/order.schema";
 import {
@@ -17,6 +18,10 @@ import { CartService, type CartOwner } from "../cart/cart.service";
 import { PaymentsService } from "../payments/payments.service";
 import type { CheckoutDto } from "./dto/checkout.dto";
 import { computeOrderTotals } from "./order-pricing";
+import {
+  OrderNotificationsService,
+  resolveOrderEvent,
+} from "./notifications/order-notifications.service";
 
 @Injectable()
 export class OrdersService {
@@ -27,7 +32,42 @@ export class OrdersService {
     @InjectModel(Product.name) private readonly productModel: Model<ProductDocument>,
     private readonly cartService: CartService,
     private readonly paymentsService: PaymentsService,
+    private readonly notifications: OrderNotificationsService,
+    @InjectConnection() private readonly db: Connection,
   ) {}
+
+  /** Who the order emails go to: the account for signed-in customers, the checkout form for guests. */
+  private async contactFor(owner: CartOwner, dto: CheckoutDto) {
+    const locale = dto.locale ?? "en";
+    if (!owner.userId) {
+      if (!dto.email)
+        throw new BadRequestException("An email address is required to place an order.");
+      return {
+        customerEmail: dto.email.trim().toLowerCase(),
+        customerName: dto.shippingAddress.fullName,
+        companyName: null as string | null,
+        locale,
+      };
+    }
+    const _id = new Types.ObjectId(owner.userId);
+    const user = await this.db.collection("users").findOne({ _id });
+    let companyName: string | null = null;
+    if (owner.type === "b2b") {
+      const profile = await this.db
+        .collection("professionalprofiles")
+        .findOne({ userId: _id });
+      companyName = profile?.companyName ?? null;
+    }
+    return {
+      customerEmail: user?.email ? String(user.email).toLowerCase() : null,
+      customerName:
+        `${user?.firstName ?? ""} ${user?.lastName ?? ""}`.trim() ||
+        dto.shippingAddress.fullName,
+      companyName,
+      // the language they are browsing in now beats an account default
+      locale: dto.locale ?? (user?.locale as "en" | "fr" | "ar" | undefined) ?? "en",
+    };
+  }
 
   private generateOrderNumber(): string {
     const date = new Date().toISOString().slice(0, 10).replace(/-/g, "");
@@ -81,25 +121,57 @@ export class OrdersService {
     if (totalMinor <= 0)
       throw new BadRequestException("The order total must be above 0 AED.");
 
-    const order = await this.orderModel.create({
-      orderNumber: this.generateOrderNumber(),
-      type: owner.type ?? "b2c",
-      userId: owner.userId ? new Types.ObjectId(owner.userId) : null,
-      guestToken: owner.userId ? null : nanoid(32),
-      items: orderItems,
-      subtotalMinor,
-      taxMinor,
-      shippingMinor,
-      totalMinor,
-      shippingAddress: dto.shippingAddress,
-      billingAddress: dto.billingAddress ?? dto.shippingAddress,
-      paymentStatus: "pending",
-      fulfillmentStatus: "pending",
-      statusHistory: [{ status: "order_created", at: new Date() }],
-    });
+    // One cart state = one order. A double-click or a re-sent request meets the same key and gets the
+    // order that already exists instead of creating (and charging, and emailing) a second one.
+    const checkoutKey = createHash("sha256")
+      .update(
+        [
+          owner.userId ?? `guest:${owner.sessionId ?? ""}`,
+          channel,
+          dto.deliveryMethod,
+          await this.cartService.version(owner),
+        ].join("|"),
+      )
+      .digest("hex");
+    const existing = await this.orderModel.findOne({ checkoutKey });
+    if (existing) return existing.toObject();
+
+    const contact = await this.contactFor(owner, dto);
+    let order: OrderDocument;
+    try {
+      order = await this.orderModel.create({
+        checkoutKey,
+        notifyPending: true,
+        paymentMethod: "demo",
+        customerEmail: contact.customerEmail,
+        customerName: contact.customerName,
+        companyName: contact.companyName,
+        locale: contact.locale,
+        orderNumber: this.generateOrderNumber(),
+        type: owner.type ?? "b2c",
+        userId: owner.userId ? new Types.ObjectId(owner.userId) : null,
+        guestToken: owner.userId ? null : nanoid(32),
+        items: orderItems,
+        subtotalMinor,
+        taxMinor,
+        shippingMinor,
+        totalMinor,
+        shippingAddress: dto.shippingAddress,
+        billingAddress: dto.billingAddress ?? dto.shippingAddress,
+        paymentStatus: "pending",
+        fulfillmentStatus: "pending",
+        statusHistory: [{ status: "order_created", at: new Date() }],
+      });
+    } catch (err) {
+      // A concurrent identical request won the race: hand back its order, never a second one.
+      if ((err as { code?: number }).code === 11000) {
+        const winner = await this.orderModel.findOne({ checkoutKey });
+        if (winner) return winner.toObject();
+      }
+      throw err;
+    }
 
     await this.attemptPayment(order, dto.paymentMethod === "mock_failure", owner);
-
     return order.toObject();
   }
 
@@ -120,8 +192,12 @@ export class OrdersService {
     } else {
       order.paymentStatus = "failed";
       order.statusHistory.push({ status: "payment_failed", at: new Date() });
+      // Free the key so a deliberate new attempt creates a fresh order (a double-click already met it).
+      order.checkoutKey = null;
     }
     await order.save();
+    // Announce the order only once it is genuinely placed; a mail problem never affects the order.
+    if (order.paymentStatus !== "failed") await this.notifications.placed(order.id);
   }
 
   private async decrementStock(order: OrderDocument) {
@@ -139,8 +215,14 @@ export class OrdersService {
     owner: CartOwner,
     paymentMethod: "mock_success" | "mock_failure",
   ) {
-    const order = await this.findOwnedOrder(orderNumber, owner);
-    if (order.paymentStatus !== "failed") {
+    const found = await this.findOwnedOrder(orderNumber, owner);
+    // Atomic claim: two quick clicks cannot both retry (no double charge, no double stock decrement).
+    const order = await this.orderModel.findOneAndUpdate(
+      { _id: found._id, paymentStatus: "failed" },
+      { $set: { paymentStatus: "pending" } },
+      { new: true },
+    );
+    if (!order) {
       throw new BadRequestException("Only a failed order can be retried.");
     }
     await this.attemptPayment(order, paymentMethod === "mock_failure", {
@@ -198,9 +280,15 @@ export class OrdersService {
     if (!["pending", "processing"].includes(order.fulfillmentStatus)) {
       throw new BadRequestException("This order can no longer be cancelled.");
     }
+    const before = {
+      fulfillmentStatus: order.fulfillmentStatus,
+      paymentStatus: order.paymentStatus,
+    };
     order.fulfillmentStatus = "cancelled";
     order.statusHistory.push({ status: "cancelled_by_customer", at: new Date() });
     await order.save();
+    const kind = resolveOrderEvent(before, order);
+    if (kind) await this.notifications.statusChanged(order.id, kind);
     return order.toObject();
   }
 

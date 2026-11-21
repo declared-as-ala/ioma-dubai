@@ -25,6 +25,7 @@ test("guest can browse, add to cart, checkout, and see a paid confirmation", asy
   await expect(page).toHaveURL(/\/en\/checkout/);
 
   // Step 1: address
+  await page.getByLabel(/email address/i).fill("jane.doe@example.test");
   await page.getByLabel(/full name/i).fill("Jane Doe");
   await page.getByLabel(/phone/i).fill("+971501234567");
   await page.getByLabel(/emirate/i).click();
@@ -55,6 +56,7 @@ test("a declined mock payment shows a failed state, and retry succeeds", async (
   await page.getByRole("button", { name: /add to cart/i }).click();
   await page.getByRole("link", { name: /checkout/i }).click();
 
+  await page.getByLabel(/email address/i).fill("failed.case@example.test");
   await page.getByLabel(/full name/i).fill("Failed Case");
   await page.getByLabel(/phone/i).fill("+971501234567");
   await page.getByLabel(/emirate/i).click();

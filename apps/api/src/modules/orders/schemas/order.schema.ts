@@ -143,6 +143,31 @@ export class Order {
 
   @Prop({ type: [StatusHistoryEntry], default: [] })
   statusHistory!: StatusHistoryEntry[];
+
+  // Who to write to about this order. Filled from the account for signed-in customers and from the
+  // checkout form for guests; never trusted from the client for signed-in users.
+  @Prop({ type: String, default: null })
+  customerEmail!: string | null;
+
+  @Prop({ type: String, default: null })
+  customerName!: string | null;
+
+  @Prop({ type: String, default: null })
+  companyName!: string | null;
+
+  @Prop({ type: String, enum: ["en", "fr", "ar"], default: "en" })
+  locale!: "en" | "fr" | "ar";
+
+  @Prop({ type: String, default: null })
+  paymentMethod!: string | null;
+
+  // Makes checkout idempotent: the same cart can only become one order (double-click, retried request).
+  @Prop({ type: String, default: null })
+  checkoutKey!: string | null;
+
+  // True from creation until the "order placed" emails are queued. A sweep re-queues stuck ones.
+  @Prop({ type: Boolean, default: false })
+  notifyPending!: boolean;
 }
 
 export const OrderSchema = SchemaFactory.createForClass(Order);
@@ -155,3 +180,15 @@ OrderSchema.index(
   },
 );
 OrderSchema.index({ userId: 1, createdAt: -1 });
+OrderSchema.index(
+  { checkoutKey: 1 },
+  {
+    name: "unique_checkout_key",
+    unique: true,
+    partialFilterExpression: { checkoutKey: { $type: "string" } },
+  },
+);
+OrderSchema.index(
+  { notifyPending: 1 },
+  { partialFilterExpression: { notifyPending: true } },
+);

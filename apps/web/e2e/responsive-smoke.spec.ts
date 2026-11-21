@@ -345,6 +345,9 @@ for (const locale of locales) {
     );
 
     await page.setViewportSize(viewports[0]);
+    // guests give an email for the order confirmation (signed-in customers do not see the field)
+    if (await page.locator("#checkout-email").count())
+      await page.locator("#checkout-email").fill("responsive@example.test");
     await page.locator("#checkout-fullname").fill("Responsive Test");
     await page.locator("#checkout-phone").fill("+971501234567");
     await page.locator("#checkout-emirate").click();

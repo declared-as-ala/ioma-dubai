@@ -58,6 +58,65 @@ describe("MailOutboxService", () => {
   });
 });
 
+describe("MailOutboxService failures and manual retry", () => {
+  it("records every attempt in the log and marks the mail failed after the last attempt", async () => {
+    const send = jest.fn().mockResolvedValue({ status: "failed", reason: "smtp 421" });
+    const { svc, rows, model } = build(send);
+    await svc.enqueue(mail);
+    await flush();
+    // pretend 7 attempts already happened: the next failure is final
+    rows.r1!.attempts = 7;
+    rows.r1!.status = "pending";
+    rows.r1!.lockedUntil = null;
+    rows.r1!.nextAttemptAt = new Date(Date.now() - 1000);
+    await svc.attempt("r1");
+    expect(rows.r1!.status).toBe("failed");
+    expect(rows.r1!.lastError).toBe("smtp 421");
+    const pushes = model.updateOne.mock.calls
+      .map(
+        (c) =>
+          (
+            c[1] as {
+              $push?: { attemptLog: { $each: { outcome: string; reason?: string }[] } };
+            }
+          ).$push,
+      )
+      .filter(Boolean);
+    expect(pushes.length).toBeGreaterThanOrEqual(2);
+    expect(pushes[0]!.attemptLog.$each[0]).toMatchObject({
+      outcome: "failed",
+      reason: "smtp 421",
+    });
+  });
+
+  it("an administrator can put a failed mail back in the queue and it is sent again", async () => {
+    const send = jest
+      .fn()
+      .mockResolvedValueOnce({ status: "failed", reason: "ECONNREFUSED" })
+      .mockResolvedValueOnce({ status: "accepted", messageId: "<ok>" });
+    const { svc, rows, model } = build(send);
+    (model.updateOne as jest.Mock).mockImplementation(
+      async (_q: unknown, u: { $set: Record<string, unknown> }) => {
+        Object.assign(rows.r1!, u.$set);
+        return { matchedCount: 1 };
+      },
+    );
+    await svc.enqueue(mail);
+    await flush();
+    rows.r1!.status = "failed";
+    expect(await svc.retry("r1")).toBe(true);
+    await flush();
+    expect(rows.r1!.status).toBe("sent");
+    expect(send).toHaveBeenCalledTimes(2);
+  });
+
+  it("refuses to retry a mail that was already sent", async () => {
+    const { svc, model } = build(jest.fn());
+    (model.updateOne as jest.Mock).mockResolvedValue({ matchedCount: 0 });
+    expect(await svc.retry("r1")).toBe(false);
+  });
+});
+
 describe("VerifiedEmailGuard", () => {
   const ctx = (user?: unknown) =>
     ({ switchToHttp: () => ({ getRequest: () => ({ user }) }) }) as never;
