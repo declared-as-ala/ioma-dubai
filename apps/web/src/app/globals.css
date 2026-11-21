@@ -518,3 +518,80 @@
 @keyframes consent-in { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
 .consent-banner { animation: consent-in 420ms var(--ease-out-strong) 600ms backwards; }
 @media (prefers-reduced-motion: reduce) { .consent-banner { animation: none; } }
+
+/* Professional portal tokens. The defaults are the original warm palette (public B2B landing);
+   .pro-carbon overrides them with an IBM Carbon-inspired white and blue system. */
+@layer base {
+  :root {
+    --pro-bg: #faf7f1;
+    --pro-line: #e8e1d4;
+    --pro-accent: #bfa273;
+    --pro-accent-strong: #8c7347;
+    --pro-accent-ink: #9c8157;
+    --pro-chip-ink: #6f5a36;
+    --pro-btn: #1a1a1d;
+    --pro-btn-hover: #8c7347;
+    --pro-radius-btn: 9999px;
+    --pro-radius-card: 1rem;
+  }
+  .pro-carbon {
+    --pro-bg: #f4f4f4;
+    --pro-line: #e0e0e0;
+    --pro-accent: #0f62fe;
+    --pro-accent-strong: #0353e9;
+    --pro-accent-ink: #0f62fe;
+    --pro-chip-ink: #0043ce;
+    --pro-btn: #0f62fe;
+    --pro-btn-hover: #0353e9;
+    --pro-radius-btn: 0;
+    --pro-radius-card: 0.125rem;
+
+    --color-sf-champagne: #0f62fe;
+    --color-sf-ivory: #f4f4f4;
+    --color-sf-platinum: #e0e0e0;
+    --color-sf-charcoal: #161616;
+    --background: #ffffff;
+    --foreground: #161616;
+    --card: #ffffff;
+    --card-foreground: #161616;
+    --primary: #0f62fe;
+    --primary-foreground: #ffffff;
+    --secondary: #f4f4f4;
+    --muted: #f4f4f4;
+    --muted-foreground: #525252;
+    --accent: #f4f4f4;
+    --border: #e0e0e0;
+    --input: #e0e0e0;
+    --ring: #0f62fe;
+    --carbon-success: #198038;
+    --carbon-warning: #b28600;
+    --carbon-error: #da1e28;
+    --radius-lg: 0.25rem;
+    --radius-xl: 0.25rem;
+    --radius-2xl: 0.25rem;
+    background: #ffffff;
+    color: #161616;
+  }
+  html:not([dir="rtl"]) .pro-carbon {
+    --font-sans: var(--font-plex), system-ui, sans-serif;
+    --font-display: var(--font-plex), system-ui, sans-serif;
+  }
+  .pro-carbon h1,
+  .pro-carbon h2 {
+    font-weight: 300;
+    letter-spacing: -0.01em;
+  }
+  .pro-carbon a,
+  .pro-carbon button {
+    transition:
+      background-color 110ms cubic-bezier(0.2, 0, 0.38, 0.9),
+      color 110ms cubic-bezier(0.2, 0, 0.38, 0.9),
+      border-color 110ms cubic-bezier(0.2, 0, 0.38, 0.9);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .pro-carbon a,
+    .pro-carbon button {
+      transition: none;
+    }
+  }
+}

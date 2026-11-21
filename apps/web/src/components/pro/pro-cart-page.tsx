@@ -141,7 +141,7 @@ export default function ProCartPage() {
               className={cn(
                 "grid size-7 shrink-0 place-items-center rounded-full border text-[0.7rem] font-semibold",
                 i === 0
-                  ? "border-[#1a1a1d] bg-[#1a1a1d] text-white"
+                  ? "border-[color:var(--pro-btn)] bg-[color:var(--pro-btn)] text-white"
                   : "border-border bg-white text-muted-foreground",
               )}
             >
@@ -204,7 +204,7 @@ export default function ProCartPage() {
                 <div
                   className={cn(
                     "h-full rounded-full transition-[width] duration-500 motion-reduce:transition-none",
-                    reached ? "bg-emerald-600" : "bg-[#1a1a1d]",
+                    reached ? "bg-emerald-600" : "bg-[color:var(--pro-btn)]",
                   )}
                   style={{ width: `${pct}%` }}
                 />

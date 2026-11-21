@@ -75,7 +75,12 @@ export function ProCard({
   children: React.ReactNode;
 }) {
   return (
-    <section className={cn("rounded-2xl border border-[#e8e1d4] bg-white", className)}>
+    <section
+      className={cn(
+        "rounded-[var(--pro-radius-card)] border border-[color:var(--pro-line)] bg-white",
+        className,
+      )}
+    >
       {children}
     </section>
   );
@@ -91,7 +96,7 @@ export function Chip({
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-full bg-sf-champagne/15 px-2 py-1 text-[0.62rem] font-semibold uppercase tracking-[0.14em] text-[#6f5a36]",
+        "inline-flex items-center rounded-full bg-sf-champagne/15 px-2 py-1 text-[0.62rem] font-semibold uppercase tracking-[0.14em] text-[color:var(--pro-chip-ink)]",
         className,
       )}
     >
@@ -102,7 +107,7 @@ export function Chip({
 
 export function LockPill({ children }: { children: React.ReactNode }) {
   return (
-    <span className="inline-flex items-center gap-1.5 text-[0.62rem] font-semibold uppercase tracking-[0.14em] text-[#6f5a36]/70">
+    <span className="inline-flex items-center gap-1.5 text-[0.62rem] font-semibold uppercase tracking-[0.14em] text-[color:var(--pro-chip-ink)]/70">
       <Lock className="size-3" aria-hidden />
       {children}
     </span>
@@ -110,9 +115,9 @@ export function LockPill({ children }: { children: React.ReactNode }) {
 }
 
 export const primaryBtn =
-  "inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-[#1a1a1d] px-6 text-xs font-semibold uppercase tracking-wider text-white transition-colors hover:bg-[#8c7347] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#bfa273] disabled:opacity-50";
+  "inline-flex min-h-11 items-center justify-center gap-2 rounded-[var(--pro-radius-btn)] bg-[color:var(--pro-btn)] px-6 text-xs font-semibold uppercase tracking-wider text-white transition-colors hover:bg-[color:var(--pro-btn-hover)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--pro-accent)] disabled:opacity-50";
 export const outlineBtn =
-  "inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-[#bfa273]/60 bg-white px-6 text-xs font-semibold uppercase tracking-wider text-foreground transition-colors hover:bg-sf-champagne/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#bfa273] disabled:opacity-50";
+  "inline-flex min-h-11 items-center justify-center gap-2 rounded-[var(--pro-radius-btn)] border border-[color:var(--pro-accent)]/60 bg-white px-6 text-xs font-semibold uppercase tracking-wider text-foreground transition-colors hover:bg-sf-champagne/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--pro-accent)] disabled:opacity-50";
 
 /**
  * Thumbnail of locked content: the (intentionally low-resolution) preview, blurred, with a
@@ -145,7 +150,10 @@ export function BlurThumb({
       {locked && (
         <span className="absolute inset-0 grid place-items-center bg-white/10">
           <span className="grid size-11 place-items-center rounded-full bg-white shadow-sm">
-            <Lock className="size-5 text-[#9c8157]" aria-label="Locked" />
+            <Lock
+              className="size-5 text-[color:var(--pro-accent-ink)]"
+              aria-label="Locked"
+            />
           </span>
         </span>
       )}
@@ -170,13 +178,13 @@ export function UnlockBanner({
   return (
     <div
       className={cn(
-        "flex flex-wrap items-center justify-between gap-4 rounded-xl border border-[#bfa273]/30 bg-sf-champagne/10 p-5",
+        "flex flex-wrap items-center justify-between gap-4 rounded-xl border border-[color:var(--pro-accent)]/30 bg-sf-champagne/10 p-5",
         className,
       )}
     >
       <div className="min-w-0">
         <p className="flex items-center gap-2 text-sm font-semibold text-foreground">
-          <Lock className="size-4 text-[#9c8157]" aria-hidden />
+          <Lock className="size-4 text-[color:var(--pro-accent-ink)]" aria-hidden />
           {tx(LOCK.unlockedByFirst)}
         </p>
         <p className="mt-1 text-xs text-muted-foreground">{tx(rule)}</p>

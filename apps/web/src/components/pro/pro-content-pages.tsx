@@ -87,8 +87,8 @@ function Tabs({
           className={cn(
             "min-h-11 rounded-lg border px-5 text-xs font-semibold uppercase tracking-wider transition-colors",
             value === t.key
-              ? "border-[#1a1a1d] bg-[#1a1a1d] text-white"
-              : "border-border bg-white hover:border-[#1a1a1d]/50",
+              ? "border-[color:var(--pro-btn)] bg-[color:var(--pro-btn)] text-white"
+              : "border-border bg-white hover:border-[color:var(--pro-btn)]/50",
           )}
         >
           {t.label}
@@ -110,10 +110,10 @@ function ProgressBar({ value }: { value: number }) {
       aria-valuenow={Math.round(value)}
       aria-valuemin={0}
       aria-valuemax={100}
-      className="h-1 overflow-hidden rounded-full bg-[#e8e1d4]"
+      className="h-1 overflow-hidden rounded-full bg-[color:var(--pro-line)]"
     >
       <div
-        className="h-full bg-[#bfa273]"
+        className="h-full bg-[color:var(--pro-accent)]"
         style={{ width: `${Math.min(100, value)}%` }}
       />
     </div>
@@ -145,7 +145,7 @@ function LessonCard({ v, onPlay }: { v: ProVideo; onPlay: (v: ProVideo) => void 
           locked={v.locked}
         >
           <span className="absolute inset-0 grid place-items-center">
-            <span className="grid size-12 place-items-center rounded-full bg-[#1a1a1d]/90 text-white shadow transition-transform group-hover:scale-105">
+            <span className="grid size-12 place-items-center rounded-full bg-[color:var(--pro-btn)]/90 text-white shadow transition-transform group-hover:scale-105">
               <Play className="size-5 translate-x-0.5 rtl:-scale-x-100" aria-hidden />
             </span>
           </span>
@@ -233,7 +233,7 @@ function Player({ video, onClose }: { video: ProVideo | null; onClose: () => voi
             onEnded={() => persist(true)}
           />
         ) : (
-          <p className="grid aspect-video place-items-center rounded-xl bg-[#faf7f1] text-sm text-muted-foreground">
+          <p className="grid aspect-video place-items-center rounded-xl bg-[color:var(--pro-bg)] text-sm text-muted-foreground">
             {tx(VIDEOS.videoSoon)}
           </p>
         )}
@@ -387,7 +387,7 @@ export function ProVideos() {
               fr: "Rechercher une leçon",
               ar: "ابحث عن درس",
             })}
-            className="min-h-11 w-64 rounded-full border border-[#e8e1d4] bg-white ps-9 pe-4 text-sm outline-none focus-visible:border-[#bfa273]"
+            className="min-h-11 w-64 rounded-full border border-[color:var(--pro-line)] bg-white ps-9 pe-4 text-sm outline-none focus-visible:border-[color:var(--pro-accent)]"
           />
         </label>
       </div>
@@ -411,7 +411,7 @@ export function ProVideos() {
           const finished = items.filter((v) => v.progress?.completed).length;
           return (
             <section key={course || "other"} className="space-y-3">
-              <div className="flex flex-wrap items-end justify-between gap-3 border-b border-[#e8e1d4] pb-2">
+              <div className="flex flex-wrap items-end justify-between gap-3 border-b border-[color:var(--pro-line)] pb-2">
                 <h2 className="font-display text-2xl">
                   {course || tr(loc, { en: "Lessons", fr: "Leçons", ar: "الدروس" })}
                 </h2>
@@ -511,8 +511,8 @@ export function ProGallery() {
               className={cn(
                 "min-h-10 rounded-full border px-4 text-xs font-medium transition-colors",
                 collection === c
-                  ? "border-[#bfa273] bg-[#bfa273]/15"
-                  : "border-[#e8e1d4] bg-white hover:border-[#bfa273]/60",
+                  ? "border-[color:var(--pro-accent)] bg-[color:var(--pro-accent)]/15"
+                  : "border-[color:var(--pro-line)] bg-white hover:border-[color:var(--pro-accent)]/60",
               )}
             >
               {c || tr(loc, { en: "All collections", fr: "Toutes", ar: "الكل" })}
@@ -530,7 +530,7 @@ export function ProGallery() {
                 type="button"
                 disabled={p.locked}
                 onClick={() => setOpen(p)}
-                className="group block w-full overflow-hidden rounded-2xl border border-[#e8e1d4] bg-white text-start disabled:cursor-default"
+                className="group block w-full overflow-hidden rounded-2xl border border-[color:var(--pro-line)] bg-white text-start disabled:cursor-default"
                 aria-label={lx(p.title)}
               >
                 <BlurThumb
@@ -647,7 +647,10 @@ export function ProBenefits() {
                 )}
                 <div className="p-6">
                   <div className="flex items-start justify-between gap-3">
-                    <Icon className="size-6 text-[#9c8157]" aria-hidden />
+                    <Icon
+                      className="size-6 text-[color:var(--pro-accent-ink)]"
+                      aria-hidden
+                    />
                     {customer ? (
                       <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[0.62rem] font-semibold uppercase tracking-[0.14em] text-emerald-800">
                         {tx(BENEFITS.unlocked)}
@@ -736,8 +739,8 @@ export function ProDocuments() {
               className={cn(
                 "min-h-10 rounded-full border px-4 text-xs font-medium transition-colors",
                 kind === k
-                  ? "border-[#bfa273] bg-[#bfa273]/15"
-                  : "border-[#e8e1d4] bg-white hover:border-[#bfa273]/60",
+                  ? "border-[color:var(--pro-accent)] bg-[color:var(--pro-accent)]/15"
+                  : "border-[color:var(--pro-line)] bg-white hover:border-[color:var(--pro-accent)]/60",
               )}
             >
               {k
@@ -750,7 +753,7 @@ export function ProDocuments() {
       {docs.isLoading ? (
         <div className="ioma-skel h-64" aria-hidden />
       ) : shown.length ? (
-        <ProCard className="divide-y divide-[#e8e1d4]">
+        <ProCard className="divide-y divide-[color:var(--pro-line)]">
           {shown.map((d) => (
             <div
               key={d.id}
@@ -759,7 +762,7 @@ export function ProDocuments() {
               <div className="flex min-w-0 items-start gap-4">
                 <FileText
                   className={cn(
-                    "mt-0.5 size-5 shrink-0 text-[#9c8157]",
+                    "mt-0.5 size-5 shrink-0 text-[color:var(--pro-accent-ink)]",
                     d.locked && "opacity-50",
                   )}
                   aria-hidden
@@ -868,7 +871,7 @@ export function ProOrders() {
                     <td className="px-5 py-4 text-end">
                       <Link
                         href={`/portal/orders/${o.orderNumber}`}
-                        className="text-xs font-semibold uppercase tracking-wider text-[#9c8157] hover:underline"
+                        className="text-xs font-semibold uppercase tracking-wider text-[color:var(--pro-accent-ink)] hover:underline"
                       >
                         {tx(OVERVIEW.view)}
                       </Link>

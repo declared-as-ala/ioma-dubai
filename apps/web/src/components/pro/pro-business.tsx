@@ -29,7 +29,7 @@ interface Business {
 
 const KEY = ["pro", "business"] as const;
 const input =
-  "mt-1 w-full rounded-xl border border-[#e8e1d4] bg-white px-4 py-3 text-sm outline-none focus-visible:border-[#bfa273] focus-visible:ring-2 focus-visible:ring-[#bfa273]/30";
+  "mt-1 w-full rounded-xl border border-[color:var(--pro-line)] bg-white px-4 py-3 text-sm outline-none focus-visible:border-[color:var(--pro-accent)] focus-visible:ring-2 focus-visible:ring-[color:var(--pro-accent)]/30";
 
 /** The partner's own public profile. Light edits go live at once; identity and location are reviewed by IOMA. */
 export function ProBusiness() {
@@ -119,7 +119,7 @@ export function ProBusiness() {
       </PageTitle>
 
       {q.isLoading ? (
-        <div className="h-64 animate-pulse rounded-2xl bg-[#e8e1d4]/50" />
+        <div className="h-64 animate-pulse rounded-2xl bg-[color:var(--pro-line)]/50" />
       ) : q.isError ? (
         <EmptyNote>
           {tr(loc, {
@@ -170,7 +170,7 @@ export function ProBusiness() {
           {q.data?.pendingChange && (
             <p
               role="status"
-              className="rounded-2xl border border-[#bfa273]/40 bg-[#bfa273]/10 p-4 text-sm"
+              className="rounded-2xl border border-[color:var(--pro-accent)]/40 bg-[color:var(--pro-accent)]/10 p-4 text-sm"
             >
               {tr(loc, {
                 en: "A change to your name or address is waiting for IOMA's review. Your public profile keeps the current details until then.",

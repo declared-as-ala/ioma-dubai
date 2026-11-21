@@ -84,7 +84,7 @@ function ContactBox({ access }: { access: ProAccess }) {
   const contact = isCustomer ? access.accountContact : access.teamContact;
   return (
     <div className="rounded-xl bg-sf-champagne/10 p-4 text-sm">
-      <p className="text-[0.62rem] font-semibold uppercase tracking-[0.18em] text-[#6f5a36]/80">
+      <p className="text-[0.62rem] font-semibold uppercase tracking-[0.18em] text-[color:var(--pro-chip-ink)]/80">
         {isCustomer ? tx(SHELL.yourContact) : tx(SHELL.help)}
       </p>
       {contact ? (
@@ -134,7 +134,7 @@ export function ProShell({ children }: { children: React.ReactNode }) {
   if (!hydrated || !user || access.isLoading) {
     return (
       <div
-        className="grid min-h-screen place-items-center bg-[#faf7f1]"
+        className="grid min-h-screen place-items-center bg-[color:var(--pro-bg)]"
         role="status"
         aria-label={tx(SHELL.loading)}
       >
@@ -142,7 +142,7 @@ export function ProShell({ children }: { children: React.ReactNode }) {
           <p className="font-display text-2xl tracking-wide">
             ioma <span className="text-xs tracking-[0.3em]">PARIS</span>
           </p>
-          <div className="ioma-bar mx-auto text-[#9c8157]" />
+          <div className="ioma-bar mx-auto text-[color:var(--pro-accent-ink)]" />
           <p className="text-xs text-muted-foreground">{tx(SHELL.loading)}</p>
         </div>
       </div>
@@ -152,7 +152,7 @@ export function ProShell({ children }: { children: React.ReactNode }) {
   const data = access.data;
   if (access.isError || !data || data.level === "visitor") {
     return (
-      <main className="grid min-h-screen place-items-center bg-[#faf7f1] px-4">
+      <main className="grid min-h-screen place-items-center bg-[color:var(--pro-bg)] px-4">
         <div className="max-w-md text-center">
           <p className="font-display text-2xl tracking-wide">
             ioma <span className="text-xs tracking-[0.3em]">PARIS</span>
@@ -179,7 +179,7 @@ export function ProShell({ children }: { children: React.ReactNode }) {
         );
 
   return (
-    <div className="min-h-screen bg-[#faf7f1] text-foreground">
+    <div className="min-h-screen bg-[color:var(--pro-bg)] text-foreground">
       <header className="sticky top-0 z-30 border-b border-border bg-white">
         <div className="flex h-14 items-center gap-3 px-4 md:px-6">
           <Link href="/portal" className="flex items-center gap-2" aria-label="IOMA Pro">
@@ -187,7 +187,7 @@ export function ProShell({ children }: { children: React.ReactNode }) {
             <span className="text-[0.6rem] tracking-[0.3em] text-muted-foreground">
               PARIS
             </span>
-            <span className="ms-1 rounded border border-[#bfa273] px-1.5 py-0.5 text-[0.6rem] font-semibold tracking-[0.2em] text-[#8c7347]">
+            <span className="ms-1 rounded border border-[color:var(--pro-accent)] px-1.5 py-0.5 text-[0.6rem] font-semibold tracking-[0.2em] text-[color:var(--pro-accent-strong)]">
               {SHELL.badge}
             </span>
           </Link>
@@ -199,8 +199,8 @@ export function ProShell({ children }: { children: React.ReactNode }) {
               className={cn(
                 "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-3 py-1 font-medium",
                 customer
-                  ? "border-emerald-200 bg-emerald-50 text-emerald-800"
-                  : "border-amber-200 bg-amber-50 text-amber-800",
+                  ? "border-[#a7f0ba] bg-[#defbe6] text-[#198038]"
+                  : "border-[#f1c21b] bg-[#fcf4d6] text-[#8e6a00]",
               )}
             >
               <Check className="size-3.5" aria-hidden />
@@ -268,12 +268,16 @@ export function ProShell({ children }: { children: React.ReactNode }) {
                   aria-current={isActive(item) ? "page" : undefined}
                   className={cn(
                     "flex min-h-11 items-center gap-3 rounded-lg px-3 text-sm transition-colors",
+                    "border-s-[3px] border-transparent",
                     isActive(item)
-                      ? "bg-sf-champagne/20 font-medium text-foreground"
+                      ? "border-[color:var(--pro-accent)] bg-sf-champagne/10 font-medium text-foreground"
                       : "text-foreground/75 hover:bg-sf-champagne/10",
                   )}
                 >
-                  <item.icon className="size-[18px] text-[#9c8157]" aria-hidden />
+                  <item.icon
+                    className="size-[18px] text-[color:var(--pro-accent-ink)]"
+                    aria-hidden
+                  />
                   <span className="flex-1">{tx(item.label)}</span>
                   {item.lockedUntilOrder && !customer && (
                     <Lock

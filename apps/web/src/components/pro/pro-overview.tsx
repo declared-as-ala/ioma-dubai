@@ -95,12 +95,12 @@ function Section({
 }) {
   return (
     <section>
-      <div className="flex flex-wrap items-end justify-between gap-3 border-b border-[#e8e1d4] pb-2">
+      <div className="flex flex-wrap items-end justify-between gap-3 border-b border-[color:var(--pro-line)] pb-2">
         <h2 className="font-display text-2xl">{title}</h2>
         {href && (
           <Link
             href={href}
-            className="text-xs font-semibold uppercase tracking-wider text-[#9c8157] hover:underline"
+            className="text-xs font-semibold uppercase tracking-wider text-[color:var(--pro-accent-ink)] hover:underline"
           >
             {hrefLabel}
           </Link>
@@ -159,7 +159,7 @@ export default function ProOverview() {
             <div className="overflow-x-auto">
               <table className="w-full min-w-[520px] text-start text-sm">
                 <thead>
-                  <tr className="border-b border-[#e8e1d4] text-[0.65rem] uppercase tracking-[0.16em] text-muted-foreground">
+                  <tr className="border-b border-[color:var(--pro-line)] text-[0.65rem] uppercase tracking-[0.16em] text-muted-foreground">
                     {[
                       OVERVIEW.cols.order,
                       OVERVIEW.cols.date,
@@ -175,7 +175,10 @@ export default function ProOverview() {
                 </thead>
                 <tbody>
                   {orders.data.slice(0, 5).map((o) => (
-                    <tr key={o._id} className="border-b border-[#e8e1d4] last:border-0">
+                    <tr
+                      key={o._id}
+                      className="border-b border-[color:var(--pro-line)] last:border-0"
+                    >
                       <td className="px-5 py-4">
                         <bdi>{o.orderNumber}</bdi>
                       </td>
@@ -191,7 +194,7 @@ export default function ProOverview() {
                       <td className="px-5 py-4 text-end">
                         <Link
                           href={`/portal/orders/${o.orderNumber}`}
-                          className="text-xs font-semibold uppercase tracking-wider text-[#9c8157] hover:underline"
+                          className="text-xs font-semibold uppercase tracking-wider text-[color:var(--pro-accent-ink)] hover:underline"
                         >
                           {tx(OVERVIEW.view)}
                         </Link>
@@ -238,7 +241,7 @@ export default function ProOverview() {
             return (
               <Link key={p.slug} href="/portal/shop" className="group block">
                 <ProCard className="overflow-hidden transition-shadow group-hover:shadow-md">
-                  <div className="relative aspect-square bg-[#faf7f1]">
+                  <div className="relative aspect-square bg-[color:var(--pro-bg)]">
                     {p.images[0] && (
                       <ProductImage
                         src={p.images[0]}
@@ -250,7 +253,7 @@ export default function ProOverview() {
                     )}
                   </div>
                   <div className="space-y-1 p-4">
-                    <p className="text-[0.65rem] uppercase tracking-[0.16em] text-[#9c8157]">
+                    <p className="text-[0.65rem] uppercase tracking-[0.16em] text-[color:var(--pro-accent-ink)]">
                       {p.range.name[loc] || p.range.name.en}
                     </p>
                     <p className="text-sm font-medium leading-snug">
@@ -285,14 +288,14 @@ export default function ProOverview() {
             <Link
               key={v.id}
               href="/portal/videos"
-              className="overflow-hidden rounded-2xl border border-[#e8e1d4] bg-white"
+              className="overflow-hidden rounded-2xl border border-[color:var(--pro-line)] bg-white"
             >
               <BlurThumb
                 src={v.locked ? v.preview : v.thumbnail || v.preview}
                 locked={v.locked}
               >
                 <span className="absolute inset-0 grid place-items-center">
-                  <span className="grid size-12 place-items-center rounded-full bg-[#1a1a1d]/90 text-white shadow">
+                  <span className="grid size-12 place-items-center rounded-full bg-[color:var(--pro-btn)]/90 text-white shadow">
                     <Play
                       className="size-5 translate-x-0.5 rtl:-scale-x-100"
                       aria-hidden
@@ -332,15 +335,18 @@ export default function ProOverview() {
           ar: "مركز الموارد",
         })}
       >
-        <ProCard className="divide-y divide-[#e8e1d4]">
+        <ProCard className="divide-y divide-[color:var(--pro-line)]">
           {h.documents.map((d) => (
             <Link
               key={d.id}
               href="/portal/documents"
-              className="flex items-center gap-4 p-4 hover:bg-[#faf7f1]"
+              className="flex items-center gap-4 p-4 hover:bg-[color:var(--pro-bg)]"
             >
               <FileText
-                className={cn("size-5 text-[#9c8157]", d.locked && "opacity-50")}
+                className={cn(
+                  "size-5 text-[color:var(--pro-accent-ink)]",
+                  d.locked && "opacity-50",
+                )}
                 aria-hidden
               />
               <span className="min-w-0 flex-1 truncate text-sm">
@@ -457,7 +463,7 @@ export default function ProOverview() {
               />
             </div>
           )}
-          <div className="bg-gradient-to-br from-white to-[#faf7f1] p-6 sm:p-10">
+          <div className="bg-gradient-to-br from-white to-[color:var(--pro-bg)] p-6 sm:p-10">
             <Eyebrow>
               {tx(customer ? OVERVIEW.customerKicker : OVERVIEW.validatedKicker)}
             </Eyebrow>
@@ -509,7 +515,7 @@ export default function ProOverview() {
                       className={cn(
                         "grid size-7 place-items-center rounded-full border text-[0.7rem] font-semibold",
                         stepState[i] || i === 1
-                          ? "border-[#1a1a1d] bg-[#1a1a1d] text-white"
+                          ? "border-[color:var(--pro-btn)] bg-[color:var(--pro-btn)] text-white"
                           : "border-border text-muted-foreground",
                       )}
                     >
@@ -533,7 +539,7 @@ export default function ProOverview() {
         <div
           key={a.id}
           role="note"
-          className="rounded-2xl border border-[#bfa273]/40 bg-[#bfa273]/10 px-6 py-4"
+          className="rounded-2xl border border-[color:var(--pro-accent)]/40 bg-[color:var(--pro-accent)]/10 px-6 py-4"
         >
           <p className="font-medium">
             <bdi>{L(a.title)}</bdi>
@@ -554,13 +560,16 @@ export default function ProOverview() {
               key={c.key}
               href={c.href}
               className={cn(
-                "group rounded-2xl border border-[#e8e1d4] bg-white p-6 transition-colors hover:border-[#bfa273]",
+                "group rounded-2xl border border-[color:var(--pro-line)] bg-white p-6 transition-colors hover:border-[color:var(--pro-accent)]",
                 locked && "bg-white/60",
               )}
             >
               <div className="flex items-start justify-between gap-3">
                 <c.icon
-                  className={cn("size-6 text-[#9c8157]", locked && "opacity-60")}
+                  className={cn(
+                    "size-6 text-[color:var(--pro-accent-ink)]",
+                    locked && "opacity-60",
+                  )}
                   aria-hidden
                 />
                 {locked && <LockPill>{tx(OVERVIEW.cards.firstOrder)}</LockPill>}
