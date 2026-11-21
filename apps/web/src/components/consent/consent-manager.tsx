@@ -126,8 +126,8 @@ export function ConsentPreferencesPanel({ onDone }: { onDone?: () => void }) {
     <div>
       <ul className="divide-y divide-border border-y border-border">
         {rows.map((r) => (
-          <li key={r.id} className="flex items-start justify-between gap-6 py-5">
-            <div>
+          <li key={r.id} className="flex items-start justify-between gap-4 py-5 md:gap-6">
+            <div className="min-w-0 flex-1">
               <label htmlFor={`consent-${r.id}`} className="font-display text-lg">
                 {r.label}
               </label>

@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Headers,
   Param,
   Patch,
   Post,
@@ -206,8 +207,10 @@ export class AdminController {
     @Param("key") key: string,
     @Param("id") id: string,
     @Body() body: unknown,
+    // The version the editor loaded: refuses the save if someone else changed the record meanwhile.
+    @Headers("x-expected-updated-at") expectedUpdatedAt?: string,
   ) {
-    return this.resources.save(user, key, body, id);
+    return this.resources.save(user, key, body, id, expectedUpdatedAt);
   }
   @Post("inventory/:id/adjust")
   stock(@CurrentUser() user: JwtPayload, @Param("id") id: string, @Body() body: unknown) {

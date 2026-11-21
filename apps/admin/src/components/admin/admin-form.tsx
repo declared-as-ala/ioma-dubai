@@ -529,7 +529,14 @@ export function AdminForm({
       );
       return apiFetch<{ id: string }>(
         `/admin/resources/${resource.key}${record ? `/${record._id}` : ""}`,
-        { method: record ? "PATCH" : "POST", body: JSON.stringify(body) },
+        {
+          method: record ? "PATCH" : "POST",
+          body: JSON.stringify(body),
+          // the version this form was loaded from, so a concurrent edit is refused rather than overwritten
+          headers: record?.updatedAt
+            ? { "x-expected-updated-at": String(record.updatedAt) }
+            : undefined,
+        },
       );
     },
     onSuccess: async (result) => {

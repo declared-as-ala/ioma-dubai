@@ -1231,7 +1231,13 @@ export class AdminResourcesService implements OnModuleInit {
       throw new BadRequestException("Use a lowercase URL slug.");
     return values;
   }
-  async save(user: JwtPayload, key: string, body: unknown, id?: string) {
+  async save(
+    user: JwtPayload,
+    key: string,
+    body: unknown,
+    id?: string,
+    expectedUpdatedAt?: string,
+  ) {
     const resource = this.resource(user, key, true);
     if (resource.readonly || (!id && !resource.create))
       throw new ForbiddenException("This module uses a dedicated workflow.");
@@ -1244,6 +1250,15 @@ export class AdminResourcesService implements OnModuleInit {
       : null;
     if (id && (!previous || (key === "products" && previous.deletedAt)))
       throw new NotFoundException("Record not found.");
+    // Optimistic concurrency: the editor sends the version it loaded. If the record was saved by someone
+    // else since, refuse instead of silently overwriting their change.
+    if (id && expectedUpdatedAt && previous?.updatedAt) {
+      const loaded = new Date(expectedUpdatedAt).getTime();
+      if (Number.isFinite(loaded) && new Date(previous.updatedAt).getTime() !== loaded)
+        throw new ConflictException(
+          "This record was changed by someone else while you were editing. Reload it and apply your change again.",
+        );
+    }
     if (
       ["products", "categories", "ranges", "concerns"].includes(key) &&
       ("seo.title" in values || "seo.description" in values)
