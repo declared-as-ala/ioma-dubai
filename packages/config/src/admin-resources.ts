@@ -620,7 +620,10 @@ export const ADMIN_RESOURCES: AdminResource[] = [
     group: "training",
     columns: ["originalName", "ownerType", "mimeType", "sizeBytes", "createdAt"],
     search: ["originalName"],
-    filter: { deletedAt: null, ownerType: { $in: ["training", "protocol"] } },
+    filter: {
+      deletedAt: null,
+      ownerType: { $in: ["training", "protocol", "b2b_content"] },
+    },
     readonly: true,
     fields: [],
   },

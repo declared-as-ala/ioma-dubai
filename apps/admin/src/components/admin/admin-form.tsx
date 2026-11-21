@@ -29,16 +29,21 @@ function ReferenceField({
   const { label } = useAdminFormat();
   const qc = useQueryClient();
   const [uploadError, setUploadError] = useState(false);
+  const [justUploaded, setJustUploaded] = useState<{ id: string; name: string } | null>(
+    null,
+  );
   // A professional document points at an uploaded file: let the administrator upload it right here.
   const upload = useMutation({
-    mutationFn: (file: File) => {
+    mutationFn: async (file: File) => {
       const form = new FormData();
       form.append("file", file);
       form.append("ownerType", "b2b_content");
-      return apiUpload<{ id: string }>("/admin/documents/upload", form);
+      const result = await apiUpload<{ id: string }>("/admin/documents/upload", form);
+      return { ...result, name: file.name };
     },
     onSuccess: async (result) => {
       setUploadError(false);
+      setJustUploaded({ id: String(result.id), name: result.name });
       await qc.invalidateQueries({ queryKey: ["admin", `references/${field.resource}`] });
       onChange(result.id);
     },
