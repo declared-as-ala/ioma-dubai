@@ -18,6 +18,8 @@ export interface SendMailOptions {
   text?: string;
   /** Customer address, so the team can answer straight from the mail client. */
   replyTo?: string;
+  /** Sender display name; defaults to the identity's name. */
+  fromName?: string;
 }
 
 /**
@@ -175,7 +177,11 @@ export class MailService implements OnModuleInit, OnModuleDestroy {
 
     const domain = (id?.address ?? "ioma.local").split("@")[1] ?? "ioma.local";
     const messageId = `<${randomUUID()}@${domain}>`;
-    const fromName = identity === "support" ? "IOMA Paris Support" : "IOMA Paris";
+    const fromName = opts.fromName
+      ? stripLineBreaks(opts.fromName)
+      : identity === "support"
+        ? "IOMA Paris Support"
+        : "IOMA Paris";
     const from = id ? { name: fromName, address: id.address } : fromAddress;
 
     for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {

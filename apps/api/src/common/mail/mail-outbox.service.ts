@@ -18,7 +18,13 @@ export interface OutboxMail {
   subject: string;
   html: string;
   replyTo?: string;
+  fromName?: string;
+  kind?: string;
+  ref?: string;
 }
+
+const LOG_CAP = 20;
+const escapeRegex = (v: string) => v.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 @Injectable()
 export class MailOutboxService implements OnModuleInit, OnModuleDestroy {
@@ -41,7 +47,7 @@ export class MailOutboxService implements OnModuleInit, OnModuleDestroy {
   }
 
   /** Stores the mail, then delivers it in the background. Never throws, never blocks the caller. */
-  async enqueue(mail: OutboxMail): Promise<{ created: boolean }> {
+  async enqueue(mail: OutboxMail): Promise<{ created: boolean; failed?: boolean }> {
     try {
       const doc = await this.model.create({
         key: mail.key,
@@ -50,13 +56,16 @@ export class MailOutboxService implements OnModuleInit, OnModuleDestroy {
         subject: mail.subject,
         html: mail.html,
         replyTo: mail.replyTo ?? null,
+        fromName: mail.fromName ?? null,
+        kind: mail.kind ?? null,
+        ref: mail.ref ?? null,
       });
       void this.attempt(doc.id);
       return { created: true };
     } catch (err) {
       if ((err as { code?: number }).code === 11000) return { created: false };
       this.logger.error(`Outbox enqueue failed (${mail.key}): ${(err as Error).message}`);
-      return { created: false };
+      return { created: false, failed: true };
     }
   }
 
@@ -81,7 +90,12 @@ export class MailOutboxService implements OnModuleInit, OnModuleDestroy {
       subject: row.subject,
       html: row.html,
       replyTo: row.replyTo ?? undefined,
+      fromName: row.fromName ?? undefined,
     });
+    const logEntry = {
+      $each: [{ at: new Date(), outcome: res.status, reason: res.reason }],
+      $slice: -LOG_CAP,
+    };
 
     if (res.status === "accepted") {
       await this.model.updateOne(
@@ -95,6 +109,7 @@ export class MailOutboxService implements OnModuleInit, OnModuleDestroy {
             lastError: null,
           },
           $inc: { attempts: 1 },
+          $push: { attemptLog: logEntry },
         },
       );
       return;
@@ -103,7 +118,10 @@ export class MailOutboxService implements OnModuleInit, OnModuleDestroy {
       // SMTP is not configured (dev): nothing to retry.
       await this.model.updateOne(
         { _id: row._id },
-        { $set: { status: "skipped", lockedUntil: null } },
+        {
+          $set: { status: "skipped", lockedUntil: null },
+          $push: { attemptLog: logEntry },
+        },
       );
       return;
     }
@@ -120,10 +138,61 @@ export class MailOutboxService implements OnModuleInit, OnModuleDestroy {
           nextAttemptAt: new Date(Date.now() + wait),
           lockedUntil: null,
         },
+        $push: { attemptLog: logEntry },
       },
     );
     if (final)
       this.logger.error(`Outbox mail ${row.key} failed permanently: ${res.reason}`);
+  }
+
+  /** Admin list (newest first). The HTML body is not returned here; use `preview`. */
+  async list(filter: { status?: string; q?: string; page: number; limit: number }) {
+    const where: Record<string, unknown> = {};
+    if (filter.status && filter.status !== "all") where.status = filter.status;
+    if (filter.q) {
+      const rx = new RegExp(escapeRegex(filter.q), "i");
+      where.$or = [{ to: rx }, { subject: rx }, { ref: rx }, { kind: rx }];
+    }
+    const [items, total] = await Promise.all([
+      this.model
+        .find(where)
+        .select("-html")
+        .sort({ createdAt: -1 })
+        .skip((filter.page - 1) * filter.limit)
+        .limit(filter.limit)
+        .lean(),
+      this.model.countDocuments(where),
+    ]);
+    return { items, total, page: filter.page, limit: filter.limit };
+  }
+
+  async preview(id: string) {
+    return this.model.findById(id).select("html subject to").lean();
+  }
+
+  /** Puts a failed (or stuck) mail back in the queue and tries again right away. */
+  async retry(id: string): Promise<boolean> {
+    const res = await this.model.updateOne(
+      { _id: id, status: { $in: ["failed", "skipped", "pending"] } },
+      {
+        $set: {
+          status: "pending",
+          attempts: 0,
+          nextAttemptAt: new Date(),
+          lockedUntil: null,
+        },
+      },
+    );
+    if (!res.matchedCount) return false;
+    void this.attempt(id);
+    return true;
+  }
+
+  async counts() {
+    const rows = await this.model.aggregate<{ _id: string; n: number }>([
+      { $group: { _id: "$status", n: { $sum: 1 } } },
+    ]);
+    return Object.fromEntries(rows.map((r) => [r._id, r.n]));
   }
 
   async sweep(): Promise<void> {

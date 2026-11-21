@@ -9,6 +9,7 @@ import { ContentController } from "./content.controller";
 import { AdminDashboardService } from "./admin-dashboard.service";
 import { AdminResourcesService } from "./admin-resources.service";
 import { AdminActionsService } from "./admin-actions.service";
+import { OrderNotificationsModule } from "../orders/notifications/order-notifications.module";
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { AdminActionsService } from "./admin-actions.service";
     AppointmentsModule,
     TrainingsModule,
     PartnersModule,
+    OrderNotificationsModule,
   ],
   controllers: [AdminController, ContentController],
   providers: [AdminDashboardService, AdminResourcesService, AdminActionsService],

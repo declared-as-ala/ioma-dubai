@@ -55,6 +55,22 @@ export class MailOutbox {
 
   @Prop({ type: Date, default: null })
   sentAt!: Date | null;
+
+  /** Display name of the sender, e.g. "IOMA Paris Orders". Defaults to the identity's name. */
+  @Prop({ type: String, default: null })
+  fromName!: string | null;
+
+  /** What the mail is (e.g. "order.placed.customer"), for filtering in the admin. */
+  @Prop({ type: String, default: null, index: true })
+  kind!: string | null;
+
+  /** What it is about (e.g. the order number), for searching. */
+  @Prop({ type: String, default: null, index: true })
+  ref!: string | null;
+
+  /** Last delivery attempts (newest last, capped): when, outcome and a safe reason. Never holds credentials. */
+  @Prop({ type: [Object], default: [] })
+  attemptLog!: { at: Date; outcome: string; reason?: string }[];
 }
 
 export const MailOutboxSchema = SchemaFactory.createForClass(MailOutbox);

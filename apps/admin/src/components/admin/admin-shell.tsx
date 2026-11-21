@@ -99,7 +99,10 @@ const NAV: NavGroup[] = [
   {
     title: "Orders",
     icon: ShoppingBag,
-    items: [{ label: "Orders", href: "/admin/orders" }],
+    items: [
+      { label: "Orders", href: "/admin/orders" },
+      { label: "Email notifications", href: "/admin/notifications" },
+    ],
   },
   {
     title: "Customers",

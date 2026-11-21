@@ -15,6 +15,10 @@ export interface CheckoutInput {
   billingAddress?: CheckoutInput["shippingAddress"];
   deliveryMethod: "standard" | "express";
   paymentMethod: "mock_success" | "mock_failure";
+  /** Guests only: where the order emails go. Signed-in customers use their account email. */
+  email?: string;
+  /** Site language, so the order emails are written in it. */
+  locale?: "en" | "fr" | "ar";
 }
 
 export function useCheckoutMutation(professional = false) {

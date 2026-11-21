@@ -7,6 +7,7 @@ import { CartModule } from "../cart/cart.module";
 import { PaymentsModule } from "../payments/payments.module";
 import { OrdersService } from "./orders.service";
 import { OrdersController } from "./orders.controller";
+import { OrderNotificationsModule } from "./notifications/order-notifications.module";
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { OrdersController } from "./orders.controller";
     CatalogModule,
     CartModule,
     PaymentsModule,
+    OrderNotificationsModule,
     PassportModule,
   ],
   controllers: [OrdersController],

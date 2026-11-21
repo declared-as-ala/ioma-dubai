@@ -12,6 +12,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { Link, useRouter } from "@/i18n/navigation";
 import { useCartQuery } from "@/hooks/use-cart";
 import { useCheckoutMutation } from "@/hooks/use-orders";
+import { useAuthStore } from "@/stores/auth-store";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -42,6 +43,10 @@ export default function CheckoutPage({
   const [step, setStep] = useState<Step>(0);
   const [address, setAddress] = useState<OrderAddressInput | null>(null);
   const [deliveryMethod, setDeliveryMethod] = useState<DeliveryMethod>("standard");
+  // Guests give an email so the confirmation and status updates have somewhere to go.
+  const user = useAuthStore((state) => state.user);
+  const needsEmail = !user && !professional;
+  const [guestEmail, setGuestEmail] = useState("");
 
   const checkout = useCheckoutMutation(professional);
 
@@ -66,7 +71,13 @@ export default function CheckoutPage({
   function submitPayment(paymentMethod: "mock_success" | "mock_failure") {
     if (!address) return;
     checkout.mutate(
-      { shippingAddress: address, deliveryMethod, paymentMethod },
+      {
+        shippingAddress: address,
+        deliveryMethod,
+        paymentMethod,
+        locale: locale as "en" | "fr" | "ar",
+        ...(needsEmail ? { email: guestEmail.trim() } : {}),
+      },
       {
         onSuccess: (order) => {
           const query = order.guestToken ? `?token=${order.guestToken}` : "";
@@ -138,8 +149,11 @@ export default function CheckoutPage({
             >
               <AddressStep
                 defaultValues={address}
-                onContinue={(values) => {
+                needsEmail={needsEmail}
+                email={guestEmail}
+                onContinue={(values, email) => {
                   setAddress(values);
+                  if (email !== undefined) setGuestEmail(email);
                   setStep(1);
                 }}
               />
@@ -216,12 +230,18 @@ export default function CheckoutPage({
 function AddressStep({
   defaultValues,
   onContinue,
+  needsEmail,
+  email: initialEmail,
 }: {
   defaultValues: OrderAddressInput | null;
-  onContinue: (values: OrderAddressInput) => void;
+  onContinue: (values: OrderAddressInput, email?: string) => void;
+  needsEmail: boolean;
+  email: string;
 }) {
   const t = useTranslations("Checkout");
   const locale = useLocale() as Locale;
+  const [email, setEmail] = useState(initialEmail);
+  const [emailError, setEmailError] = useState(false);
 
   const form = useForm<OrderAddressInput>({
     resolver: zodResolver(orderAddressSchema),
@@ -236,9 +256,39 @@ function AddressStep({
   });
 
   return (
-    <form onSubmit={form.handleSubmit(onContinue)} noValidate>
+    <form
+      onSubmit={form.handleSubmit((values) => {
+        if (needsEmail) {
+          const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+          setEmailError(!ok);
+          if (!ok) return;
+        }
+        onContinue(values, needsEmail ? email.trim() : undefined);
+      })}
+      noValidate
+    >
       <h2 className="font-display text-2xl">{t("addressTitle")}</h2>
       <FieldGroup className="mt-6">
+        {needsEmail ? (
+          <Field data-invalid={emailError}>
+            <FieldLabel htmlFor="checkout-email">{t("email")}</FieldLabel>
+            <Input
+              id="checkout-email"
+              type="email"
+              dir="ltr"
+              autoComplete="email"
+              inputMode="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              aria-invalid={emailError}
+              aria-describedby="checkout-email-help"
+              maxLength={160}
+            />
+            <p id="checkout-email-help" className="text-xs text-muted-foreground">
+              {emailError ? t("emailInvalid") : t("emailHelp")}
+            </p>
+          </Field>
+        ) : null}
         <Controller
           name="fullName"
           control={form.control}
