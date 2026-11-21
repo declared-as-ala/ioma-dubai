@@ -36,7 +36,7 @@ export default function FaqPage() {
             asChild
             variant="outline"
             size="lg"
-            className="uppercase tracking-widest"
+            className="h-auto max-w-full whitespace-normal py-3 text-center uppercase tracking-widest"
           >
             <Link href="/contact">{t("contactCta")}</Link>
           </Button>

@@ -11,18 +11,22 @@ import {
 } from "@/hooks/use-wishlist";
 import { Button } from "@/components/ui/button";
 import { formatMinor } from "@/lib/money";
+import { useAuthStore } from "@/stores/auth-store";
+import { useAuthHydrated } from "@/hooks/use-auth-hydrated";
 
 export default function WishlistPage() {
   const t = useTranslations("Wishlist");
   const locale = useLocale() as Locale;
   const { data: wishlist, isLoading, error } = useWishlistQuery();
   const removeItem = useRemoveWishlistItem();
+  const user = useAuthStore((st) => st.user);
+  const hydrated = useAuthHydrated();
 
   return (
     <main className="mx-auto max-w-[1440px] px-4 md:px-6 py-24">
       <h1 className="font-display text-4xl">{t("title")}</h1>
 
-      {isLoading ? (
+      {!hydrated || isLoading ? (
         <div
           className="mt-10 grid grid-cols-2 gap-4 md:grid-cols-3 md:gap-6 lg:grid-cols-4"
           aria-busy="true"
@@ -34,7 +38,7 @@ export default function WishlistPage() {
             />
           ))}
         </div>
-      ) : isUnauthorized(error) ? (
+      ) : isUnauthorized(error) || !user ? (
         <p className="mt-10 max-w-sm text-sm text-muted-foreground">
           {t("signInPrompt")}
         </p>

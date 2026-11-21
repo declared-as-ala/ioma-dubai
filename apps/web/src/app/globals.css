@@ -631,3 +631,8 @@
     animation: none;
   }
 }
+
+/* A link inside running text may break anywhere when it is longer than the line (long URLs on phones). */
+main :is(p, li, dd) a {
+  overflow-wrap: anywhere;
+}

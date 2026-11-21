@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { WishlistItem } from "@ioma/types";
 import { apiFetch, ApiError } from "@/lib/api";
+import { useAuthStore } from "@/stores/auth-store";
 
 const WISHLIST_KEY = ["wishlist"];
 
@@ -8,9 +9,12 @@ const WISHLIST_KEY = ["wishlist"];
 // means "not logged in," not a real error, so callers treat isError with a
 // 401 status as "signed out" rather than surfacing a failure state.
 export function useWishlistQuery() {
+  // Visitors have no wishlist: do not ask the API (it would answer 401 on every page)
+  const signedIn = useAuthStore((st) => !!st.user);
   return useQuery({
     queryKey: WISHLIST_KEY,
     queryFn: () => apiFetch<WishlistItem[]>("/wishlist"),
+    enabled: signedIn,
     retry: false,
   });
 }

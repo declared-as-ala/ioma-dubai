@@ -97,10 +97,10 @@ export default async function LoyaltyPage() {
               <li
                 key={u.en}
                 data-cine-item
-                className="flex items-center justify-between gap-6 py-6 text-base md:text-lg"
+                className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 py-6 text-base md:text-lg"
               >
                 <span>{u[loc]}</span>
-                <span className="shrink-0 rounded-full border border-sf-champagne/70 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-sf-champagne rtl:tracking-normal">
+                <span className="max-w-full rounded-full border border-sf-champagne/70 px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-sf-champagne rtl:tracking-normal">
                   {COMMON.toConfirm[loc]}
                 </span>
               </li>
