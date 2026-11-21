@@ -22,6 +22,15 @@ import { AdminPanel, AdminEmpty, AdminQueryState, useAdminFormat } from "./admin
 import { AdminCustomers } from "./admin-customers";
 import { AdminOrders } from "./admin-orders";
 import { PartnerDrawer } from "./admin-partner";
+import { RowActions } from "./admin-row-actions";
+// Lists that get the per-row management menu (edit drawer, publish, archive).
+const ROW_MENU = [
+  "pro-videos",
+  "pro-gallery",
+  "pro-benefits",
+  "pro-documents",
+  "services",
+];
 const control = "pl-input";
 // Multi-select bulk actions that exist for a resource (status changes go through the
 // generic PATCH endpoint, one record at a time). Every list can export its selection.
@@ -714,12 +723,21 @@ export function AdminResourcePage({
                           </td>
                         ))}
                         <td className="!text-end" onClick={(e) => e.stopPropagation()}>
-                          <Link
-                            href={`/admin/${resourceKey}/${id}`}
-                            className="pl-btn pl-btn--plain pl-btn--link pl-btn--sm"
-                          >
-                            {t("view")}
-                          </Link>
+                          {ROW_MENU.includes(resourceKey) ? (
+                            <RowActions
+                              resource={resource}
+                              resourceKey={resourceKey}
+                              row={row}
+                              manage={manage}
+                            />
+                          ) : (
+                            <Link
+                              href={`/admin/${resourceKey}/${id}`}
+                              className="pl-btn pl-btn--plain pl-btn--link pl-btn--sm"
+                            >
+                              {t("view")}
+                            </Link>
+                          )}
                         </td>
                       </tr>
                     );

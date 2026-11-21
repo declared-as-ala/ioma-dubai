@@ -660,7 +660,11 @@ export function CategoryWorkspaceDrawer({
       onClose();
     },
     onError: (err: any) => {
-      setErrorMsg(err.message || "Failed to save category.");
+      setErrorMsg(
+        /invalid management fields/i.test(String(err.message))
+          ? "Please fill in the English and Arabic names and a web address."
+          : err.message || "The category could not be saved.",
+      );
     },
   });
 
@@ -772,7 +776,21 @@ export function CategoryWorkspaceDrawer({
                   className="pl-input"
                 />
                 <span className="text-[10px] text-neutral-500">
-                  French and Arabic names are in the Translations tab.
+                  The French name is in the Translations tab.
+                </span>
+              </label>
+              <label className="grid gap-1">
+                <span className="font-semibold text-neutral-700">Arabic name *</span>
+                <input
+                  type="text"
+                  dir="rtl"
+                  value={nameAr}
+                  onChange={(e) => setNameAr(e.target.value)}
+                  placeholder="الاسم بالعربية"
+                  className="pl-input"
+                />
+                <span className="text-[10px] text-neutral-500">
+                  Shown to customers browsing in Arabic.
                 </span>
               </label>
               <div className="grid grid-cols-2 gap-4">

@@ -347,7 +347,7 @@ export const ADMIN_RESOURCES: AdminResource[] = [
       f("preview", "image"),
       f("featured", "boolean"),
       f("sortOrder", "number", false, { min: 0, max: 9999 }),
-      select("status", ["draft", "published"], true),
+      select("status", ["draft", "published", "archived"], true),
     ],
   },
   {
@@ -368,7 +368,7 @@ export const ADMIN_RESOURCES: AdminResource[] = [
       f("preview", "image"),
       f("featured", "boolean"),
       f("sortOrder", "number", false, { min: 0, max: 9999 }),
-      select("status", ["draft", "published"], true),
+      select("status", ["draft", "published", "archived"], true),
     ],
   },
   {
@@ -426,7 +426,7 @@ export const ADMIN_RESOURCES: AdminResource[] = [
       f("version", "text"),
       ref("fileDocumentId", "documents"),
       f("sortOrder", "number", false, { min: 0, max: 9999 }),
-      select("status", ["draft", "published"], true),
+      select("status", ["draft", "published", "archived"], true),
     ],
   },
   {
