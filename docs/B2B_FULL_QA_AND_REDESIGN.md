@@ -1,60 +1,61 @@
-# B2B QA, portal redesign and admin management — status report
+# B2B QA, portal redesign and admin management: final status
 
-Written 2026-11-21. Only things that were actually run are marked tested. Browser tests were done in a real Chrome
-session (admin + approved-partner sessions) on production until the Chrome connection dropped; later checks use
-headless Chromium device emulation (Playwright) and database queries.
+Updated 2026-11-21. "Tested" means it was run against production (real Chrome sessions earlier; later through the real API and
+headless Chromium with real device emulation). Test records were removed afterwards; settings and portal content were restored.
 
 ## Modules (Professional / B2B admin)
 
-| Module                | Admin CRUD                                                                                                   | Edit drawer                | Archive / delete                                | Portal sync                                                | Browser tested                           | Status                                        |
-| --------------------- | ------------------------------------------------------------------------------------------------------------ | -------------------------- | ----------------------------------------------- | ---------------------------------------------------------- | ---------------------------------------- | --------------------------------------------- |
-| Professionals         | list, open, edit profile, suspend/reactivate (existing detail page); new row menu (hide/show public listing) | detail page (not a drawer) | no hard delete; B2B suspension                  | n/a                                                        | row menu: hide + restore listing         | partial: no create, no archive                |
-| Partner applications  | approve / reject (existing)                                                                                  | existing                   | n/a                                             | account approval                                           | opened only                              | not retested end to end                       |
-| Portal home           | banner, announcements, sections (existing page)                                                              | page                       | n/a                                             | not retested                                               | opened only                              | not retested                                  |
-| B2B orders            | view drawer, edit status, notes                                                                              | yes (existing)             | paid/authorised orders can no longer be removed | status Shipped shown in portal                             | full test order (see below)              | works; company name added to detail           |
-| Professional pricing  | edit trade price / RRP / MOQ, preview, publish (existing)                                                    | page                       | n/a                                             | shop shows trade price                                     | opened; prices seen in portal shop       | history/restore not added                     |
-| Cabin products        | product editor (Price & stock tab)                                                                           | page                       | product archive                                 | portal cabin page renders                                  | opened                                   | works                                         |
-| Training videos       | create, edit, publish, unpublish, archive                                                                    | **yes (new)**              | archive (not delete)                            | create/edit/unpublish/republish/archive verified in portal | yes                                      | **done** (video + thumbnail upload, playback) |
-| Cabin gallery         | list + menu                                                                                                  | yes (new)                  | archive                                         | renders                                                    | opened                                   | menu not exercised                            |
-| Pro benefits          | list + menu                                                                                                  | yes (new)                  | archive                                         | empty in portal                                            | opened                                   | menu not exercised                            |
-| Pro documents         | create, edit, upload / replace file, publish, archive                                                        | **yes (new)**              | archive                                         | file in private bucket; portal access check unchanged      | create, replace, archive tested in admin | portal-side download not tested               |
-| Services & treatments | list + menu                                                                                                  | yes (new)                  | archive                                         | n/a                                                        | opened                                   | menu not exercised                            |
-| B2B settings          | page (existing)                                                                                              | page                       | n/a                                             | not retested                                               | opened                                   | not retested                                  |
+| Module                | Admin management                                                                 | Drawer      | Archive / delete              | Portal sync                                                    | Tested on production             |
+| --------------------- | -------------------------------------------------------------------------------- | ----------- | ----------------------------- | -------------------------------------------------------------- | -------------------------------- |
+| Professionals         | list, open and edit, suspend / reactivate, show / hide public listing (row menu) | detail page | no hard delete (suspension)   | n/a                                                            | row menu hide + restore          |
+| Partner applications  | approve / reject (existing)                                                      | existing    | n/a                           | account approval                                               | opened                           |
+| Portal home           | banner, announcements, sections                                                  | page        | n/a                           | **headline edit reached the portal home**                      | yes (restored)                   |
+| B2B orders            | detail drawer, edit status, notes                                                | yes         | paid orders cannot be removed | status Shipped shown in portal                                 | full test order                  |
+| Professional pricing  | trade price, RRP, MOQ, preview, publish                                          | page        | n/a                           | shop shows trade price                                         | prices seen in portal            |
+| Cabin products        | product editor (Price & stock)                                                   | page        | archive                       | portal cabin page                                              | opened                           |
+| Training videos       | create, edit, publish, unpublish, archive, video + thumbnail upload              | **yes**     | archive                       | **create, edit, play, unpublish, republish, archive**          | yes                              |
+| Cabin gallery         | create, edit, reorder, archive                                                   | **yes**     | archive                       | **create, order, reorder, archive**                            | yes                              |
+| Pro benefits          | create, edit, publish, unpublish, archive                                        | **yes**     | archive                       | **full lifecycle**                                             | yes                              |
+| Pro documents         | create, upload, replace file, publish, archive                                   | **yes**     | archive                       | private bucket; link needs a signed-in partner (401 otherwise) | create, replace, archive, access |
+| Services & treatments | list, row menu                                                                   | yes         | archive                       | n/a                                                            | list loads                       |
+| B2B settings          | page                                                                             | page        | n/a                           | **team contact edit reached the partner portal**               | yes (restored)                   |
+
+Permissions: a partner cannot create admin content (403) or edit the portal home (403).
 
 ## Priority tests
 
-1. **Video lifecycle**: done in Chrome. Created TEST video with uploaded MP4 and PNG thumbnail, published, appeared in the
-   Training Academy, played (3 s), edited title and thumbnail (both showed in the portal), unpublished (gone), republished
-   (back), archived (gone). Test records removed from the database.
-   The Magnesium / Ashwagandha image came from the "Preparing Ma Crème" lesson, whose preview had been changed to an
-   uploaded image on 2026-11-20; the original in-lab preview was restored.
-2. **B2B order at trade prices**: done. 2 x Ma Crème Jour (IBP194-30ML) at the trade price AED 217.00 = AED 434.00,
-   VAT 5% AED 21.70, shipping 0, total AED 455.70. Admin shows the same SKU, quantity and totals. Status changed to
-   Shipped in admin and shown as Shipped in the portal. Payment is the demo workflow (no gateway, no real charge).
-   Order **IOMA-20261121-2WE4R3** is a test order; it stays in the records (shipped orders cannot be cancelled).
-3. **Documents**: partially. Create + upload + replace + archive verified in admin and database; portal download not tested.
-4. Gallery, 5. Benefits, 6. Partner application flow, 7. Settings sync: **not tested**.
-
-## Bugs found and fixed
-
-- Uploaded documents could not be saved (server reference filter excluded them) and defaulted to a public bucket: fixed, private bucket.
-- Admin "View website" link pointed to localhost: fixed (build argument).
-- Translation review and History panels called a non-admin API path (404): fixed.
-- Portal header said "Customer" for an approved partner: label changed to "Approved partner" (the level logic was correct).
-- B2B order detail showed a generic "Professional Partner": company name now read from the professional profile.
-- Order drawer labelled every payment "Cash on Delivery": neutral labels.
-- Orders: a paid, uncancelled order could be hidden from the list: now refused (2 tests).
-- Training lesson showed a supplement product image: restored.
+1. Video lifecycle: done. 2. B2B order at trade prices: done (2 x AED 217.00 = AED 434.00, VAT AED 21.70, total AED 455.70;
+   order IOMA-20261121-2WE4R3 is a test order that stays on file, as shipped orders cannot be cancelled).
+2. Documents: create / replace / archive / access verified; portal download by a partner not exercised.
+3. Gallery: done. 5. Benefits: done. 6. Partner application flow: not run end to end. 7. Settings sync: done.
 
 ## Portal redesign (IBM Carbon white and blue)
 
-Implemented as scoped design tokens (`.pro-carbon` in globals.css): blue #0F62FE primary, white / #F4F4F4 surfaces,
-#E0E0E0 borders, square buttons and cards, IBM Plex Sans (portal only), active-page indicator, reduced-motion respected.
-Checked visually on production: overview, shop, cabin, training academy, gallery, benefits, documents, business
-profile, cart, checkout. Not done: component rebuild (animated drawers, skeletons, new product card, sticky summary
-redesign), responsive pass at 320/390 for the portal.
+Scoped design tokens (`.pro-carbon`), IBM Plex Sans (portal only), blue #0F62FE, square buttons and cards, reduced-motion
+respected. Rebuilt shell: slide-in navigation drawer on phones, cart with count badge, account menu (company, status,
+business profile, sign out), breadcrumbs, skip link, page fade on every navigation. Shop: image-led product tiles with
+hover zoom, trade price with RRP, quantity and add controls that never overflow, card skeletons and a route-level loading
+state. Measured with real device emulation: no horizontal overflow on any of the 10 portal pages at 320, 390 and 1360px
+(it was 516px wide in a 390px window before).
 
-## Not done (explicit)
+## Customer reviews and translations (separate deliveries, tested on production)
 
-Professionals create/archive, orders drawer redesign, portal-home / settings sync tests, pricing history, gallery /
-benefits / services lifecycle tests, bulk actions, export, optimistic concurrency, Playwright E2E for the B2B flows.
+Real moderated reviews with photos, verified purchase only from paid and delivered orders, admin moderation and replies
+(22 API checks + customer UI on a 390px phone). Translation drafts: 63 English and 63 Arabic stored for review, bulk
+approval with verification and rollback (publish and rollback tested; nothing published).
+
+## Product page
+
+No sideways scroll at 320 to 768px in English and Arabic. English and Arabic never show French (untranslated copy is hidden
+until approved). On phones the title, price and Add to cart come before the accordions.
+
+## Automated tests
+
+API 292 (Jest), web 19 (Vitest), Playwright specs: product page overflow and language, B2B lifecycle
+(`e2e/b2b-lifecycle.spec.ts`, needs E2E_* credentials), plus the existing suite.
+
+## Not done
+
+Manual creation of a professional from the admin (professionals come from approved applications), pricing history view,
+bulk actions and exports on the B2B lists, optimistic concurrency, the partner-application end-to-end run, and a visual
+pass of the admin on a phone (the admin blocks framing and the Chrome tool could not resize the window).
