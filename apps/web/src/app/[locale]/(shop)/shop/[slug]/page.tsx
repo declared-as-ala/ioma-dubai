@@ -175,15 +175,15 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
     <main className="mx-auto max-w-[1480px] px-4 sm:px-6 lg:px-12 pt-8 sm:pt-10 pb-28">
       {/* 2-COLUMN LUXURY PDP LAYOUT (Aligned with ioma-paris.com Flagship) */}
       <div
-        className="grid gap-12 lg:grid-cols-[1.15fr_0.85fr] lg:gap-16 items-start"
+        className="grid items-start gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:gap-x-16 lg:gap-y-8"
         data-testid="pdp-layout"
       >
         {/* ========================================================================= */}
         {/* LEFT COLUMN: Visual Packshot Gallery + Clinical Accordions (Directly under) */}
         {/* ========================================================================= */}
-        <div className="flex min-w-0 flex-col gap-8">
+        <div className="contents">
           {/* Gallery Row: Left Vertical Thumbnails + Central Packshot */}
-          <div className="flex min-w-0 flex-col-reverse items-start gap-4 md:flex-row">
+          <div className="order-1 flex min-w-0 flex-col-reverse items-start gap-4 md:flex-row lg:col-start-1 lg:row-start-1">
             {/* Vertical Thumbnails Strip (Left) */}
             {product.images.length > 1 && (
               <div className="flex max-w-full gap-3 overflow-x-auto pb-2 md:max-h-[520px] md:flex-col md:overflow-y-auto md:pb-0 md:pe-1 shrink-0">
@@ -243,7 +243,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
           </div>
 
           {/* Under-Image Clinical Accordions (01..06 Editorial Skincare System) */}
-          <div className="w-full pt-2">
+          <div className="order-3 w-full min-w-0 lg:order-none lg:col-start-1 lg:row-start-2">
             <PdpInformationSections
               locale={locale as "en" | "fr" | "ar"}
               charterColor={rangeConfig.hex}
@@ -261,7 +261,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
         {/* ========================================================================= */}
         {/* RIGHT COLUMN: Commerce, Sizing, Price & Conversion Stack                  */}
         {/* ========================================================================= */}
-        <div className="flex min-w-0 flex-col space-y-5 lg:sticky lg:top-40">
+        <div className="order-2 flex min-w-0 flex-col space-y-5 lg:sticky lg:top-40 lg:order-none lg:col-start-2 lg:row-span-2 lg:row-start-1">
           {/* Range Tag & Number Badge */}
           <div className="flex items-center gap-2">
             <span

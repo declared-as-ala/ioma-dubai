@@ -11,6 +11,15 @@ describe("looksFrench", () => {
   });
 });
 
+describe("looksFrench short taglines", () => {
+  it("catches short French taglines and leaves English ones", () => {
+    expect(looksFrench("Hydratation intense et longue durée")).toBe(true);
+    expect(looksFrench("Contre les ridules de déshydratation")).toBe(true);
+    expect(looksFrench("Intense, long-lasting hydration")).toBe(false);
+    expect(looksFrench("Eye contour care")).toBe(false);
+  });
+});
+
 describe("pickText", () => {
   it("never shows French on the English page", () => {
     expect(pickText({ en: FR, fr: FR }, "en")).toBe("");

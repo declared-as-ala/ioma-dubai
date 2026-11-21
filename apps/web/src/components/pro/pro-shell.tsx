@@ -393,7 +393,10 @@ export function ProShell({ children }: { children: React.ReactNode }) {
 
       {/* Navigation drawer (phones and tablets) */}
       <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
-        <SheetContent side="left" className="w-[86vw] max-w-sm gap-0 overflow-y-auto p-0">
+        <SheetContent
+          side="left"
+          className="pro-carbon w-[86vw] max-w-sm gap-0 overflow-y-auto p-0"
+        >
           <SheetTitle className="sr-only">{tx(SHELL.menu)}</SheetTitle>
           <SheetDescription className="sr-only">{data.companyName}</SheetDescription>
           <div className="border-b border-border px-5 py-4">

@@ -24,6 +24,9 @@ const EN_WORDS = /\b(the|and|with|your|for|skin|care|this|that|is|of|to|apply|da
 export function looksFrench(text: string): boolean {
   const f = (text.match(FR_WORDS) ?? []).length;
   const e = (text.match(EN_WORDS) ?? []).length;
+  // French-only letters (é è ê à ç ù û ô î œ) are a strong signal on short sentences such as taglines
+  const accents = (text.match(/[éèêàçùûôîœÉÈÊÀÇ]/g) ?? []).length;
+  if (e === 0 && (accents >= 2 || (accents >= 1 && f >= 1))) return true;
   return f >= 2 && f > e;
 }
 
