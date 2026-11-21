@@ -50,6 +50,7 @@ const BULK_STATUS: Record<
     actions: [
       { label: "Publish", value: "published" },
       { label: "Unpublish", value: "draft" },
+      { label: "Archive", value: "archived" },
     ],
   },
   "pro-gallery": {
@@ -57,6 +58,7 @@ const BULK_STATUS: Record<
     actions: [
       { label: "Publish", value: "published" },
       { label: "Unpublish", value: "draft" },
+      { label: "Archive", value: "archived" },
     ],
   },
   "pro-benefits": {
@@ -64,6 +66,7 @@ const BULK_STATUS: Record<
     actions: [
       { label: "Publish", value: "published" },
       { label: "Unpublish", value: "draft" },
+      { label: "Archive", value: "archived" },
     ],
   },
   "pro-documents": {
@@ -71,6 +74,14 @@ const BULK_STATUS: Record<
     actions: [
       { label: "Publish", value: "published" },
       { label: "Unpublish", value: "draft" },
+      { label: "Archive", value: "archived" },
+    ],
+  },
+  services: {
+    field: "status",
+    actions: [
+      { label: "Activate", value: "active" },
+      { label: "Archive", value: "archived" },
     ],
   },
   protocols: {

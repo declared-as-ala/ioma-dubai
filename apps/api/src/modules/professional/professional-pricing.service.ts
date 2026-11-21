@@ -131,10 +131,28 @@ export class ProfessionalPricingService {
     if (r.data.dryRun)
       return { applied: false, changes: changes.map((c) => ({ sku: c.sku, ...c.diff })) };
 
-    for (const c of changes)
+    const at = new Date();
+    for (const c of changes) {
       await this.db
         .collection("productvariants")
-        .updateOne({ _id: c.id }, { $set: { ...c.set, updatedAt: new Date() } });
+        .updateOne({ _id: c.id }, { $set: { ...c.set, updatedAt: at } });
+      // one history row per changed price: who changed what, from which value to which, and when
+      for (const [field, d] of Object.entries(
+        c.diff as Record<string, { from: unknown; to: unknown }>,
+      ))
+        await this.db.collection("pricehistory").insertOne({
+          variantId: c.id,
+          sku: c.sku,
+          channel: "b2b",
+          field,
+          from: d.from,
+          to: d.to,
+          at,
+          byEmail: actor.email,
+          byId: actor.sub,
+          source: { manual: true },
+        });
+    }
     if (changes.length)
       await this.audit.recordEvent({
         actorId: actor.sub,
@@ -145,5 +163,48 @@ export class ProfessionalPricingService {
         details: { count: changes.length, skus: changes.slice(0, 50).map((c) => c.sku) },
       });
     return { applied: true, changes: changes.map((c) => ({ sku: c.sku, ...c.diff })) };
+  }
+
+  /** Price history (manual changes and price-list imports), newest first. */
+  async history(query: { sku?: string; page?: number; limit?: number }) {
+    const page = Math.max(1, Number(query.page) || 1);
+    const limit = Math.min(100, Math.max(1, Number(query.limit) || 25));
+    const filter: Row = {};
+    if (query.sku) {
+      const escaped = String(query.sku)
+        .slice(0, 40)
+        .replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      filter.sku = { $regex: escaped, $options: "i" };
+    }
+    const col = this.db.collection("pricehistory");
+    const [rows, total] = await Promise.all([
+      col
+        .find(filter)
+        .sort({ at: -1 })
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .toArray() as Promise<Row[]>,
+      col.countDocuments(filter),
+    ]);
+    return {
+      total,
+      page,
+      limit,
+      items: rows.map((r) => ({
+        id: String(r._id),
+        sku: r.sku,
+        channel: r.channel,
+        field: r.field,
+        from: r.from ?? null,
+        to: r.to ?? null,
+        at: r.at,
+        by: r.byEmail ?? null,
+        source: r.source?.filename
+          ? `Price list import: ${r.source.filename}`
+          : r.source?.manual
+            ? "Manual change"
+            : "Change",
+      })),
+    };
   }
 }

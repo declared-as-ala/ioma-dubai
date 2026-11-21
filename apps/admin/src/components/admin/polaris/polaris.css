@@ -560,6 +560,9 @@ select.pl-input {
 /* ---------- Data table ---------- */
 .pl-table-wrap {
   overflow-x: auto;
+  /* positioning context: absolutely positioned helpers inside the table (screen-reader labels, menus)
+     are clipped with it instead of widening the whole page on phones */
+  position: relative;
 }
 .pl-table {
   width: 100%;

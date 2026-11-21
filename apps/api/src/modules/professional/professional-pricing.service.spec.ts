@@ -5,6 +5,7 @@ type Doc = Record<string, any>;
 
 function build(variants: Doc[]) {
   const updates: Array<[Doc, Doc]> = [];
+  const history: Doc[] = [];
   const db = {
     collection: (name: string) => ({
       find: (q: Doc) => ({
@@ -13,6 +14,10 @@ function build(variants: Doc[]) {
             ? variants.filter((v) => q.sku.$in.includes(v.sku))
             : variants,
       }),
+      insertOne: async (d: Doc) => {
+        if (name === "pricehistory") history.push(d);
+        return {};
+      },
       updateOne: async (filter: Doc, update: Doc) => {
         updates.push([filter, update]);
         const v = variants.find((x) => String(x._id) === String(filter._id));
@@ -25,6 +30,7 @@ function build(variants: Doc[]) {
   return {
     svc: new ProfessionalPricingService(db as never, audit as never),
     updates,
+    history,
     audit,
   };
 }
@@ -55,11 +61,20 @@ describe("ProfessionalPricingService", () => {
   });
 
   it("publishes the change and records it in the audit trail", async () => {
-    const { svc, updates, audit } = build([variant()]);
+    const { svc, updates, audit, history } = build([variant()]);
     const r = await svc.change(actor, {
       items: [{ sku: "IBP302", b2bPriceMinor: 12500, moq: 2 }],
     });
     expect(r.applied).toBe(true);
+    // who changed which price, from what to what, and when
+    expect(history).toHaveLength(2);
+    expect(history.find((h) => h.field === "b2bPriceMinor")).toMatchObject({
+      sku: "IBP302",
+      from: 10000,
+      to: 12500,
+      byEmail: "admin@example.test",
+    });
+    expect(history[0]!.at).toBeInstanceOf(Date);
     expect(updates).toHaveLength(1);
     expect(audit.recordEvent).toHaveBeenCalledWith(
       expect.objectContaining({ action: "admin.professional-pricing.updated" }),

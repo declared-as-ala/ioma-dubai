@@ -191,6 +191,19 @@ export class ProfessionalPricingController {
     });
   }
 
+  @Get("history")
+  history(
+    @CurrentUser() user: JwtPayload,
+    @Query() q: Record<string, string | undefined>,
+  ) {
+    requirePermission(user, "b2b.view");
+    return this.pricing.history({
+      sku: q.sku,
+      page: q.page ? Number(q.page) : undefined,
+      limit: q.limit ? Number(q.limit) : undefined,
+    });
+  }
+
   @Patch()
   change(@CurrentUser() user: JwtPayload, @Body() body: unknown) {
     requirePermission(user, "b2b.manage");

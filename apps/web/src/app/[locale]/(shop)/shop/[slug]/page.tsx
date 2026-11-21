@@ -291,12 +291,18 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
           </div>
 
           {/* Product Title */}
-          <MaskText
-            as="h1"
-            immediate
-            text={product.name[locale]}
-            className="font-display text-[clamp(1.9rem,3.4vw,3rem)] font-medium tracking-[-0.02em] leading-[1.08] text-foreground rtl:leading-[1.3] rtl:tracking-normal"
-          />
+          {/* A Latin product name keeps its own left-to-right word order inside an Arabic page */}
+          <div
+            dir={/[؀-ۿ]/.test(product.name[locale]) ? undefined : "ltr"}
+            className={locale === "ar" ? "text-right" : undefined}
+          >
+            <MaskText
+              as="h1"
+              immediate
+              text={product.name[locale]}
+              className="font-display text-[clamp(1.9rem,3.4vw,3rem)] font-medium tracking-[-0.02em] leading-[1.08] text-foreground rtl:leading-[1.3] rtl:tracking-normal"
+            />
+          </div>
 
           {/* Rating: real published reviews only; renders nothing without reviews */}
           <ProductRatingSummary slug={product.slug} />
@@ -345,7 +351,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                   {formatMinor(selectedVariant.priceMinor, locale)}
                 </span>
                 {unitPriceText && (
-                  <span className="text-xs text-muted-foreground font-mono">
+                  <span dir="ltr" className="text-xs text-muted-foreground font-mono">
                     {unitPriceText}
                   </span>
                 )}
@@ -366,7 +372,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
           {/* Capacity / Contenance Badge */}
           {product.contenance && (
             <div className="text-xs text-muted-foreground font-mono">
-              <span>
+              <span dir="ltr" className="inline-block">
                 {locale === "fr"
                   ? product.contenance
                   : product.contenance.replace(

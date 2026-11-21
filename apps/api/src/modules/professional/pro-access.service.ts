@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -366,6 +367,103 @@ export class ProAccessService {
       void this.mail.sendHtml(lead.email, mail.subject, mail.html);
     }
     return lead.toObject();
+  }
+
+  /**
+   * Manual creation by an administrator (no application): the same result as validating a lead. A new login
+   * gets an unusable random password and an emailed link to choose their own; an existing customer simply
+   * gains professional access. Nothing is created twice, and an approved professional is never duplicated.
+   */
+  async createProfessional(
+    adminId: string,
+    input: {
+      email: string;
+      firstName: string;
+      lastName: string;
+      companyName: string;
+      phone?: string;
+      locale?: "en" | "fr" | "ar";
+      note?: string;
+    },
+  ) {
+    const email = input.email.trim().toLowerCase();
+    let user = await this.users.findByEmail(email);
+    const isNewUser = !user;
+    if (user) {
+      const existing = await this.profileModel.findOne({
+        userId: new Types.ObjectId(user.id as string),
+      });
+      if (existing && existing.status === "approved")
+        throw new ConflictException(
+          "This person already has an approved professional account.",
+        );
+    } else {
+      user = await this.users.create({
+        email,
+        passwordHash: await argon2.hash(randomBytes(32).toString("hex"), {
+          type: argon2.argon2id,
+        }),
+        firstName: input.firstName,
+        lastName: input.lastName,
+        locale: input.locale ?? "en",
+      });
+    }
+    const userId = user.id as string;
+    const now = new Date();
+    const application = await this.applicationModel.create({
+      userId: new Types.ObjectId(userId),
+      status: "approved",
+      companyName: input.companyName,
+      contactPerson: `${input.firstName} ${input.lastName}`.trim(),
+      email,
+      phone: input.phone ?? "",
+      documents: [],
+      reviewedBy: new Types.ObjectId(adminId),
+      submittedAt: now,
+      statusHistory: [
+        {
+          status: "approved",
+          at: now,
+          note: input.note?.trim() || "Account created manually by IOMA",
+        },
+      ],
+    });
+    const profile = await this.profileModel.findOneAndUpdate(
+      { userId: new Types.ObjectId(userId) },
+      {
+        $set: { status: "approved", companyName: input.companyName },
+        $setOnInsert: {
+          userId: new Types.ObjectId(userId),
+          applicationId: application._id,
+          accessLevel: "validated",
+        },
+      },
+      { upsert: true, new: true },
+    );
+    await this.users.removeRole(userId, "professional_pending");
+    await this.users.addRole(userId, "professional_approved");
+    const locale = input.locale === "ar" ? "ar" : "en";
+    if (isNewUser) {
+      const { url } = await this.auth.createPasswordSetupLink(userId, locale, 72);
+      const mail = emails.validationInvite(locale, input.firstName, url, 72);
+      void this.mail.sendHtml(email, mail.subject, mail.html);
+    } else {
+      const adminBase = this.config.get<string>("APP_URL") ?? "";
+      const mail = emails.validationNotice(
+        locale,
+        input.firstName,
+        `${adminBase}/${locale}/portal`,
+      );
+      void this.mail.sendHtml(email, mail.subject, mail.html);
+    }
+    return {
+      userId,
+      profileId: String(profile!._id),
+      invited: isNewUser,
+      message: isNewUser
+        ? "Account created. An email was sent so the professional can choose a password."
+        : "This customer now has professional access.",
+    };
   }
 
   async rejectLead(adminId: string, id: string, reason: string) {

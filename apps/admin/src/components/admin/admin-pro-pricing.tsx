@@ -6,6 +6,7 @@ import { apiFetch } from "@/lib/api";
 import { useAdminAccess, useAdminQuery } from "@/hooks/use-admin";
 import { Badge, Button, Card, Input, Select } from "./polaris";
 import { AdminEmpty, AdminQueryState } from "./admin-ui";
+import { PriceHistoryDrawer } from "./admin-pro-price-history";
 
 interface Item {
   sku: string;
@@ -55,6 +56,58 @@ export function AdminProPricing() {
   const [percent, setPercent] = useState("");
   const [preview, setPreview] = useState<Change[] | null>(null);
   const manage = !!access.data?.permissions.includes("b2b.manage");
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  // CSV of every price matching the current search, fetched page by page
+  const exportPrices = async () => {
+    setExporting(true);
+    try {
+      const rows: Item[] = [];
+      for (let pg = 1; pg < 50; pg++) {
+        const p = new URLSearchParams({ page: String(pg), limit: "100" });
+        if (q.trim()) p.set("q", q.trim());
+        if (visibility) p.set("visibility", visibility);
+        const r = await apiFetch<Page>(`/admin/pro-pricing?${p}`);
+        rows.push(...r.items);
+        if (rows.length >= r.total || r.items.length === 0) break;
+      }
+      const esc = (v: unknown) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+      const csv = [
+        [
+          "SKU",
+          "Product",
+          "Size",
+          "Channel",
+          "Trade price AED (excl. VAT)",
+          "Recommended retail AED",
+          "Retail AED",
+          "Min order",
+        ],
+        ...rows.map((r) => [
+          r.sku,
+          r.productName,
+          r.size,
+          r.visibility,
+          aed(r.b2bPriceMinor),
+          aed(r.suggestedRetailMinor),
+          aed(r.b2cPriceMinor),
+          r.moq ?? "",
+        ]),
+      ]
+        .map((l) => l.map(esc).join(","))
+        .join("\n");
+      const a = document.createElement("a");
+      // the byte-order mark lets Excel read the file as UTF-8
+      a.href = URL.createObjectURL(
+        new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8;" }),
+      );
+      a.download = `ioma_professional_prices_${new Date().toISOString().slice(0, 10)}.csv`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    } finally {
+      setExporting(false);
+    }
+  };
 
   const qs = new URLSearchParams({ page: String(page), limit: "25" });
   if (q.trim()) qs.set("q", q.trim());
@@ -136,14 +189,23 @@ export function AdminProPricing() {
 
   return (
     <div className="mx-auto max-w-[1200px] space-y-4 pb-24">
-      <header>
-        <h1 className="pl-page-title">Professional pricing</h1>
-        <p className="pl-help !mt-1">
-          Trade prices, recommended retail prices (AED) and minimum order quantities for
-          professional products. Changes apply to the partner shop and checkout once
-          published. Totals are always recalculated on the server.
-        </p>
+      <header className="flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0">
+          <h1 className="pl-page-title">Professional pricing</h1>
+          <p className="pl-help !mt-1">
+            Trade prices, recommended retail prices (AED) and minimum order quantities for
+            professional products. Changes apply to the partner shop and checkout once
+            published. Totals are always recalculated on the server.
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <Button onClick={() => setHistoryOpen(true)}>Price history</Button>
+          <Button disabled={exporting} onClick={exportPrices}>
+            {exporting ? "Exporting…" : "Export prices"}
+          </Button>
+        </div>
       </header>
+      <PriceHistoryDrawer open={historyOpen} onOpenChange={setHistoryOpen} />
 
       <Card>
         <div className="grid gap-3 p-4 md:grid-cols-[1fr_200px_auto]">
