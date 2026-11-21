@@ -203,3 +203,25 @@ export function EmptyNote({ children }: { children: React.ReactNode }) {
     </p>
   );
 }
+
+/** Placeholder blocks shown while a portal page loads (no layout jump when the data arrives). */
+export function SkeletonBlock({ className }: { className?: string }) {
+  return <div className={cn("ioma-skel", className)} aria-hidden />;
+}
+
+export function SkeletonProductCard() {
+  return (
+    <div
+      className="overflow-hidden rounded-[var(--pro-radius-card)] border border-[color:var(--pro-line)] bg-white"
+      aria-hidden
+    >
+      <SkeletonBlock className="aspect-[4/3] w-full rounded-none" />
+      <div className="space-y-3 p-4">
+        <SkeletonBlock className="h-4 w-1/3" />
+        <SkeletonBlock className="h-6 w-3/4" />
+        <SkeletonBlock className="h-4 w-1/2" />
+        <SkeletonBlock className="h-11 w-full" />
+      </div>
+    </div>
+  );
+}

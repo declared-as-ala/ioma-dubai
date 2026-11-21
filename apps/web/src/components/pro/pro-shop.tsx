@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Minus, Plus, Search } from "lucide-react";
+import { Check, Minus, Plus, Search } from "lucide-react";
 import type { B2BProductListItem } from "@ioma/types";
 import { Link } from "@/i18n/navigation";
 import { ProductImage } from "@/components/shop/product-image";
@@ -16,6 +16,7 @@ import {
   EmptyNote,
   PageTitle,
   ProCard,
+  SkeletonProductCard,
   UnlockBanner,
   outlineBtn,
   primaryBtn,
@@ -151,13 +152,13 @@ export default function ProShop() {
               <EmptyNote>{tx(SHOP.noProducts)}</EmptyNote>
             )
           ) : catalog.isLoading ? (
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-4 min-[600px]:grid-cols-2 2xl:grid-cols-3">
               {[0, 1, 2, 3].map((i) => (
-                <div key={i} className="ioma-skel h-72" aria-hidden />
+                <SkeletonProductCard key={i} />
               ))}
             </div>
           ) : visible.length ? (
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-4 min-[600px]:grid-cols-2 2xl:grid-cols-3">
               {visible.map((p) => {
                 const v = p.variants[0];
                 if (!v) return null;
@@ -166,87 +167,104 @@ export default function ProShop() {
                 const priced = v.b2bPriceMinor !== null;
                 const justAdded = add.isSuccess && add.variables?.sku === v.sku;
                 return (
-                  <ProCard key={p.slug} className="flex flex-col p-5">
-                    <div className="relative aspect-[4/3] rounded-lg bg-ioma-grey-50">
+                  <ProCard
+                    key={p.slug}
+                    className="group flex min-w-0 flex-col overflow-hidden transition-shadow duration-200 hover:shadow-md motion-reduce:transition-none"
+                  >
+                    <div className="relative aspect-[4/3] overflow-hidden bg-ioma-grey-50">
                       {p.images[0] && (
                         <ProductImage
                           src={p.images[0]}
                           alt={p.name[loc] || p.name.en}
                           fill
-                          sizes="(min-width: 640px) 25vw, 90vw"
-                          className="object-contain p-4"
+                          sizes="(min-width: 1024px) 25vw, 90vw"
+                          className="object-contain p-5 transition-transform duration-300 ease-out group-hover:scale-[1.04] motion-reduce:transition-none"
                         />
                       )}
+                      <Chip className="absolute start-3 top-3 max-w-[calc(100%-1.5rem)] bg-white/90">
+                        <span className="truncate">
+                          {p.range.name[loc] || p.range.name.en}
+                        </span>
+                      </Chip>
                     </div>
-                    <Chip className="mt-4 self-start">
-                      {p.range.name[loc] || p.range.name.en}
-                    </Chip>
-                    <h2 className="mt-2 font-display text-xl">
-                      <bdi>{p.name[loc] || p.name.en}</bdi>
-                    </h2>
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      {v.size} · {tx(SHOP.moq(moq))}
-                    </p>
-                    <div className="mt-3 flex flex-wrap items-baseline gap-x-4 gap-y-1 text-sm">
-                      {(v.suggestedRetailMinor ??
-                        (v.b2cPriceMinor > 0 ? v.b2cPriceMinor : null)) !== null && (
-                        <span className="text-muted-foreground">
-                          {tx(SHOP.rrp)}{" "}
-                          {formatMinor(
-                            (v.suggestedRetailMinor ?? v.b2cPriceMinor) as number,
-                            loc,
+                    <div className="flex flex-1 flex-col p-4">
+                      <h2 className="font-display text-lg leading-snug">
+                        <bdi>{p.name[loc] || p.name.en}</bdi>
+                      </h2>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {v.size} · {tx(SHOP.moq(moq))}
+                      </p>
+                      <div className="mt-3">
+                        <p className="text-xl font-medium tabular-nums">
+                          {priced
+                            ? formatMinor(v.b2bPriceMinor!, loc)
+                            : tx(SHOP.priceTbc)}
+                        </p>
+                        <p className="mt-0.5 flex flex-wrap gap-x-3 text-xs text-muted-foreground">
+                          {priced && <span>{tx(SHOP.trade)}</span>}
+                          {(v.suggestedRetailMinor ??
+                            (v.b2cPriceMinor > 0 ? v.b2cPriceMinor : null)) !== null && (
+                            <span>
+                              {tx(SHOP.rrp)}{" "}
+                              {formatMinor(
+                                (v.suggestedRetailMinor ??
+                                  (v.b2cPriceMinor > 0
+                                    ? v.b2cPriceMinor
+                                    : null)) as number,
+                                loc,
+                              )}
+                            </span>
                           )}
-                        </span>
-                      )}
-                      <span className="font-medium">
-                        {priced
-                          ? `${tx(SHOP.trade)} ${formatMinor(v.b2bPriceMinor!, loc)}`
-                          : tx(SHOP.priceTbc)}
-                      </span>
-                    </div>
-                    <div className="mt-4 flex items-center gap-3">
-                      <div
-                        className="flex h-11 items-center rounded-lg border border-border"
-                        role="group"
-                        aria-label={tx(SHOP.qty)}
-                      >
+                        </p>
+                      </div>
+                      <div className="mt-auto flex flex-wrap items-center gap-2 pt-4">
+                        <div
+                          className="flex h-11 shrink-0 items-center border border-border"
+                          role="group"
+                          aria-label={tx(SHOP.qty)}
+                        >
+                          <button
+                            type="button"
+                            aria-label="−"
+                            className="grid size-11 place-items-center hover:bg-muted"
+                            onClick={() =>
+                              setQty({ ...qty, [v.sku]: Math.max(moq, q - 1) })
+                            }
+                          >
+                            <Minus className="size-4" aria-hidden />
+                          </button>
+                          <span
+                            className="w-8 text-center text-sm tabular-nums"
+                            aria-live="polite"
+                          >
+                            {q}
+                          </span>
+                          <button
+                            type="button"
+                            aria-label="+"
+                            className="grid size-11 place-items-center hover:bg-muted"
+                            onClick={() => setQty({ ...qty, [v.sku]: q + 1 })}
+                          >
+                            <Plus className="size-4" aria-hidden />
+                          </button>
+                        </div>
                         <button
                           type="button"
-                          aria-label="−"
-                          className="grid size-11 place-items-center"
-                          onClick={() =>
-                            setQty({ ...qty, [v.sku]: Math.max(moq, q - 1) })
-                          }
+                          className={cn(
+                            primaryBtn,
+                            "min-w-[8.5rem] flex-1 whitespace-nowrap px-4",
+                          )}
+                          disabled={!priced || !v.inStock || add.isPending || q < moq}
+                          onClick={() => add.mutate({ sku: v.sku, qty: q })}
                         >
-                          <Minus className="size-4" aria-hidden />
-                        </button>
-                        <span
-                          className="w-8 text-center text-sm tabular-nums"
-                          aria-live="polite"
-                        >
-                          {q}
-                        </span>
-                        <button
-                          type="button"
-                          aria-label="+"
-                          className="grid size-11 place-items-center"
-                          onClick={() => setQty({ ...qty, [v.sku]: q + 1 })}
-                        >
-                          <Plus className="size-4" aria-hidden />
+                          {justAdded && <Check className="size-4" aria-hidden />}
+                          {!v.inStock
+                            ? tx(SHOP.unavailable)
+                            : justAdded
+                              ? tx(SHOP.added)
+                              : tx(SHOP.add)}
                         </button>
                       </div>
-                      <button
-                        type="button"
-                        className={cn(primaryBtn, "flex-1")}
-                        disabled={!priced || !v.inStock || add.isPending || q < moq}
-                        onClick={() => add.mutate({ sku: v.sku, qty: q })}
-                      >
-                        {!v.inStock
-                          ? tx(SHOP.unavailable)
-                          : justAdded
-                            ? tx(SHOP.added)
-                            : tx(SHOP.add)}
-                      </button>
                     </div>
                   </ProCard>
                 );
