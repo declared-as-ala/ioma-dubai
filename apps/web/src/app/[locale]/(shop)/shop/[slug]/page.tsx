@@ -22,6 +22,7 @@ import { formatMinor } from "@/lib/money";
 import { cn } from "@/lib/utils";
 import { Link } from "@/i18n/navigation";
 import { tr, toLoc } from "@/lib/l10n";
+import { ProductRatingSummary, ProductReviews } from "@/components/shop/product-reviews";
 import {
   Truck,
   Sparkles,
@@ -282,20 +283,8 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
             className="font-display text-[clamp(1.9rem,3.4vw,3rem)] font-medium tracking-[-0.02em] leading-[1.08] text-foreground rtl:leading-[1.3] rtl:tracking-normal"
           />
 
-          {/* Star Rating Header (Links to reviews) */}
-          <div className="flex items-center gap-2 text-xs">
-            <div className="flex items-center text-sf-champagne" aria-hidden="true">
-              {[...Array(5)].map((_, i) => (
-                <Star key={i} className="size-3.5 fill-current" />
-              ))}
-            </div>
-            <a
-              href="#avis-clients"
-              className="font-medium text-foreground hover:text-sf-champagne transition-colors underline-offset-2 hover:underline"
-            >
-              {(product.rating || 4.8).toFixed(1)} ({product.reviewCount || 64})
-            </a>
-          </div>
+          {/* Rating: real published reviews only; renders nothing without reviews */}
+          <ProductRatingSummary slug={product.slug} />
 
           {/* Skin Type & Concern Badges */}
           {((product.skinTypes && product.skinTypes.length > 0) ||
@@ -534,139 +523,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
         </div>
       </div>
 
-      {/* ========================================================================= */}
-      {/* BOTTOM SECTION: Certified Customer Reviews ("Avis Clients")               */}
-      {/* ========================================================================= */}
-      <section id="avis-clients" className="mt-24 border-t border-border pt-16">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 pb-8 border-b border-border/70">
-          <div>
-            <h2 className="font-display text-2xl font-normal text-foreground">
-              Avis Clients
-            </h2>
-            <div className="mt-2 flex flex-wrap items-center gap-3">
-              <span className="flex items-center gap-1.5 text-xl font-bold text-foreground">
-                <Star className="size-5 fill-[#782285] text-sf-champagne" />
-                <span>4.8</span>
-              </span>
-              <span className="text-sm font-medium text-foreground/80">64 avis</span>
-              <span className="inline-flex items-center gap-1 rounded bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-800 border border-emerald-200">
-                <Check className="size-3" />
-                <span>Vérifié</span>
-              </span>
-              <Award className="size-5 text-neutral-400" />
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <Button className="rounded-full bg-[#AA9FEB] hover:bg-[#782285] text-neutral-900 hover:text-white px-6 font-semibold uppercase tracking-wider text-xs h-10 shadow-xs">
-              Écrire un avis
-            </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              aria-label="Filter reviews"
-              className="size-10 rounded-full"
-            >
-              <Filter className="size-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              aria-label="Sort reviews"
-              className="size-10 rounded-full"
-            >
-              <ArrowUpDown className="size-4" />
-            </Button>
-          </div>
-        </div>
-
-        {/* Customer Unboxing & Packaging Photos Preview */}
-        <div className="mt-6 flex items-center gap-3 overflow-x-auto pb-2">
-          {product.images.slice(0, 4).map((img, i) => (
-            <div
-              key={i}
-              className="relative size-20 sm:size-24 shrink-0 overflow-hidden rounded-md border border-border/80 bg-neutral-50 shadow-xs"
-            >
-              <Image
-                src={img}
-                alt="Client photo review"
-                fill
-                sizes="96px"
-                variant="thumbnail"
-                className="object-cover"
-              />
-            </div>
-          ))}
-          <div className="size-20 sm:size-24 shrink-0 rounded-md border border-dashed border-border/80 flex flex-col items-center justify-center text-[10px] text-muted-foreground text-center p-2">
-            <Camera className="size-4 mb-1 text-muted-foreground/80" />
-            <span>+ 18 photos clientes</span>
-          </div>
-        </div>
-
-        {/* "Les clients disent" AI-Synthesized Verified Summary (From Screenshot) */}
-        <div className="mt-6 rounded-lg border border-[#AA9FEB]/40 bg-gradient-to-r from-[#AA9FEB]/10 via-white to-[#AA9FEB]/5 p-5 shadow-xs">
-          <div className="flex items-center gap-1.5 text-xs font-bold text-sf-champagne uppercase tracking-wider mb-2">
-            <Sparkles className="size-4 text-sf-champagne" />
-            <span>Résumé des avis généré par IA basé sur les avis clients récents</span>
-          </div>
-          <p className="text-xs sm:text-sm leading-relaxed text-foreground/90">
-            « Les clients ont fait l'éloge de ce soin expert IOMA pour sa « texture fine
-            et agréable » qui pénètre en profondeur sans laisser de matière grasse.
-            Beaucoup ont noté « une peau douce qui ne tiraille pas » et « de meilleurs
-            résultats visuels sur les ridules et la fermeté ». La formule hydrate
-            intensément et les clients adorent l'expérience d'application quotidienne.
-            Très bien noté pour son confort, son efficacité régénérante et sa
-            sensorialité. »
-          </p>
-        </div>
-
-        {/* Sample Customer Reviews List */}
-        <div className="mt-8 space-y-4 divide-y divide-border/60">
-          <div className="pt-4 first:pt-0 space-y-2">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="font-semibold text-xs text-foreground">Sophie D.</span>
-                <span className="rounded bg-emerald-50 px-1.5 py-0.2 text-[10px] font-medium text-emerald-800 border border-emerald-200">
-                  Achat vérifié
-                </span>
-              </div>
-              <span className="text-[11px] text-muted-foreground">Il y a 2 semaines</span>
-            </div>
-            <div className="flex items-center text-sf-champagne">
-              {[...Array(5)].map((_, i) => (
-                <Star key={i} className="size-3 fill-current" />
-              ))}
-            </div>
-            <p className="text-xs text-foreground/80 leading-relaxed">
-              Une merveille ! Ma peau est transformée après 3 semaines d'utilisation
-              quotidienne. La texture fond littéralement sur le visage sans film gras.
-            </p>
-          </div>
-
-          <div className="pt-4 space-y-2">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <span className="font-semibold text-xs text-foreground">
-                  Fatima A. (Dubai)
-                </span>
-                <span className="rounded bg-emerald-50 px-1.5 py-0.2 text-[10px] font-medium text-emerald-800 border border-emerald-200">
-                  Achat vérifié
-                </span>
-              </div>
-              <span className="text-[11px] text-muted-foreground">Il y a 1 mois</span>
-            </div>
-            <div className="flex items-center text-sf-champagne">
-              {[...Array(5)].map((_, i) => (
-                <Star key={i} className="size-3 fill-current" />
-              ))}
-            </div>
-            <p className="text-xs text-foreground/80 leading-relaxed">
-              Le meilleur soin anti-âge que j'ai pu tester. Idéal avec le climat de Dubaï
-              car il hydrate en profondeur tout en restant léger et confortable.
-            </p>
-          </div>
-        </div>
-      </section>
+      <ProductReviews slug={product.slug} />
     </main>
   );
 }

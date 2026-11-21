@@ -15,6 +15,7 @@ import { AuthModule } from "./modules/auth/auth.module";
 import { ContactModule } from "./modules/contact/contact.module";
 import { NewsletterModule } from "./modules/newsletter/newsletter.module";
 import { CatalogModule } from "./modules/catalog/catalog.module";
+import { ReviewsModule } from "./modules/reviews/reviews.module";
 import { CatalogSyncModule } from "./modules/catalog-sync/catalog-sync.module";
 import { CartModule } from "./modules/cart/cart.module";
 import { WishlistModule } from "./modules/wishlist/wishlist.module";
@@ -81,6 +82,7 @@ import { MediaModule } from "./modules/media/media.module";
     ContactModule,
     NewsletterModule,
     CatalogModule,
+    ReviewsModule,
     CatalogSyncModule,
     CartModule,
     WishlistModule,
