@@ -104,12 +104,12 @@ export function Header() {
           }`}
         >
           <div className="mx-auto flex min-h-9 max-w-[1440px] items-center justify-between px-4 text-[0.65rem] uppercase tracking-widest md:px-6">
-            <div className="flex items-center gap-4">
-              <span>
+            <div className="flex min-w-0 flex-1 items-center gap-4 pe-2">
+              <span className="min-w-0 leading-tight">
                 {t("region")} — {t("currency")}
               </span>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex shrink-0 items-center gap-3">
               <Link
                 href="/partners"
                 className={`hidden md:inline-flex text-[0.65rem] uppercase tracking-wider transition-colors ${

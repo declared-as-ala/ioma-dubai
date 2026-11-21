@@ -181,12 +181,12 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
         {/* ========================================================================= */}
         {/* LEFT COLUMN: Visual Packshot Gallery + Clinical Accordions (Directly under) */}
         {/* ========================================================================= */}
-        <div className="flex flex-col gap-8">
+        <div className="flex min-w-0 flex-col gap-8">
           {/* Gallery Row: Left Vertical Thumbnails + Central Packshot */}
-          <div className="flex flex-col-reverse sm:flex-row gap-4 items-start">
+          <div className="flex min-w-0 flex-col-reverse items-start gap-4 md:flex-row">
             {/* Vertical Thumbnails Strip (Left) */}
             {product.images.length > 1 && (
-              <div className="flex sm:flex-col gap-3 overflow-x-auto sm:overflow-y-auto sm:max-h-[520px] pb-2 sm:pb-0 sm:pr-1 shrink-0">
+              <div className="flex max-w-full gap-3 overflow-x-auto pb-2 md:max-h-[520px] md:flex-col md:overflow-y-auto md:pb-0 md:pe-1 shrink-0">
                 {product.images.map((img, idx) => (
                   <button
                     key={img}
@@ -217,7 +217,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
             {/* Central High-Resolution Packshot */}
             <ImageReveal
               drift={false}
-              className="aspect-square w-full flex-1 rounded-[2rem] bg-sf-ivory min-h-[360px] sm:min-h-[440px] lg:min-h-[560px] group"
+              className="group aspect-square w-full min-w-0 flex-1 rounded-[2rem] bg-sf-ivory lg:min-h-[560px]"
             >
               {currentImage ? (
                 <motion.div
@@ -261,7 +261,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
         {/* ========================================================================= */}
         {/* RIGHT COLUMN: Commerce, Sizing, Price & Conversion Stack                  */}
         {/* ========================================================================= */}
-        <div className="flex flex-col space-y-5 lg:sticky lg:top-40">
+        <div className="flex min-w-0 flex-col space-y-5 lg:sticky lg:top-40">
           {/* Range Tag & Number Badge */}
           <div className="flex items-center gap-2">
             <span
