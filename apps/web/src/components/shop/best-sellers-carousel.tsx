@@ -161,7 +161,7 @@ export function BestSellersCarousel() {
           asChild
           variant="outline"
           size="lg"
-          className="uppercase tracking-widest font-semibold"
+          className="h-auto min-h-11 max-w-full whitespace-normal py-3 text-center font-semibold uppercase tracking-widest"
         >
           <Link href="/shop?bestSeller=true" className="inline-flex items-center gap-2">
             <span>
