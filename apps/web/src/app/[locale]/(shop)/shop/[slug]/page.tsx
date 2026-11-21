@@ -21,7 +21,7 @@ import { PdpInformationSections } from "@/components/shop/pdp-information-sectio
 import { formatMinor } from "@/lib/money";
 import { cn } from "@/lib/utils";
 import { Link } from "@/i18n/navigation";
-import { tr, toLoc } from "@/lib/l10n";
+import { tr, toLoc, pickText } from "@/lib/l10n";
 import { ProductRatingSummary, ProductReviews } from "@/components/shop/product-reviews";
 import {
   Truck,
@@ -153,12 +153,23 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
     rangeSlug === "inlab";
 
   // Formatted clinical text
-  const currentDetails = product.details?.[locale] || product.details?.fr;
-  const currentResults = product.results?.[locale] || product.results?.fr;
-  const currentTexture = product.texture?.[locale] || product.texture?.fr;
-  const currentHowToUse = product.howToUse?.[locale] || product.howToUse?.fr;
+  const rawTagline =
+    pickText(product.accroche, locale) || pickText(product.shortBenefit, locale);
+  const tagline = /^High-performance .* for visible, lasting results\.?$/i.test(
+    rawTagline,
+  )
+    ? ""
+    : rawTagline;
+  // English and Arabic pages never show French text: untranslated sections are simply left out.
+  const currentDetails = pickText(product.details, locale);
+  const currentResults = pickText(product.results, locale);
+  const currentTexture = pickText(product.texture, locale);
+  const currentHowToUse = pickText(product.howToUse, locale);
+  // The ingredient list (INCI) is a technical reference and stays as supplied.
   const currentInci =
-    product.fullIngredientsText?.[locale] || product.fullIngredientsText?.fr;
+    product.fullIngredientsText?.[locale] ||
+    product.fullIngredientsText?.en ||
+    product.fullIngredientsText?.fr;
 
   return (
     <main className="mx-auto max-w-[1480px] px-4 sm:px-6 lg:px-12 pt-8 sm:pt-10 pb-28">
@@ -295,7 +306,7 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                   key={st.slug}
                   className="rounded-full bg-neutral-100 text-neutral-800 px-2.5 py-0.5 text-[11px] font-medium"
                 >
-                  {st.name[locale] || st.name.fr}
+                  {pickText(st.name, locale)}
                 </span>
               ))}
               {product.concerns?.slice(0, 3).map((c) => (
@@ -308,20 +319,17 @@ export default function ProductPage({ params }: { params: Promise<{ slug: string
                     borderColor: `${rangeConfig.hex}25`,
                   }}
                 >
-                  {c.name[locale] || c.name.fr}
+                  {pickText(c.name, locale)}
                 </span>
               ))}
             </div>
           )}
 
-          {/* Editorial Accroche / Short Benefit Paragraph */}
-          {product.accroche?.[locale] ? (
+          {/* Editorial tagline. The generic placeholder sentence ("High-performance ... for visible,
+              lasting results.") is not real product copy and is never shown. */}
+          {tagline && (
             <p className="text-xs sm:text-sm leading-relaxed text-foreground/80 font-normal">
-              {product.accroche[locale]}
-            </p>
-          ) : (
-            <p className="text-xs sm:text-sm leading-relaxed text-foreground/80 font-normal">
-              {product.shortBenefit[locale]}
+              {tagline}
             </p>
           )}
 

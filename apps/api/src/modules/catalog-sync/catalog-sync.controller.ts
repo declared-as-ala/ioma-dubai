@@ -37,28 +37,33 @@ export class CatalogSyncController {
   }
 
   @Get("translations/:productId")
-  translationOf(@CurrentUser() user: JwtPayload, @Param("productId") productId: string) {
+  translationOf(
+    @CurrentUser() user: JwtPayload,
+    @Param("productId") productId: string,
+    @Query("lang") lang?: string,
+  ) {
     requirePermission(user, "commerce.view");
-    return this.translations.get(productId);
+    return this.translations.get(productId, lang);
   }
 
   @Post("translations/:productId/approve")
   approveTranslation(
     @CurrentUser() user: JwtPayload,
     @Param("productId") productId: string,
-    @Body() body: { fields?: Record<string, string> },
+    @Body() body: { fields?: Record<string, string>; lang?: string },
   ) {
     requirePermission(user, "commerce.manage");
-    return this.translations.approve(user, productId, body?.fields ?? {});
+    return this.translations.approve(user, productId, body?.fields ?? {}, body?.lang);
   }
 
   @Post("translations/:productId/reject")
   rejectTranslation(
     @CurrentUser() user: JwtPayload,
     @Param("productId") productId: string,
+    @Body() body: { lang?: string },
   ) {
     requirePermission(user, "commerce.manage");
-    return this.translations.reject(user, productId);
+    return this.translations.reject(user, productId, body?.lang);
   }
 
   @Get("integrity/history/:productId")

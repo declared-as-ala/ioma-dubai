@@ -46,9 +46,11 @@ export function TranslationReviewCard({
   readOnly: boolean;
   onApplied: () => void;
 }) {
+  const [lang, setLang] = useState<"en" | "ar">("en");
   const q = useQuery({
-    queryKey: ["catalog-sync", "translations", productId],
-    queryFn: () => apiFetch<Review>(`/catalog-sync/translations/${productId}`),
+    queryKey: ["catalog-sync", "translations", productId, lang],
+    queryFn: () =>
+      apiFetch<Review>(`/catalog-sync/translations/${productId}?lang=${lang}`),
     enabled: !!productId,
     retry: false,
   });
@@ -70,6 +72,7 @@ export function TranslationReviewCard({
       apiFetch(`/catalog-sync/translations/${productId}/approve`, {
         method: "POST",
         body: JSON.stringify({
+          lang,
           fields: Object.fromEntries([...chosen].map((f) => [f, edit[f] ?? ""])),
         }),
       }),
@@ -80,7 +83,10 @@ export function TranslationReviewCard({
   });
   const reject = useMutation({
     mutationFn: () =>
-      apiFetch(`/catalog-sync/translations/${productId}/reject`, { method: "POST" }),
+      apiFetch(`/catalog-sync/translations/${productId}/reject`, {
+        method: "POST",
+        body: JSON.stringify({ lang }),
+      }),
     onSuccess: async () => {
       await q.refetch();
       onApplied();
@@ -89,7 +95,7 @@ export function TranslationReviewCard({
 
   if (!productId)
     return (
-      <Card title="Arabic translation review">
+      <Card title="Translation review">
         <p className="pl-help !mt-0">Save the product first.</p>
       </Card>
     );
@@ -97,7 +103,7 @@ export function TranslationReviewCard({
   const status = d?.status ?? "none";
   return (
     <Card
-      title="Arabic translation review"
+      title="Translation review"
       action={
         <Badge
           tone={
@@ -115,18 +121,32 @@ export function TranslationReviewCard({
       }
     >
       <div className="space-y-4 p-4">
+        <div className="flex gap-2" role="tablist" aria-label="Language">
+          {(["en", "ar"] as const).map((l) => (
+            <button
+              key={l}
+              type="button"
+              role="tab"
+              aria-selected={lang === l}
+              className={`pl-btn pl-btn--sm ${lang === l ? "pl-btn--primary" : ""}`}
+              onClick={() => setLang(l)}
+            >
+              {l === "en" ? "English" : "العربية"}
+            </button>
+          ))}
+        </div>
         {!d ? (
           <p className="pl-help !mt-0">Loading…</p>
         ) : status !== "draft" ? (
           <p className="pl-help !mt-0">
             {status === "approved"
-              ? `The Arabic text was reviewed and approved${d.reviewedBy ? ` by ${d.reviewedBy}` : ""}. You can still edit it in General information.`
-              : "No Arabic draft is waiting for review for this product. Arabic text is edited in General information (language switch: العربية)."}
+              ? `The ${lang === "en" ? "English" : "Arabic"} text was reviewed and approved${d.reviewedBy ? ` by ${d.reviewedBy}` : ""}. You can still edit it in the Product tab.`
+              : `No ${lang === "en" ? "English" : "Arabic"} draft is waiting for review for this product. Text is edited in the Product tab (language switch).`}
           </p>
         ) : (
           <>
             <p className="pl-help !mt-0">
-              The Arabic below is a proposal{d.source ? ` (${d.source})` : ""}. Edit it if
+              The text below is a proposal{d.source ? ` (${d.source})` : ""}. Edit it if
               needed, tick what you approve, then approve. Brand names and technical
               references are kept as they are. Nothing changes on the site until you
               approve.
@@ -158,9 +178,11 @@ export function TranslationReviewCard({
                     )}
                   </div>
                   <div className="space-y-1 text-[13px]">
-                    <p className="pl-help !mt-0">Arabic draft (editable)</p>
+                    <p className="pl-help !mt-0">
+                      {lang === "en" ? "English" : "Arabic"} draft (editable)
+                    </p>
                     <Textarea
-                      dir="rtl"
+                      dir={lang === "ar" ? "rtl" : "ltr"}
                       rows={f.field === "name" ? 2 : 5}
                       disabled={readOnly || !f.draftAr}
                       value={edit[f.field] ?? ""}
@@ -169,7 +191,7 @@ export function TranslationReviewCard({
                       }
                     />
                     {f.liveAr && (
-                      <p className="pl-help" dir="rtl">
+                      <p className="pl-help" dir={lang === "ar" ? "rtl" : "ltr"}>
                         Live now: {f.liveAr}
                       </p>
                     )}

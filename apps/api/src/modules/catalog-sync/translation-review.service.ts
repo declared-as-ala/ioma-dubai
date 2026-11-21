@@ -20,6 +20,11 @@ export type ArField = (typeof AR_FIELDS)[number];
 
 const text = (v: unknown) => (typeof v === "string" ? v : "");
 
+/** Languages that go through human review. Drafts live in `arDraft` / `enDraft`, apart from the live text. */
+export type ReviewLang = "ar" | "en";
+const draftKey = (lang: ReviewLang) => (lang === "en" ? "enDraft" : "arDraft");
+export const toLang = (v: unknown): ReviewLang => (v === "en" ? "en" : "ar");
+
 /**
  * Arabic translations are proposed as drafts (`arDraft`), kept apart from the live content, and only
  * written to the product (`<field>.ar`) when an administrator approves them, optionally after editing.
@@ -69,57 +74,64 @@ export class TranslationReviewService {
     };
   }
 
-  async get(productId: string) {
+  async get(productId: string, langIn: unknown = "ar") {
+    const lang = toLang(langIn);
+    const key = draftKey(lang);
     const p = (await this.db
       .collection("products")
       .findOne({ _id: this.oid(productId) })) as Row | null;
     if (!p) throw new NotFoundException("Product not found.");
+    const draft = p[key] as Row | undefined;
     return {
       id: String(p._id),
-      status: (p.arDraft?.status as string | undefined) ?? "none",
-      source: (p.arDraft?.source as string | undefined) ?? null,
-      draftedAt: p.arDraft?.draftedAt ?? null,
-      reviewedBy: p.arDraft?.reviewedBy ?? null,
+      lang,
+      status: (draft?.status as string | undefined) ?? "none",
+      source: (draft?.source as string | undefined) ?? null,
+      draftedAt: draft?.draftedAt ?? null,
+      reviewedBy: draft?.reviewedBy ?? null,
       fields: AR_FIELDS.map((f) => ({
         field: f,
         en: text(p[f]?.en),
         fr: text(p[f]?.fr),
-        liveAr: text(p[f]?.ar),
-        draftAr: text(p.arDraft?.fields?.[f]),
+        liveAr: text(p[f]?.[lang]),
+        draftAr: text(draft?.fields?.[f]),
       })).filter((r) => r.en || r.fr || r.liveAr || r.draftAr),
     };
   }
 
-  /** Applies the reviewed Arabic text (the admin may have edited it) to the live product. */
+  /** Applies the reviewed text (the admin may have edited it) to the live product. */
   async approve(
     actor: { sub: string; email: string },
     productId: string,
     final: Partial<Record<ArField, string>>,
+    langIn: unknown = "ar",
   ) {
+    const lang = toLang(langIn);
+    const key = draftKey(lang);
     const _id = this.oid(productId);
     const p = (await this.db.collection("products").findOne({ _id })) as Row | null;
     if (!p) throw new NotFoundException("Product not found.");
-    if (!p.arDraft || p.arDraft.status !== "draft")
-      throw new BadRequestException("There is no pending Arabic draft for this product.");
+    if (!p[key] || p[key].status !== "draft")
+      throw new BadRequestException("There is no pending draft for this product.");
     const set: Row = { updatedAt: new Date() };
     const applied: string[] = [];
     for (const [field, value] of Object.entries(final)) {
       if (!(AR_FIELDS as readonly string[]).includes(field)) continue;
       const v = text(value).trim();
       if (!v) continue;
-      set[`${field}.ar`] = v;
+      set[`${field}.${lang}`] = v;
       applied.push(field);
     }
     if (!applied.length)
       throw new BadRequestException("Approve at least one translated field.");
-    set["arDraft.status"] = "approved";
-    set["arDraft.reviewedBy"] = actor.email;
-    set["arDraft.reviewedAt"] = new Date();
+    set[`${key}.status`] = "approved";
+    set[`${key}.reviewedBy`] = actor.email;
+    set[`${key}.reviewedAt`] = new Date();
     await this.db.collection("products").updateOne({ _id }, { $set: set });
     await this.audit.recordEvent({
       actorId: actor.sub,
       actorEmail: actor.email,
-      action: "admin.translation.ar.approved",
+      action: `admin.translation.${lang}.approved`,
       resource: "products",
       resourceId: productId,
       details: { fields: applied },
@@ -127,24 +139,30 @@ export class TranslationReviewService {
     return { applied };
   }
 
-  async reject(actor: { sub: string; email: string }, productId: string) {
+  async reject(
+    actor: { sub: string; email: string },
+    productId: string,
+    langIn: unknown = "ar",
+  ) {
+    const lang = toLang(langIn);
+    const key = draftKey(lang);
     const _id = this.oid(productId);
     const r = await this.db.collection("products").updateOne(
-      { _id, "arDraft.status": "draft" },
+      { _id, [`${key}.status`]: "draft" },
       {
         $set: {
-          "arDraft.status": "rejected",
-          "arDraft.reviewedBy": actor.email,
-          "arDraft.reviewedAt": new Date(),
+          [`${key}.status`]: "rejected",
+          [`${key}.reviewedBy`]: actor.email,
+          [`${key}.reviewedAt`]: new Date(),
         },
       },
     );
     if (!r.matchedCount)
-      throw new BadRequestException("There is no pending Arabic draft for this product.");
+      throw new BadRequestException("There is no pending draft for this product.");
     await this.audit.recordEvent({
       actorId: actor.sub,
       actorEmail: actor.email,
-      action: "admin.translation.ar.rejected",
+      action: `admin.translation.${lang}.rejected`,
       resource: "products",
       resourceId: productId,
       details: {},

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { extractClinicalResults, isEmptyContent } from "@ioma/validation";
 import type { ActiveIngredientItem } from "@ioma/types";
+import { pickText } from "@/lib/l10n";
 
 interface PdpInformationSectionsProps {
   locale: "en" | "fr" | "ar";
@@ -282,7 +283,7 @@ export function PdpInformationSections({
                     <p className="text-xs leading-relaxed text-foreground/75 mt-1.5 font-light">
                       {typeof act.description === "string"
                         ? act.description
-                        : act.description?.[locale] || act.description?.fr || ""}
+                        : pickText(act.description, locale)}
                     </p>
                   )}
                 </div>
