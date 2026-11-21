@@ -155,7 +155,7 @@ export function ConsentPreferencesPanel({ onDone }: { onDone?: () => void }) {
       </p>
       <div className="mt-6 flex flex-wrap gap-3">
         <Button
-          className="h-11 rounded-full px-7 uppercase tracking-widest"
+          className="h-auto min-h-11 max-w-full whitespace-normal rounded-full px-7 py-2.5 text-center uppercase tracking-widest"
           onClick={() => {
             saveConsent({ analytics, marketing });
             onDone?.();
@@ -165,7 +165,7 @@ export function ConsentPreferencesPanel({ onDone }: { onDone?: () => void }) {
         </Button>
         <Button
           variant="outline"
-          className="h-11 rounded-full px-7 uppercase tracking-widest"
+          className="h-auto min-h-11 max-w-full whitespace-normal rounded-full px-7 py-2.5 text-center uppercase tracking-widest"
           onClick={() => {
             acceptAll();
             onDone?.();
@@ -175,7 +175,7 @@ export function ConsentPreferencesPanel({ onDone }: { onDone?: () => void }) {
         </Button>
         <Button
           variant="outline"
-          className="h-11 rounded-full px-7 uppercase tracking-widest"
+          className="h-auto min-h-11 max-w-full whitespace-normal rounded-full px-7 py-2.5 text-center uppercase tracking-widest"
           onClick={() => {
             rejectOptional();
             onDone?.();
