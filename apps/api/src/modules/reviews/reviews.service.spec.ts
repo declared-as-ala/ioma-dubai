@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import { Types } from "mongoose";
-import { ReviewsService } from "./reviews.service";
+import { ReviewsService, imageKind } from "./reviews.service";
 import type { JwtPayload } from "../auth/strategies/jwt.strategy";
 
 const productId = new Types.ObjectId();
@@ -54,11 +54,16 @@ function build(
     },
   };
   const audit = { recordEvent: jest.fn().mockResolvedValue(undefined) };
+  const documents = {
+    create: jest.fn().mockResolvedValue({ _id: new Types.ObjectId() }),
+    getBytes: jest.fn(),
+  };
   const service = new ReviewsService(
     { collection: (n: string) => collections[n] } as never,
     audit as never,
+    documents as never,
   );
-  return { service, reviews, collections, audit };
+  return { service, reviews, collections, audit, documents };
 }
 
 describe("ReviewsService", () => {
@@ -216,5 +221,83 @@ describe("ReviewsService", () => {
     await expect(
       service.moderate(admin, String(r._id), { status: "bogus" }),
     ).rejects.toThrow(BadRequestException);
+  });
+
+  describe("photos", () => {
+    const jpeg = Buffer.concat([Buffer.from([255, 216, 255, 224]), Buffer.alloc(40)]);
+    const file = (buffer: Buffer, size = buffer.length) =>
+      ({ buffer, size }) as Express.Multer.File;
+
+    it("recognises images by their bytes, not their declared type", () => {
+      expect(imageKind(jpeg)).toBe("jpg");
+      expect(imageKind(Buffer.from("<html>not an image</html>......"))).toBeNull();
+    });
+
+    it("stores a valid photo privately, and sends a published review back to moderation", async () => {
+      const review = {
+        _id: new Types.ObjectId(),
+        userId,
+        status: "published",
+        photos: [],
+      };
+      const { service, reviews, documents } = build({ existing: review });
+      const res = await service.addPhoto(user, String(review._id), file(jpeg));
+      expect(res.status).toBe("pending");
+      expect(documents.create.mock.calls[0][0]).toMatchObject({
+        bucket: "ioma-private",
+        ownerType: "review",
+      });
+      expect(reviews.updateOne.mock.calls[0][1].$set.status).toBe("pending");
+    });
+
+    it("rejects files that are not photos, too large, or beyond three photos", async () => {
+      const review = {
+        _id: new Types.ObjectId(),
+        userId,
+        status: "pending",
+        photos: [1, 2, 3],
+      };
+      const { service } = build({ existing: review });
+      await expect(
+        service.addPhoto(
+          user,
+          String(review._id),
+          file(Buffer.from("not an image at all, sorry")),
+        ),
+      ).rejects.toThrow(/JPEG/);
+      await expect(
+        service.addPhoto(user, String(review._id), file(jpeg, 6 * 1024 * 1024)),
+      ).rejects.toThrow(/5 MB/);
+      await expect(
+        service.addPhoto(user, String(review._id), file(jpeg)),
+      ).rejects.toThrow(/up to 3/);
+    });
+
+    it("only the author can add a photo", async () => {
+      const review = {
+        _id: new Types.ObjectId(),
+        userId: new Types.ObjectId(),
+        status: "pending",
+        photos: [],
+      };
+      const { service } = build({ existing: review });
+      await expect(
+        service.addPhoto(user, String(review._id), file(jpeg)),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it("a photo is public only when its review is published", async () => {
+      const { service, reviews, documents } = build();
+      reviews.findOne.mockResolvedValue(null);
+      await expect(service.publicPhoto(String(new Types.ObjectId()))).rejects.toThrow(
+        NotFoundException,
+      );
+      expect(reviews.findOne.mock.calls[0][0].status).toBe("published");
+      reviews.findOne.mockResolvedValue({ _id: 1 });
+      documents.getBytes.mockResolvedValue({ data: jpeg, mimeType: "image/jpeg" });
+      await expect(
+        service.publicPhoto(String(new Types.ObjectId())),
+      ).resolves.toMatchObject({ mimeType: "image/jpeg" });
+    });
   });
 });

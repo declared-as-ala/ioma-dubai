@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { apiFetch } from "@/lib/api";
+import { apiFetch, apiUploadProgress } from "@/lib/api";
 
 export interface ReviewItem {
   id: string;
@@ -8,6 +8,8 @@ export interface ReviewItem {
   comment: string;
   authorName: string;
   verifiedPurchase: boolean;
+  photos: string[];
+  photoCount: number;
   createdAt: string;
   reply: { text: string; at: string } | null;
 }
@@ -54,19 +56,43 @@ export function useProductReviews(
   });
 }
 
+export const MAX_REVIEW_PHOTOS = 3;
+export const MAX_REVIEW_PHOTO_BYTES = 5 * 1024 * 1024;
+
 export function useSubmitReview(slug: string) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (input: {
+    mutationFn: async ({
+      files = [],
+      ...input
+    }: {
       rating: number;
       title: string;
       comment: string;
       locale: string;
-    }) =>
-      apiFetch<{ id: string; status: "pending"; verifiedPurchase: boolean }>(
-        `/products/${encodeURIComponent(slug)}/reviews`,
-        { method: "POST", body: JSON.stringify(input) },
-      ),
+      files?: File[];
+    }) => {
+      const review = await apiFetch<{
+        id: string;
+        status: "pending";
+        verifiedPurchase: boolean;
+      }>(`/products/${encodeURIComponent(slug)}/reviews`, {
+        method: "POST",
+        body: JSON.stringify(input),
+      });
+      // The review is saved first; photos are added one by one, and a failed photo never loses the review.
+      let photoErrors = 0;
+      for (const file of files.slice(0, MAX_REVIEW_PHOTOS)) {
+        try {
+          const form = new FormData();
+          form.append("file", file);
+          await apiUploadProgress(`/reviews/${review.id}/photos`, form, () => undefined);
+        } catch {
+          photoErrors++;
+        }
+      }
+      return { ...review, photoErrors };
+    },
     onSuccess: () => qc.invalidateQueries({ queryKey: reviewsKey(slug) }),
   });
 }

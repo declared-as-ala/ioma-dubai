@@ -8,6 +8,7 @@ import {
 import { InjectConnection } from "@nestjs/mongoose";
 import { Connection, Types } from "mongoose";
 import { AuditService } from "../audit/audit.service";
+import { DocumentsService } from "../documents/documents.service";
 import type { JwtPayload } from "../auth/strategies/jwt.strategy";
 import { requirePermission } from "../admin/admin-permissions";
 
@@ -26,6 +27,25 @@ const MAX_TITLE = 120;
 const MAX_COMMENT = 2000;
 const MIN_COMMENT = 10;
 const DAILY_LIMIT = 5;
+const MAX_PHOTOS = 3;
+const MAX_PHOTO_BYTES = 5 * 1024 * 1024;
+
+/** The real type of an uploaded image, from its first bytes (never trust the declared type). */
+export function imageKind(b: Buffer): "jpg" | "png" | "webp" | null {
+  if (b.length > 12 && b[0] === 255 && b[1] === 216 && b[2] === 255) return "jpg";
+  if (
+    b.length > 12 &&
+    b.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))
+  )
+    return "png";
+  if (
+    b.length > 12 &&
+    b.subarray(0, 4).toString() === "RIFF" &&
+    b.subarray(8, 12).toString() === "WEBP"
+  )
+    return "webp";
+  return null;
+}
 
 /** Plain text only: tags are removed and whitespace is collapsed. */
 const clean = (v: unknown, max: number) =>
@@ -50,6 +70,7 @@ export class ReviewsService {
   constructor(
     @InjectConnection() private readonly db: Connection,
     private readonly audit: AuditService,
+    private readonly documents: DocumentsService,
   ) {}
 
   private get col() {
@@ -125,6 +146,13 @@ export class ReviewsService {
       verifiedPurchase: !!r.verifiedPurchase,
       createdAt: r.createdAt,
       reply: r.reply?.text ? { text: r.reply.text, at: r.reply.at } : null,
+      photos:
+        r.status === "published"
+          ? ((r.photos as Row[] | undefined) ?? []).map(
+              (p) => `/api/reviews/photos/${String(p.documentId)}`,
+            )
+          : [],
+      photoCount: ((r.photos as Row[] | undefined) ?? []).length,
     };
   }
 
@@ -298,6 +326,63 @@ export class ReviewsService {
     return { id, status: "withdrawn" };
   }
 
+  /** The customer adds a photo to their own review. A published review goes back to moderation. */
+  async addPhoto(user: JwtPayload, id: string, file: Express.Multer.File | undefined) {
+    if (!file || !file.size || file.size > MAX_PHOTO_BYTES)
+      throw new BadRequestException("Choose a photo up to 5 MB.");
+    const kind = imageKind(file.buffer);
+    if (!kind) throw new BadRequestException("Use a JPEG, PNG or WebP photo.");
+    const review = (await this.col.findOne({ _id: this.oid(id) })) as Row | null;
+    if (!review || String(review.userId) !== user.sub)
+      throw new NotFoundException("Review not found.");
+    if (review.status === "withdrawn")
+      throw new ForbiddenException("This review was withdrawn.");
+    if (((review.photos as Row[] | undefined) ?? []).length >= MAX_PHOTOS)
+      throw new BadRequestException(`You can add up to ${MAX_PHOTOS} photos.`);
+    const doc = await this.documents.create({
+      bucket: "ioma-private",
+      data: file.buffer,
+      mimeType:
+        kind === "jpg" ? "image/jpeg" : kind === "png" ? "image/png" : "image/webp",
+      ownerType: "review",
+      ownerId: review._id,
+      uploadedBy: new Types.ObjectId(user.sub),
+      extension: `.${kind}`,
+    });
+    await this.col.updateOne(
+      { _id: review._id },
+      {
+        $push: { photos: { documentId: doc._id, at: new Date() } } as never,
+        $set: {
+          updatedAt: new Date(),
+          ...(review.status === "published" ? { status: "pending" } : {}),
+        },
+      },
+    );
+    await this.audit.recordEvent({
+      actorId: user.sub,
+      actorEmail: user.email,
+      action: "review.photo_added",
+      resource: "reviews",
+      resourceId: id,
+    });
+    return {
+      documentId: String(doc._id),
+      status: review.status === "published" ? "pending" : review.status,
+    };
+  }
+
+  /** A review photo is public only while its review is published. */
+  async publicPhoto(documentId: string) {
+    const _id = this.oid(documentId, "Photo");
+    const review = await this.col.findOne({
+      "photos.documentId": _id,
+      status: "published",
+    });
+    if (!review) throw new NotFoundException("Photo not found.");
+    return this.documents.getBytes(_id);
+  }
+
   // ---------------------------------------------------------------- admin
 
   async adminList(user: JwtPayload, query: Record<string, string | undefined>) {
@@ -379,11 +464,23 @@ export class ReviewsService {
     requirePermission(user, "commerce.view");
     const r = (await this.col.findOne({ _id: this.oid(id) })) as Row | null;
     if (!r) throw new NotFoundException("Review not found.");
+    const photos: string[] = [];
+    for (const p of (r.photos as Row[] | undefined) ?? []) {
+      try {
+        const { data, mimeType } = await this.documents.getBytes(
+          new Types.ObjectId(String(p.documentId)),
+        );
+        photos.push(`data:${mimeType};base64,${data.toString("base64")}`);
+      } catch {
+        /* a missing file is simply not shown */
+      }
+    }
     return {
       ...r,
       _id: String(r._id),
       productId: String(r.productId),
       userId: String(r.userId),
+      photos,
     };
   }
 

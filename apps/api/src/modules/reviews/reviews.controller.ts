@@ -7,8 +7,13 @@ import {
   Patch,
   Post,
   Query,
+  Res,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from "@nestjs/common";
+import { FileInterceptor } from "@nestjs/platform-express";
+import type { Response } from "express";
 import { ApiTags } from "@nestjs/swagger";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { OptionalJwtAuthGuard } from "../auth/guards/optional-jwt-auth.guard";
@@ -43,6 +48,30 @@ export class ReviewsController {
     @Body() body: Record<string, unknown>,
   ) {
     return this.reviews.create(slug, user, body);
+  }
+
+  @Post("reviews/:id/photos")
+  @UseGuards(JwtAuthGuard, VerifiedEmailGuard)
+  @UseInterceptors(FileInterceptor("file", { limits: { fileSize: 5 * 1024 * 1024 } }))
+  addPhoto(
+    @Param("id") id: string,
+    @CurrentUser() user: JwtPayload,
+    @UploadedFile() file: Express.Multer.File | undefined,
+  ) {
+    return this.reviews.addPhoto(user, id, file);
+  }
+
+  /** Photos of published reviews only. */
+  @Get("reviews/photos/:documentId")
+  async photo(@Param("documentId") documentId: string, @Res() res: Response) {
+    const { data, mimeType } = await this.reviews.publicPhoto(documentId);
+    res
+      .set({
+        "Content-Type": mimeType,
+        "Cache-Control": "public, max-age=3600",
+        "X-Content-Type-Options": "nosniff",
+      })
+      .send(data);
   }
 
   @Delete("reviews/:id")

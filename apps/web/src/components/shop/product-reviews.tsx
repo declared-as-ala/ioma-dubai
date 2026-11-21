@@ -20,6 +20,8 @@ import {
   useProductReviews,
   useSubmitReview,
   useWithdrawReview,
+  MAX_REVIEW_PHOTOS,
+  MAX_REVIEW_PHOTO_BYTES,
   type ReviewSort,
 } from "@/hooks/use-reviews";
 
@@ -120,6 +122,30 @@ const T = {
     fr: (n: number) => `${n} étoiles sur 5`,
     ar: (n: number) => `${n} من 5 نجوم`,
   },
+  photos: { en: "Photos (optional)", fr: "Photos (facultatif)", ar: "صور (اختياري)" },
+  photosHint: {
+    en: "Up to 3 photos, JPEG, PNG or WebP, 5 MB each.",
+    fr: "Jusqu'à 3 photos, JPEG, PNG ou WebP, 5 Mo chacune.",
+    ar: "حتى 3 صور بصيغة JPEG أو PNG أو WebP، بحجم 5 ميغابايت لكل صورة.",
+  },
+  addPhotos: { en: "Add photos", fr: "Ajouter des photos", ar: "إضافة صور" },
+  removePhoto: { en: "Remove photo", fr: "Retirer la photo", ar: "إزالة الصورة" },
+  photoAlt: { en: "Customer photo", fr: "Photo client", ar: "صورة العميلة" },
+  photoRejected: {
+    en: "A photo was skipped: use JPEG, PNG or WebP up to 5 MB.",
+    fr: "Une photo a été ignorée : JPEG, PNG ou WebP jusqu'à 5 Mo.",
+    ar: "تم تجاهل صورة: استخدمي JPEG أو PNG أو WebP بحجم أقصاه 5 ميغابايت.",
+  },
+  photoFailed: {
+    en: "Your review was received, but a photo could not be uploaded.",
+    fr: "Votre avis a bien été reçu, mais une photo n'a pas pu être envoyée.",
+    ar: "تم استلام تقييمك، لكن تعذّر رفع إحدى الصور.",
+  },
+  photosPending: {
+    en: (n: number) => `${n} photo${n === 1 ? "" : "s"} awaiting approval.`,
+    fr: (n: number) => `${n} photo${n === 1 ? "" : "s"} en attente de validation.`,
+    ar: (n: number) => `${n} صورة بانتظار الموافقة.`,
+  },
   errors: {
     duplicate: {
       en: "You have already reviewed this product.",
@@ -208,8 +234,25 @@ function ReviewForm({
   const [comment, setComment] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
+  const [files, setFiles] = useState<File[]>([]);
+  const [photoNote, setPhotoNote] = useState<string | null>(null);
+
+  const addFiles = (list: FileList | null) => {
+    if (!list) return;
+    const ok: File[] = [];
+    let rejected = false;
+    for (const f of Array.from(list)) {
+      if (/^image\/(jpeg|png|webp)$/.test(f.type) && f.size <= MAX_REVIEW_PHOTO_BYTES)
+        ok.push(f);
+      else rejected = true;
+    }
+    setFiles((cur) => [...cur, ...ok].slice(0, MAX_REVIEW_PHOTOS));
+    setPhotoNote(rejected ? tr(locale, T.photoRejected) : null);
+  };
 
   const reset = () => {
+    setFiles([]);
+    setPhotoNote(null);
     setRating(0);
     setTitle("");
     setComment("");
@@ -224,9 +267,12 @@ function ReviewForm({
     if (comment.trim().length < 10) return setError(tr(locale, T.errors.short));
     setError(null);
     submit.mutate(
-      { rating, title: title.trim(), comment: comment.trim(), locale },
+      { rating, title: title.trim(), comment: comment.trim(), locale, files },
       {
-        onSuccess: () => setDone(true),
+        onSuccess: (res) => {
+          setDone(true);
+          if (res.photoErrors) setPhotoNote(tr(locale, T.photoFailed));
+        },
         onError: (err) =>
           setError(
             err instanceof ApiError && err.statusCode === 409
@@ -257,6 +303,7 @@ function ReviewForm({
             <p className="text-sm leading-relaxed text-foreground">
               {tr(locale, T.thanks)}
             </p>
+            {photoNote && <p className="text-sm text-destructive">{photoNote}</p>}
             <Button className="w-full" onClick={() => onOpenChange(false)}>
               OK
             </Button>
@@ -322,6 +369,51 @@ function ReviewForm({
               <p id="review-comment-hint" className="text-xs text-muted-foreground">
                 {tr(locale, T.commentHint)} {comment.length}/2000
               </p>
+            </div>
+
+            <div className="space-y-2">
+              <p className="text-sm font-medium">{tr(locale, T.photos)}</p>
+              {files.length > 0 && (
+                <ul className="flex flex-wrap gap-2">
+                  {files.map((f, i) => (
+                    <li
+                      key={`${f.name}-${i}`}
+                      className="relative size-20 overflow-hidden rounded-md border border-border"
+                    >
+                      <img
+                        src={URL.createObjectURL(f)}
+                        alt={tr(locale, T.photoAlt)}
+                        className="size-full object-cover"
+                      />
+                      <button
+                        type="button"
+                        aria-label={tr(locale, T.removePhoto)}
+                        className="absolute end-0 top-0 grid size-7 place-items-center bg-black/60 text-white"
+                        onClick={() => setFiles((cur) => cur.filter((_, j) => j !== i))}
+                      >
+                        ×
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {files.length < MAX_REVIEW_PHOTOS && (
+                <label className="inline-flex min-h-11 cursor-pointer items-center rounded-md border border-border px-4 text-sm hover:bg-muted">
+                  {tr(locale, T.addPhotos)}
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    multiple
+                    className="sr-only"
+                    onChange={(e) => {
+                      addFiles(e.target.files);
+                      e.target.value = "";
+                    }}
+                  />
+                </label>
+              )}
+              <p className="text-xs text-muted-foreground">{tr(locale, T.photosHint)}</p>
+              {photoNote && <p className="text-xs text-destructive">{photoNote}</p>}
             </div>
 
             {error && (
@@ -462,6 +554,11 @@ export function ProductReviews({ slug }: { slug: string }) {
           <p className="mt-1 whitespace-pre-line break-words text-sm leading-relaxed text-foreground/85">
             {mine.comment}
           </p>
+          {mine.photoCount > 0 && mine.status !== "published" && (
+            <p className="mt-2 text-xs text-muted-foreground">
+              {tr(locale, T.photosPending)(mine.photoCount)}
+            </p>
+          )}
           {mine.status !== "published" && (
             <p className="mt-3 text-xs text-muted-foreground" role="status">
               {tr(locale, T[mine.status as "pending" | "rejected" | "hidden"])}
@@ -531,6 +628,27 @@ export function ProductReviews({ slug }: { slug: string }) {
                 <p className="whitespace-pre-line break-words text-sm leading-relaxed text-foreground/85">
                   {r.comment}
                 </p>
+                {r.photos.length > 0 && (
+                  <ul className="flex flex-wrap gap-2 pt-1">
+                    {r.photos.map((src) => (
+                      <li key={src}>
+                        <a
+                          href={src}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block"
+                        >
+                          <img
+                            src={src}
+                            alt={tr(locale, T.photoAlt)}
+                            loading="lazy"
+                            className="size-20 rounded-md border border-border object-cover sm:size-24"
+                          />
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                )}
                 {r.reply && (
                   <div className="ms-0 mt-2 rounded-md bg-muted/50 p-3 text-sm sm:ms-6">
                     <p className="text-xs font-semibold uppercase tracking-wider text-foreground/70">

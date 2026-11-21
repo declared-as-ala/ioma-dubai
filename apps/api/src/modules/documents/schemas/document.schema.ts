@@ -10,7 +10,8 @@ export type DocumentOwnerType =
   | "protocol"
   | "order"
   | "ai_analysis"
-  | "cms";
+  | "cms"
+  | "review";
 
 // See DATA_MODEL.md "Document". Named `DocumentRecord` (not `Document`) to
 // avoid colliding with the DOM/Node global `Document` type across the API
@@ -41,6 +42,7 @@ export class DocumentRecord {
       "order",
       "ai_analysis",
       "cms",
+      "review",
     ],
     index: true,
   })

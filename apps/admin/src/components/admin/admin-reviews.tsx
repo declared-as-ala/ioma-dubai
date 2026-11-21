@@ -26,6 +26,7 @@ interface Review {
   comment: string;
   locale?: string;
   verifiedPurchase: boolean;
+  photos?: string[];
   status: Status;
   createdAt: string;
   reply?: { text: string; by: string; at: string };
@@ -173,6 +174,21 @@ function ReviewDrawer({
                 <p className="whitespace-pre-line break-words text-[14px] leading-relaxed">
                   {r.comment}
                 </p>
+                {r.photos && r.photos.length > 0 && (
+                  <ul className="flex flex-wrap gap-2 pt-2">
+                    {r.photos.map((src, k) => (
+                      <li key={k}>
+                        <a href={src} target="_blank" rel="noopener noreferrer">
+                          <img
+                            src={src}
+                            alt={`Customer photo ${k + 1}`}
+                            className="size-24 rounded border object-cover"
+                          />
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
 
               {r.moderation && (

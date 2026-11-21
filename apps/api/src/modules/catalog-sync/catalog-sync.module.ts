@@ -15,6 +15,7 @@ import { CatalogSyncService } from "./catalog-sync.service";
 import { CatalogSyncController } from "./catalog-sync.controller";
 import { CatalogIntegrityService } from "./catalog-integrity.service";
 import { TranslationReviewService } from "./translation-review.service";
+import { TranslationBulkService } from "./translation-bulk.service";
 
 @Module({
   imports: [
@@ -27,6 +28,11 @@ import { TranslationReviewService } from "./translation-review.service";
     ]),
   ],
   controllers: [CatalogSyncController],
-  providers: [CatalogSyncService, CatalogIntegrityService, TranslationReviewService],
+  providers: [
+    CatalogSyncService,
+    CatalogIntegrityService,
+    TranslationReviewService,
+    TranslationBulkService,
+  ],
 })
 export class CatalogSyncModule {}

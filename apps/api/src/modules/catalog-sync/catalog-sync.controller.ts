@@ -16,6 +16,7 @@ import { requirePermission } from "../admin/admin-permissions";
 import { CatalogSyncService, type ApplyChoice } from "./catalog-sync.service";
 import { CatalogIntegrityService } from "./catalog-integrity.service";
 import { TranslationReviewService } from "./translation-review.service";
+import { TranslationBulkService } from "./translation-bulk.service";
 
 /**
  * Administrator-only catalogue synchronisation. Reads need `commerce.view`; anything that changes data needs
@@ -28,7 +29,32 @@ export class CatalogSyncController {
     private readonly sync: CatalogSyncService,
     private readonly integrity: CatalogIntegrityService,
     private readonly translations: TranslationReviewService,
+    private readonly bulk: TranslationBulkService,
   ) {}
+
+  @Get("translations/bulk/preview")
+  bulkPreview(@CurrentUser() user: JwtPayload) {
+    requirePermission(user, "commerce.view");
+    return this.bulk.preview();
+  }
+
+  @Get("translations/bulk/batches")
+  bulkBatches(@CurrentUser() user: JwtPayload) {
+    requirePermission(user, "commerce.view");
+    return this.bulk.batchList();
+  }
+
+  @Post("translations/bulk/approve")
+  bulkApprove(@CurrentUser() user: JwtPayload, @Body() body: Record<string, unknown>) {
+    requirePermission(user, "commerce.manage");
+    return this.bulk.approve(user, body ?? {});
+  }
+
+  @Post("translations/bulk/rollback/:batchId")
+  bulkRollback(@CurrentUser() user: JwtPayload, @Param("batchId") batchId: string) {
+    requirePermission(user, "commerce.manage");
+    return this.bulk.rollback(user, batchId);
+  }
 
   @Get("translations")
   translationQueue(@CurrentUser() user: JwtPayload) {
