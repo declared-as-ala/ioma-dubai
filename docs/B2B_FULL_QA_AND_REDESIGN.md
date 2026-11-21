@@ -54,8 +54,31 @@ until approved). On phones the title, price and Add to cart come before the acco
 API 292 (Jest), web 19 (Vitest), Playwright specs: product page overflow and language, B2B lifecycle
 (`e2e/b2b-lifecycle.spec.ts`, needs E2E_* credentials), plus the existing suite.
 
-## Not done
+## Completed since the last revision (all verified on production)
 
-Manual creation of a professional from the admin (professionals come from approved applications), pricing history view,
-bulk actions and exports on the B2B lists, optimistic concurrency, the partner-application end-to-end run, and a visual
-pass of the admin on a phone (the admin blocks framing and the Chrome tool could not resize the window).
+- **Manual professional accounts**: Admin > Professionals > Add professional. New person gets an approved account and an email to
+  choose a password; an existing customer gains access; a duplicate is refused (409). 3 unit tests + production test.
+- **Pricing history**: every manual price, recommended retail or minimum-order change records who, when, from and to; Price history
+  drawer (also shows price-list imports); Export prices (CSV).
+- **Bulk actions and export**: Professionals (select, show/hide listing, export all or selected); content lists gained bulk Archive;
+  Services got bulk Activate/Archive.
+- **Professional application, end to end** (production): visitor applies, admin attaches the trade licence (validation is refused
+  without it), approves (a second approval is refused), the professional signs in at level "validated", trade price AED 217.00
+  computed on the server, order placed, visible to the professional and to the admin. 17 checks, test records removed.
+- **Optimistic concurrency**: saving a record sends the version it loaded; if someone else saved first the save is refused (409).
+- **Admin on phones**: audited 21 pages at 390 and 320px. 13 pages scrolled sideways (screen-reader labels inside tables escaped the
+  table frame); fixed at the source, now none do.
+- **Storefront audit**: 35 pages x 3 languages x 2 sizes plus products. Fixed: failed wishlist request on every product page for
+  visitors, French pages overflowing on phones (loyalty, FAQ, cookie preferences, switch touch area), Arabic title and unit-price
+  word order.
+- **Translations published**: 63 English and 63 Arabic product translations (514 texts) after an independent review that produced
+  32 corrections (31 Arabic, 1 English); backup taken first; bulk rollback available.
+
+## Genuinely remaining
+
+- The email a new professional receives (set-password link) was not read by a human here; account creation and sending were
+  verified, delivery to the inbox was not.
+- Real payment gateway: checkout still runs in demo mode (no gateway keys supplied).
+- Hair-care and other categories' translations beyond the 63 shop products and the 56 cabin products' copy (cabin descriptions
+  are not translated; they are professional-only).
+- Review photos are stored but not re-compressed; very large images are limited to 5 MB.
