@@ -461,7 +461,7 @@ export function ProductReviews({ slug }: { slug: string }) {
       id="avis-clients"
       className="mt-20 border-t border-border pt-12 sm:mt-24 sm:pt-16"
     >
-      <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+      <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
         <div className="min-w-0">
           <h2 className="font-display text-2xl font-normal text-foreground">
             {tr(locale, T.title)}
@@ -489,13 +489,13 @@ export function ProductReviews({ slug }: { slug: string }) {
         </div>
         {user ? (
           !mine && (
-            <Button className="w-full sm:w-auto" onClick={openWrite}>
+            <Button className="w-full md:w-auto" onClick={openWrite}>
               {tr(locale, T.write)}
             </Button>
           )
         ) : (
-          <div className="sm:text-end">
-            <Button asChild className="w-full sm:w-auto">
+          <div className="md:text-end">
+            <Button asChild className="w-full md:w-auto">
               <Link
                 href={`/login?redirect=${encodeURIComponent(pathname.replace(/^\/(en|fr|ar)/, "") || "/")}`}
               >
