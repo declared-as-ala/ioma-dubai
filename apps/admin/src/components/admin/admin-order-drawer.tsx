@@ -889,7 +889,7 @@ export function AdminOrderDrawer({
                       </span>
                     </div>
                     <p className="text-[11px] text-neutral-500 truncate font-medium">
-                      Cash on Delivery (COD)
+                      Online payment
                     </p>
                   </div>
 
@@ -1665,7 +1665,7 @@ export function AdminOrderDrawer({
                       <div className="flex items-center justify-between border-b border-neutral-100 pb-2.5">
                         <h3 className="pl-card-title !mb-0 flex items-center gap-2">
                           <CreditCard className="size-4 text-emerald-600" />
-                          Payment Details (COD)
+                          Payment details
                         </h3>
                       </div>
 
@@ -1673,7 +1673,7 @@ export function AdminOrderDrawer({
                         <div className="flex justify-between items-center text-neutral-600">
                           <span>Method</span>
                           <span className="font-semibold text-neutral-900 bg-neutral-100 px-2 py-0.5 rounded text-[11px]">
-                            Cash on Delivery (COD)
+                            Online payment
                           </span>
                         </div>
                         <div className="flex justify-between items-center text-neutral-600">
@@ -1683,12 +1683,12 @@ export function AdminOrderDrawer({
                           >
                             {(isFormEditable ? paymentStatus : record?.paymentStatus) ===
                             "paid"
-                              ? "Cash Collected (Paid)"
-                              : "Cash Due on Delivery"}
+                              ? "Payment received"
+                              : "Awaiting payment"}
                           </span>
                         </div>
                         <div className="flex justify-between items-center text-neutral-600 pt-1.5 border-t border-neutral-100">
-                          <span>Total to Collect</span>
+                          <span>Order total</span>
                           <span className="font-mono font-bold text-neutral-900 text-sm">
                             {format.money(
                               isFormEditable

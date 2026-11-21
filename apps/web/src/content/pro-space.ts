@@ -398,7 +398,7 @@ export const LOCK = {
 
 export const OVERVIEW = {
   validatedKicker: l("Account validated", "تم التحقق من الحساب", "Compte validé"),
-  customerKicker: l("Customer", "عميل", "Client"),
+  customerKicker: l("Approved partner", "شريك معتمد", "Partenaire validé"),
   welcome: (name: string): L =>
     l(`Welcome, ${name}.`, `مرحباً، ${name}.`, `Bienvenue, ${name}.`),
   welcomeBack: (name: string): L =>

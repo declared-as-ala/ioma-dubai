@@ -810,6 +810,13 @@ export class AdminResourcesService implements OnModuleInit {
       record.productName = product?.name ?? null;
       record.image = product?.images?.[0] ?? null;
     }
+    if (key === "orders" && record.type === "b2b" && record.userId) {
+      // Show the business the professional orders for, not only the name typed in the delivery address.
+      const profile = await this.db
+        .collection("professionalprofiles")
+        .findOne({ userId: record.userId }, { projection: { companyName: 1 } });
+      if (profile?.companyName) record.companyName = profile.companyName;
+    }
     if (key === "orders" && record.items?.length) {
       const variants = await this.db
         .collection("productvariants")
